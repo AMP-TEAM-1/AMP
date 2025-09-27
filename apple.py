@@ -1,3 +1,6 @@
+
+# 으잉 모르겠다 
+
 import turtle
 
 t = turtle.Turtle()
@@ -20,3 +23,4 @@ t.end_fill()
 t.hideturtle()
 
 turtle.exitonclick()
+
