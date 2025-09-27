@@ -1,5 +1,6 @@
 
 # 으잉 모르겠다 
+# seo 일요일에 커밋 보냅니다. 
 
 import turtle
 
