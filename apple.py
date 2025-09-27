@@ -5,7 +5,7 @@ import turtle
 
 t = turtle.Turtle()
 
-t.pensize(3)
+t.pensize(4)
 t.fillcolor("red")
 
 t.begin_fill()
