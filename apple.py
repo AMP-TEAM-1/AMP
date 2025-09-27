@@ -2,6 +2,7 @@ import turtle
 
 t = turtle.Turtle()
 
+t.pensize(3)
 t.fillcolor("red")
 
 t.begin_fill()
