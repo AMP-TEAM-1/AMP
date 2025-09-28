@@ -1,13 +1,12 @@
 
-# 으잉 모르겠다 
-# 배지윤 일욜 수정
+# 으잉 모르겠다
 
 import turtle
 
 t = turtle.Turtle()
 
 t.pensize(10)
-t.fillcolor("red")
+t.fillcolor("black")
 
 t.begin_fill()
 
