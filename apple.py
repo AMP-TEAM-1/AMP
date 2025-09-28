@@ -1,12 +1,12 @@
 
-# 으잉 모르겠다
+# 으잉 모르겠다 
 
 import turtle
 
 t = turtle.Turtle()
 
-t.pensize(10)
-t.fillcolor("black")
+t.pensize(4)
+t.fillcolor("red")
 
 t.begin_fill()
 
@@ -25,3 +25,4 @@ t.hideturtle()
 
 turtle.exitonclick()
 
+# 새로운 파일 추가?
