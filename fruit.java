@@ -1,6 +1,10 @@
+interface Fruit {
+
+}
+
 public class fruit {
 
-    public fruit(String name) {
+    class apple implements Fruit {
 
     }
     public static void main(String[] args){
