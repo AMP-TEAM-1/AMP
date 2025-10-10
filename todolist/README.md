@@ -1,50 +1,45 @@
-# Welcome to your Expo app 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+### 설치해야할 라이브러리
+pip install fastapi
+pip install "uvicorn[standard]"
+pip install sqlalchemy
+pip install psycopg2-binary
+pip install "python-jose[cryptography]"
+pip install "passlib[bcrypt]"
+npx expo install expo-secure-store
+npm install axios
 
-## Get started
+-> 모두 설치 한 후에 
+pip uninstall bcrypt
+pip install bcrypt==4.1.2
+해서 bcrypt 라이브러리는 따로 재설치.
 
-1. Install dependencies
+### 실행하는 방법
+uvicorn app.main:app --reload 
+npx start -> w 입력 (웹으로 접속)
+-> cmd 두 개로 각각 명령어 입력
 
-   ```bash
-   npm install
-   ```
+### 전체 파일 구조
 
-2. Start the app
+- main.py
+총 관리자, FastAPI 접속 
+- auth.py 
+사용자 인증, 회원가입 등 모든 API 엔드포인트 관리
+- crud.py
+데이터베이스 관련 모든 작업
+- schemas.py
+데이터 유효성 검사 및 구조 정의
+* 로그인 제약사항 (이메일 유효성 검사, 비밀번호 세부사항)
+- models.py
+데이터베이스의 테이블 구조 정의 
+users 테이블 (id, email, password)
+- security.py
+사용자 인증 및 보안 관련 로직
+* 비밀번로 해싱 
+* JWT 생성
+- database.py
+데이터베이스 연결 관련 설정
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+*** 로그인 테스트 시에 팀장에게 공인IP 알리기
+> https://whatismyipaddress.com/
+여기 접속하면 공인IP 알 수 있음.
