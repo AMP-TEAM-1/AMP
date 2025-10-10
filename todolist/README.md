@@ -1,50 +1,21 @@
-# Welcome to your Expo app 👋
+# 설치해야하는 라이브러리
+pip install fastapi
+pip install "uvicorn[standard]"
+pip install sqlalchemy
+pip install psycopg2-binary
+pip install "python-jose[cryptography]"
+pip install "passlib[bcrypt]"
+npx expo install expo-secure-store
+npm install axios   
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# 실행(cmd)
+uvicorn app.main:app --reload
+npm start 
 
-## Get started
+# 작동원리
+index.tsx(엡)에서 email,pw 입력 -> FastAPI(서버)에서 main.py에서 DB 연결 후 이메일 일치한지 확인 -> security.py에서 비번 일치한지 확인 -> 토큰 생성 함수 호출(담긴 내용: 이메일, 서버만 알고 있는 SECRET_KEY로 이 정보들 암호화 후 JWT 토큰 생성 <=[.env]에서 확인 가능)
+-> 로그인 화면에서 home.tsx화면으로 이동
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# 부가 설명
+![DB사진](./db.png)
+위 사진처럼 회원가입 시 DB 테이블에 저장됨
