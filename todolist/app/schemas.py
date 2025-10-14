@@ -1,4 +1,24 @@
 from pydantic import BaseModel, EmailStr, Field
+from typing import List, Optional
+
+# --- Todo Schemas ---
+class TodoBase(BaseModel):
+    title: str
+
+class TodoCreate(TodoBase):
+    pass
+
+class TodoUpdate(BaseModel):
+    title: Optional[str] = None
+    completed: Optional[bool] = None
+
+class Todo(TodoBase):
+    id: int
+    completed: bool
+    owner_id: int
+
+    class Config:
+        from_attributes = True
 
 # --- User Schemas ---
 class UserBase(BaseModel):
@@ -14,6 +34,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
+    todos: List[Todo] = []
 
     class Config:
         from_attributes = True # SQLAlchemy 모델을 Pydantic 모델로 변환

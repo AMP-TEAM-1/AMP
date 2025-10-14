@@ -5,6 +5,7 @@ from jose import JWTError, jwt
 
 from . import crud, models, schemas, security
 from .database import get_db
+import logging
 
 router = APIRouter()
 
@@ -24,6 +25,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
             raise credentials_exception
         token_data = schemas.TokenData(email=email)
     except JWTError:
+        logging.exception('JWT decode failed')
         raise credentials_exception
     user = crud.get_user_by_email(db, email=token_data.email)
     if user is None:
@@ -41,8 +43,25 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login/", response_model=schemas.Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    logging.info('Login attempt for username=%s', form_data.username)
     user = crud.get_user_by_email(db, email=form_data.username)
-    if not user or not security.verify_password(form_data.password, user.password):
+    if not user:
+        logging.info('User not found for username=%s', form_data.username)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    try:
+        ok = security.verify_password(form_data.password, user.password)
+    except Exception:
+        logging.exception('Error while verifying password for user=%s', form_data.username)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal error",
+        )
+    if not ok:
+        logging.info('Password mismatch for username=%s', form_data.username)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
