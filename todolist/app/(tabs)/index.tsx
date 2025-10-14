@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Link, router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, TextInput } from 'react-native';
 
 // 백엔드 서버 주소 (실행 환경에 맞게 수정)
 // Android 에뮬레이터에서는 'http://10.0.2.2:8000'
@@ -24,14 +24,17 @@ export default function LoginScreen() {
     }
     setIsLoading(true);
 
-    // OAuth2PasswordRequestForm은 'application/x-www-form-urlencoded' 형식을 사용합니다.
-    const params = new URLSearchParams();
-    params.append('username', email);
-    params.append('password', password);
+  // OAuth2PasswordRequestForm은 'application/x-www-form-urlencoded' 형식을 사용합니다.
+  const params = new URLSearchParams();
+  params.append('username', email);
+  params.append('password', password);
 
     try {
-      const response = await axios.post(`${API_URL}/login/`, params);
-
+      const response = await axios.post(`${API_URL}/login/`, params, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
       const { access_token } = response.data;
       
       try {
@@ -44,22 +47,52 @@ export default function LoginScreen() {
         // 저장에 실패하더라도 일단 로그인은 진행시킵니다.
       }
 
-      Alert.alert('성공', '로그인에 성공했습니다.');
+      // Alert may not show on web in some environments; use window.alert fallback on web
+      if (Platform.OS === 'web') {
+        window.alert('로그인에 성공했습니다.');
+      } else {
+        Alert.alert('성공', '로그인에 성공했습니다.');
+      }
 
       // 로그인 성공 후 홈 화면으로 이동
       router.replace('/home');
 
     } catch (error: any) { // API 요청 실패 시의 에러 처리
       if (axios.isAxiosError(error)) {
+        // Detailed logging for debugging CORS / network / server errors
+        console.error('Login request error:', {
+          message: error.message,
+          isAxiosError: true,
+          response: error.response ? {
+            status: error.response.status,
+            data: error.response.data,
+            headers: error.response.headers,
+          } : null,
+          request: error.request,
+        });
+
         if (!error.response) {
           // 네트워크 오류 (서버 주소가 틀렸거나, 서버가 꺼져있거나, CORS 문제 등)
-          Alert.alert('네트워크 오류', '서버에 연결할 수 없습니다. API 주소와 네트워크 연결을 확인해주세요.');
+          if (Platform.OS === 'web') {
+            window.alert('네트워크 오류: 서버에 연결할 수 없습니다. API 주소와 네트워크 연결을 확인해주세요. (브라우저 콘솔에서 자세한 오류를 확인하세요)');
+          } else {
+            Alert.alert('네트워크 오류', '서버에 연결할 수 없습니다. API 주소와 네트워크 연결을 확인해주세요.');
+          }
         } else if (error.response.status === 401) {
           // 서버에서 '인증 실패' 응답을 보낸 경우
-          Alert.alert('로그인 실패', '이메일 또는 비밀번호가 일치하지 않습니다.');
+          if (Platform.OS === 'web') {
+            window.alert('로그인 실패: 이메일 또는 비밀번호가 일치하지 않습니다.');
+          } else {
+            Alert.alert('로그인 실패', '이메일 또는 비밀번호가 일치하지 않습니다.');
+          }
         } else {
           // 그 외 서버 응답 오류
-          Alert.alert('서버 오류', `서버에서 오류가 발생했습니다. (상태 코드: ${error.response.status})`);
+          const status = error.response.status;
+          if (Platform.OS === 'web') {
+            window.alert(`서버 오류: 상태 코드 ${status}. 브라우저 콘솔에서 자세한 오류를 확인하세요.`);
+          } else {
+            Alert.alert('서버 오류', `서버에서 오류가 발생했습니다. (상태 코드: ${status})`);
+          }
         }
       } else {
         // Axios 오류가 아닌 다른 예외 상황

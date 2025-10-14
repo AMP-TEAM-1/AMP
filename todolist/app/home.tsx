@@ -1,8 +1,8 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { Alert, Button, Platform, StyleSheet } from 'react-native';
+import { Alert, Button, Platform, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // 재사용 가능한 InfoCard 컴포넌트 정의
@@ -44,6 +44,16 @@ export default function HomeScreen() {
             이제 앱의 모든 기능을 자유롭게 이용할 수 있습니다.
           </ThemedText>
         </InfoCard>
+
+        <Link href="/todos" asChild>
+          <Pressable>
+            <InfoCard title="할일 목록">
+              <ThemedText style={[styles.cardText, styles.blackText]}>
+                할일 목록을 확인하고 관리하세요.
+              </ThemedText>
+            </InfoCard>
+          </Pressable>
+        </Link>
 
         <InfoCard title="다음 단계">
           <ThemedText style={[styles.cardText, styles.blackText]}>- 프로필 정보 수정하기</ThemedText>

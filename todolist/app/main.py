@@ -12,6 +12,8 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:8081",
+    "http://192.168.200.167",
+    "exp://192.168.200.167:8081"
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -24,3 +26,7 @@ app.add_middleware(
 # 인증 관련 라우터 등록
 from .auth import router as auth_router
 app.include_router(auth_router)
+
+# Todo 관련 라우터 등록
+from .todos import router as todos_router
+app.include_router(todos_router)
