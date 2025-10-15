@@ -2,8 +2,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import axios from 'axios';
 import { Link, router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import { useState } from 'react';
+import { useState } from 'react'; 
+import { tokenStorage } from '../storage';
 import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, TextInput } from 'react-native';
 
 // 백엔드 서버 주소 (실행 환경에 맞게 수정)
@@ -39,10 +39,10 @@ export default function LoginScreen() {
       
       try {
         // 로그인 성공 시 받은 토큰을 안전하게 저장합니다.
-        await SecureStore.setItemAsync('authToken', access_token);
+        await tokenStorage.setItem(access_token);
       } catch (storageError: any) {
         // SecureStore 저장 실패 시 (주로 웹 환경에서 발생)
-        console.warn('SecureStore 저장 실패:', storageError);
+        console.warn('Token storage failed:', storageError);
         Alert.alert('저장소 오류', '토큰을 기기에 저장하는 데 실패했습니다. 앱이 정상적으로 동작하지 않을 수 있습니다.');
         // 저장에 실패하더라도 일단 로그인은 진행시킵니다.
       }

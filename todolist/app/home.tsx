@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link, router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import { tokenStorage } from './storage';
 import { Alert, Button, Platform, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,10 +20,8 @@ const InfoCard = ({ title, children }: InfoCardProps) => (
 export default function HomeScreen() {
 
   const handleLogout = async () => {
-    if (Platform.OS !== 'web') {
-      // 기기에 저장된 인증 토큰을 삭제합니다.
-      await SecureStore.deleteItemAsync('authToken');
-    }
+    // 기기에 저장된 인증 토큰을 삭제합니다.
+    await tokenStorage.removeItem();
 
     // 사용자에게 로그아웃 되었음을 알립니다.
     Alert.alert('로그아웃', '성공적으로 로그아웃되었습니다.');

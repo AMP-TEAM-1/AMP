@@ -2,8 +2,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import axios from 'axios';
 import { router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react'; 
+import { tokenStorage } from './storage';
 import { ActivityIndicator, FlatList, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -22,8 +22,8 @@ export default function TodosScreen() {
 	const [refreshing, setRefreshing] = useState(false);
 
 	const getAuthHeaders = async () => {
-		const token = await SecureStore.getItemAsync('authToken');
-		console.log('[Auth Debug] Token from SecureStore:', token ? 'exists' : 'missing');
+		const token = await tokenStorage.getItem();
+		console.log('[Auth Debug] Token from storage:', token ? 'exists' : 'missing');
 		return token ? { Authorization: `Bearer ${token}` } : {};
 	};
 
@@ -261,4 +261,3 @@ const styles = StyleSheet.create({
 		borderRadius: 6,
 	},
 });
-
