@@ -53,6 +53,16 @@ export default function HomeScreen() {
           </Pressable>
         </Link>
 
+        <Link href="/mypage" asChild>
+          <Pressable>
+            <InfoCard title="마이페이지">
+              <ThemedText style={[styles.cardText, styles.blackText]}>
+                캐릭터를 꾸미고 관리하세요.
+              </ThemedText>
+            </InfoCard>
+          </Pressable>
+        </Link>
+
         <InfoCard title="다음 단계">
           <ThemedText style={[styles.cardText, styles.blackText]}>- 프로필 정보 수정하기</ThemedText>
           <ThemedText style={[styles.cardText, styles.blackText]}>- 게시물 작성하기</ThemedText>
