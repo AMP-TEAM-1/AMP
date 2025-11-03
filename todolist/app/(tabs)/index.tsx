@@ -20,7 +20,7 @@ export default function LoginScreen() {
       <ThemedText
         style={[
           styles.slogan,
-          { fontSize: width * 0.05, marginBottom: height * 0.012 },
+          { fontSize: width * 0.055, marginBottom: height * 0.012 },
         ]}
       >
         당신만의 스마트 비서 투두리스트
@@ -36,7 +36,7 @@ export default function LoginScreen() {
       </ThemedText>
 
       <Image
-        source={require('../../assets/images/rabbit.png')}
+        source={require('../../assets/images/item/rabbit.png')}
         style={{
           width: width * 0.6,
           height: height * 0.3,
