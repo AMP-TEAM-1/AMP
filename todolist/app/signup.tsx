@@ -1,15 +1,25 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import axios from 'axios';
-import { Link, router } from 'expo-router';
+import { Link, router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+  Text,
+  useWindowDimensions,
+} from 'react-native';
 
-// 백엔드 서버 주소 (login.tsx와 동일하게 설정)
-// 환경 변수로 관리하는 것을 권장합니다. (예: process.env.EXPO_PUBLIC_API_URL)
+// 백엔드 서버 주소
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 export default function SignupScreen() {
+  const { width, height } = useWindowDimensions(); // ✅ 반응형 적용
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,19 +32,14 @@ export default function SignupScreen() {
     setIsLoading(true);
 
     try {
-      // 회원가입 API는 JSON 형식으로 데이터를 전송합니다.
-      // ES6 단축 속성명 사용
       await axios.post(`${API_URL}/signup/`, { email, password });
-
       Alert.alert('성공', '회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
-      router.replace('/'); // 회원가입 성공 후 로그인 페이지(첫 화면)로 이동
-
+      router.replace('/');
     } catch (error: any) {
       console.error(error);
       if (error.response && error.response.status === 400) {
         Alert.alert('가입 실패', '이미 사용 중인 이메일입니다.');
       } else if (error.response && error.response.status === 422) {
-        // Pydantic 유효성 검사 실패 시 (비밀번호 길이 등)
         const errorDetail = error.response.data?.detail?.[0]?.msg || '입력 값이 유효하지 않습니다.';
         Alert.alert('가입 실패', errorDetail);
       } else {
@@ -46,34 +51,93 @@ export default function SignupScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>회원가입</ThemedText>
-      <TextInput
-        style={styles.input}
-        placeholder="이메일"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        placeholderTextColor="#888"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="비밀번호"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        placeholderTextColor="#888"
-      />
-      <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]} onPress={handleSignup} disabled={isLoading}>
-        {isLoading ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.buttonText}>회원가입</ThemedText>}
-      </Pressable>
-      <Link href="/" asChild>
-        <Pressable style={styles.linkContainer}>
-          <ThemedText type="link">이미 계정이 있으신가요? 로그인</ThemedText>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <ThemedView
+        style={[
+          styles.container,
+          { padding: width * 0.06, gap: height * 0.02 }, // ✅ 동적 스타일
+        ]}
+      >
+        <ThemedText type="title" style={[styles.title2, { marginLeft: width * 0.06 }]}>
+          캐롯
+        </ThemedText>
+        <ThemedText
+          type="title"
+          style={[styles.title, { marginLeft: width * 0.06, marginBottom: height * 0.08 }]}
+        >
+          가입하기
+        </ThemedText>
+
+        <TextInput
+          style={[
+            styles.input,
+            {
+              width: width * 0.85,
+              height: height * 0.06,
+              paddingHorizontal: width * 0.04,
+              fontSize: width * 0.04,
+            },
+          ]}
+          placeholder="이메일"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          placeholderTextColor="#888"
+        />
+        <TextInput
+          style={[
+            styles.input,
+            {
+              width: width * 0.85,
+              height: height * 0.06,
+              paddingHorizontal: width * 0.04,
+              fontSize: width * 0.04,
+            },
+          ]}
+          placeholder="비밀번호"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          placeholderTextColor="#888"
+        />
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.signupButton,
+            {
+              width: width * 0.85,
+              height: height * 0.06,
+              marginTop: height * 0.12,
+              borderRadius: width * 0.08,
+            },
+            pressed && styles.signupButtonPressed,
+          ]}
+          onPress={handleSignup}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <ThemedText style={[styles.signupButtonText, { fontSize: width * 0.04 }]}>
+              회원가입
+            </ThemedText>
+          )}
         </Pressable>
-      </Link>
-    </ThemedView>
+
+        <View style={[styles.loginContainer, { marginTop: height * 0.01 }]}>
+          <Text style={[styles.normalText, { fontSize: width * 0.035 }]}>
+            이미 계정이 있으신가요?{' '}
+          </Text>
+          <Link href="/login" asChild>
+            <Pressable>
+              <Text style={[styles.loginText, { fontSize: width * 0.035 }]}>로그인</Text>
+            </Pressable>
+          </Link>
+        </View>
+      </ThemedView>
+    </>
   );
 }
 
@@ -81,30 +145,46 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#f5f5f5',
-    gap: 16,
+    backgroundColor: '#fff',
   },
   title: {
-    textAlign: 'center',
-    marginBottom: 24,
+    textAlign: 'left',
   },
-  input: { height: 50, backgroundColor: '#fff', paddingHorizontal: 16, borderRadius: 8, fontSize: 16, borderWidth: 1, borderColor: '#ddd' },
-  button: {
-    height: 50,
-    backgroundColor: '#007AFF',
+  title2: {
+    textAlign: 'left',
+    color: '#FFB347',
+  },
+  input: {
+    backgroundColor: '#D3D3D3',
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    alignSelf: 'center',
+  },
+  signupButton: {
+    backgroundColor: '#FFE0A3',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
-    marginTop: 8,
+    alignSelf: 'center',
   },
-  buttonPressed: {
-    backgroundColor: '#0056b3',
+  signupButtonPressed: {
+    backgroundColor: '#D3D3D3',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
+  signupButtonText: {
+    color: '#000',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  loginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  normalText: {
+    color: '#000',
     fontWeight: 'bold',
   },
-  linkContainer: { marginTop: 16, alignItems: 'center' },
+  loginText: {
+    color: '#FFB347',
+    fontWeight: 'bold',
+  },
 });
