@@ -14,8 +14,16 @@ function formatMonthYear(date: Date) {
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
 }
 
-// -------------------- HomeContent (원본 기능 유지) --------------------
+/// -------------------- HomeContent (원본 기능 유지) --------------------
 function HomeContent() {
+
+  type Todo = {
+  id: number;
+  title: string;
+  checked: boolean;
+  categoryIds?: number[]; // ✅ 여러 카테고리
+  };
+
   const navigation = useNavigation<any>();
   const flatListRef = useRef<FlatList<number>>(null);
   const today = new Date();
@@ -31,16 +39,18 @@ function HomeContent() {
   const CENTER_INDEX = Math.floor(TOTAL_DAYS / 2);
 
   const [selected, setSelected] = useState<Date>(today);
-  const [todos, setTodos] = useState<{ [key: string]: { id: number; title: string; checked: boolean; categoryId?: number | 'all' }[] }>({});
   const [newTodo, setNewTodo] = useState('');
   const [showInput, setShowInput] = useState(false);
   const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
   const [focusTodoId, setFocusTodoId] = useState<number | null>(null);
   const [actionModalVisible, setActionModalVisible] = useState(false);
-  const [actionTodo, setActionTodo] = useState<{ id: number; title: string } | null>(null);
-  const [categorySelectVisible, setCategorySelectVisible] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<'all' | number>('all');
   const [newCategory, setNewCategory] = useState('');
+  const [todos, setTodos] = useState<{ [key: string]: Todo[] }>({});
+  const [categories, setCategories] = useState<{ id: number; text: string }[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<'all' | number>('all');
+  const [actionTodo, setActionTodo] = useState<Todo | null>(null);
+  const [categorySelectVisible, setCategorySelectVisible] = useState(false);
+  
 
 
   const selectedKey = selected.toDateString();
@@ -61,7 +71,6 @@ function HomeContent() {
     });
   };
 
-  const [categories, setCategories] = useState<{ id: number; text: string }[]>([]);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -94,7 +103,7 @@ function HomeContent() {
 
   const handleAddTodo = () => {
     if (!newTodo.trim()) return;
-    const newItem = { id: Date.now(), title: newTodo.trim(), checked: false };
+    const newItem = { id: Date.now(), title: newTodo.trim(), checked: false, categoryIds: [] };
     setTodos(prev => ({
       ...prev,
       [selectedKey]: [...(prev[selectedKey] || []), newItem],
@@ -121,17 +130,19 @@ function HomeContent() {
     }));
   };
 
-  const handleAddCategory = () => {
+  const handleAddCategory = async () => {
   if (!newCategory.trim()) return;
-  setCategories((prev) => [
-    ...prev,
-    { id: Date.now(), text: newCategory.trim() },
-  ]);
-  setNewCategory('');
-};
 
-const handleDeleteCategory = (id: number) => {
-  setCategories((prev) => prev.filter((cat) => cat.id !== id));
+  const updatedCategories = [
+    ...categories,
+    { id: Date.now(), text: newCategory.trim() },
+  ];
+
+  setCategories(updatedCategories);
+  setNewCategory('');
+
+  // ✅ AsyncStorage에 저장
+  await AsyncStorage.setItem('categories', JSON.stringify(updatedCategories));
 };
 
   // ------------------- 수정 포커스 useEffect -------------------
@@ -328,7 +339,7 @@ const handleDeleteCategory = (id: number) => {
             data={
               selectedCategory === 'all'
                 ? currentTodos
-                : currentTodos.filter(todo => Number(todo.categoryId) === Number(selectedCategory))
+                : currentTodos.filter(todo => todo.categoryIds?.includes(selectedCategory))
             }
 
             keyExtractor={(item) => item.id.toString()}
@@ -366,10 +377,18 @@ const handleDeleteCategory = (id: number) => {
                     </Text>
                   )}
 
-                  {item.categoryId && (
-                    <Text style={{ fontSize: 13, color: '#1f7aeb', marginTop: 2, marginLeft: 5 }}>
-                      {categories.find(c => c.id === item.categoryId)?.text || ''}
-                    </Text>
+                  {item.categoryIds && item.categoryIds.length > 0 && (
+                    <View style={{ flexDirection: 'row', marginTop: 2, marginLeft: 10, gap: 6, flexWrap: 'wrap' }}>
+                      {item.categoryIds.map(id => {
+                        const cat = categories.find(c => c.id === id);
+                        if (!cat) return null;
+                        return (
+                          <View key={id} style={{ paddingHorizontal: 6, paddingVertical: 2, backgroundColor: '#FFE0A3', borderRadius: 6 }}>
+                            <Text style={{ fontSize: 13, color: '#1f7aeb' }}>{cat.text}</Text>
+                          </View>
+                        );
+                      })}
+                    </View>
                   )}
 
                   <View style={{ flexDirection: 'row', marginLeft: 'auto', gap: 8, alignItems: 'center' }}>
@@ -511,7 +530,8 @@ const handleDeleteCategory = (id: number) => {
           </View>
         </Modal>
 
-        {/* ✅ 카테고리 선택 모달 */}
+        {/* 카테고리 선택 모달*/}
+
         <Modal visible={categorySelectVisible} transparent animationType="fade" onRequestClose={() => setCategorySelectVisible(false)}>
           <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={() => setCategorySelectVisible(false)} />
 
@@ -537,41 +557,48 @@ const handleDeleteCategory = (id: number) => {
                   key={cat.id}
                   style={{ paddingVertical: 12, paddingHorizontal: 20, borderBottomWidth: 1, borderColor: '#eee' }}
                   onPress={() => {
-                    if (actionTodo) {
-                      setTodos(prev => ({
-                        ...prev,
-                        [selectedKey]: (prev[selectedKey] || []).map(todo =>
-                          todo.id === actionTodo.id ? { ...todo, categoryId: cat.id } : todo
-                        ),
-                      }));
-                    }
-                    setCategorySelectVisible(false);
+                    if (!actionTodo) return;
+
+                    setTodos(prev => ({
+                      ...prev,
+                      [selectedKey]: (prev[selectedKey] || []).map(todo => {
+                        if (todo.id === actionTodo.id) {
+                          const currentIds = todo.categoryIds || [];
+                          const newIds = currentIds.includes(cat.id)
+                            ? currentIds.filter(id => id !== cat.id) // 이미 선택된 카테고리면 제거
+                            : [...currentIds, cat.id];            // 아니면 추가
+                          return { ...todo, categoryIds: newIds };
+                        }
+                        return todo;
+                      }),
+                    }));
                   }}
                 >
-                  <Text style={{ fontSize: 16 }}>{cat.text}</Text>
+                  <Text style={{ fontSize: 16 }}>
+                    {cat.text} {actionTodo?.categoryIds?.includes(cat.id) ? '✅' : ''}
+                  </Text>
                 </Pressable>
               ))}
 
-              {/* 카테고리 취소 */}
+              {/* 카테고리 초기화 */}
               <Pressable
                 style={{ paddingVertical: 12, paddingHorizontal: 20, alignItems: 'center', marginTop: 10, backgroundColor: '#eee', borderRadius: 10 }}
                 onPress={() => {
-                  if (actionTodo) {
-                    setTodos(prev => ({
-                      ...prev,
-                      [selectedKey]: (prev[selectedKey] || []).map(todo =>
-                        todo.id === actionTodo.id ? { ...todo, categoryId: undefined } : todo
-                      ),
-                    }));
-                  }
-                  setCategorySelectVisible(false);
+                  if (!actionTodo) return;
+                  setTodos(prev => ({
+                    ...prev,
+                    [selectedKey]: (prev[selectedKey] || []).map(todo =>
+                      todo.id === actionTodo.id ? { ...todo, categoryIds: [] } : todo
+                    ),
+                  }));
                 }}
               >
-                <Text style={{ fontSize: 16 }}>카테고리 취소</Text>
+                <Text style={{ fontSize: 16 }}>카테고리 초기화</Text>
               </Pressable>
             </ScrollView>
           </View>
         </Modal>
+
       </View>
     </SafeAreaView>
   );
@@ -659,15 +686,39 @@ function CustomDrawerContent({ userName, ...props }: any) {
         <Text style={styles.userText}>{userName}</Text>
       </View>
 
-      <DrawerItem label="오늘의 할 일" onPress={() => props.navigation.navigate('Home')} />
-      <DrawerItem label="카테고리" onPress={() => props.navigation.navigate('Category')} />
+      <DrawerItem label="오늘의 할 일" onPress={() => props.navigation.navigate('Home')}
+        icon={({ color, size }) => <Ionicons name="time-outline" size={size} color={color} />}
+      />
 
-      <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 8 }} />
-      <DrawerItem label="마이페이지" onPress={() => props.navigation.navigate('MyPage')} />
+      <DrawerItem
+      label="카테고리"
+      onPress={() => props.navigation.navigate('Category')}
+      icon={({ color, size }) => <Ionicons name="menu-outline" size={size} color={color} />}
+      />
 
-      <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 8 }} />
+      <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
 
-      <DrawerItem label="계정 정보" onPress={() => props.navigation.navigate('Info')} />
+      <Text style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>
+        커스터마이징
+      </Text>
+
+      <DrawerItem
+        label="마이페이지"
+        onPress={() => props.navigation.navigate('MyPage')}
+        icon={({ color, size }) => <MaterialIcons name="emoji-emotions" size={size} color={color} />}
+      />
+
+      <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
+
+      <Text style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>
+        설정
+      </Text>
+
+      <DrawerItem
+        label="계정 정보"
+        onPress={() => props.navigation.navigate('Info')}
+        icon={({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />}
+      />
     </DrawerContentScrollView>
   );
 }
@@ -697,8 +748,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 24, backgroundColor: '#fff' },
   header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 90 },
-  drawerHeader: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#ccc', marginBottom: 8 },
-  userText: { fontSize: 18, fontWeight: 'bold', color: '#000' },
+  drawerHeader: { padding: 16, marginBottom: 8 },
+  userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 15},
   menuButton: { marginRight: 8 },
   calendarContainer: {
     backgroundColor: 'white',
