@@ -20,10 +20,10 @@ export default function CategoryContent() {
   // ✅ 박스 추가 시 자동 편집 모드로 생성
   const handleAddBox = () => {
     const newBox = { id: Date.now(), text: '', editing: true };
-    setBoxes(prev =>
-      prev.map(box => ({ ...box, editing: false })) // 기존 박스 편집 해제
-    );
-    setBoxes(prev => [...prev, newBox]);
+    setBoxes(prev => {
+      const updated = prev.map(box => ({ ...box, editing: false }));
+      return [...updated, newBox];
+    });
   };
 
   const handleTextChange = (id: number, newText: string) => {
@@ -66,7 +66,10 @@ export default function CategoryContent() {
       }
     };
     loadCategories();
-  }, []);
+
+    const unsubscribe = navigation.addListener('focus', loadCategories); // 화면 이동 시 최신 값 로드
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -209,7 +212,7 @@ const styles = StyleSheet.create({
   },
 
   dynamicBox: {
-    minHeight: 60,
+    minHeight: 53,
     backgroundColor: '#ddd',
     borderRadius: 30,
     justifyContent: 'center',
