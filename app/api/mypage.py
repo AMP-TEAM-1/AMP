@@ -73,4 +73,4 @@ def update_user_inventory(
     inventory_item = crud.update_user_inventory(db, user_id, item_id, is_equipped)
     if inventory_item is None:
         raise HTTPException(status_code=404, detail="인벤토리 아이템을 찾을 수 없습니다.")
-    return inventory_item   
+    return inventory_item 
