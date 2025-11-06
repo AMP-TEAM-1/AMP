@@ -3,7 +3,7 @@ import { ThemedView } from '@/components/themed-view';
 import axios from 'axios';
 import { Link, router, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { tokenStorage } from './storage';
+import { tokenStorage } from '../storage';
 import {
   ActivityIndicator,
   Alert,

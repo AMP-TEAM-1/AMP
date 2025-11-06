@@ -7,8 +7,8 @@ import axios from 'axios';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { tokenStorage } from './storage';
-import * as RawShopData from './shopItems.json'; // 임시 데이터 소스
+import { tokenStorage } from '../storage';
+import * as RawShopData from '../shopItems.json'; // 임시 데이터 소스
 
 // --- 상수 및 타입 정의 ---
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';

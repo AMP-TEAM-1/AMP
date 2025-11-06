@@ -2,9 +2,9 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import axios from 'axios';
 import { router } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react'; 
-import { tokenStorage } from './storage';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { tokenStorage } from '../storage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
