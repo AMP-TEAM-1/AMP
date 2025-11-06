@@ -17,7 +17,7 @@ export default function CategoryContent() {
   const navigation = useNavigation<any>();
   const [boxes, setBoxes] = useState<{ id: number; text: string; editing: boolean }[]>([]);
 
-  // ✅ 박스 추가 시 자동 편집 모드로 생성
+  /// ✅ 박스 추가 시 자동 편집 모드로 생성
   const handleAddBox = () => {
     const newBox = { id: Date.now(), text: '', editing: true };
     setBoxes(prev => {
