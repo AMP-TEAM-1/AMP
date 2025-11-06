@@ -14,7 +14,7 @@ function formatMonthYear(date: Date) {
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
 }
 
-// -------------------- HomeContent (원본 기능 유지) --------------------
+/// -------------------- HomeContent (원본 기능 유지) --------------------
 function HomeContent() {
 
   type Todo = {
