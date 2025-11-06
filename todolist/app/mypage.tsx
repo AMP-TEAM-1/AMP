@@ -1,5 +1,5 @@
 //UI 개발 및 테스트를 위해 로컬 JSON 파일(shopItems.json)을 임시 데이터로 사용하고 있으며,
-// 실제 서버와 통신하는 API 연동 로직은 주석 처리되어 있습니다. 
+// 실제 서버와 통신하는 API 연동 로직은 주석 처리되어 있습니다.
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -10,7 +10,8 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import axios from 'axios';
 import { tokenStorage } from './storage';
-import * as RawShopData from './shopItems.json'; // 임시 추가
+import { router } from 'expo-router';
+import * as RawShopData from './shopItems.json'; // 임시 추가c
 
 const rabbitImage = require('../assets/images/item/rabbit.png');
 
@@ -82,7 +83,7 @@ const imageMap: { [key: string]: any } = {
 
 export default function MyPageScreen() {
   const { height: screenHeight } = useWindowDimensions();
-  const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('모자');
+  const [selectedCategory, setSelectedCategory] = useState<ItemCategory | null>(null);
   const [carrots, setCarrots] = useState(0); // 당근 개수 (서버에서 가져올 예정)
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
@@ -124,15 +125,28 @@ export default function MyPageScreen() {
         // 아래로 충분히 스와이프하면 시트를 최소화합니다.
         translateY.value = withSpring(partialHeight, { damping: 90 });
         setIsSheetMinimized(true);
+        setSelectedCategory(null); // 시트가 내려가면 카테고리 선택 해제
       } else {
         // 그렇지 않으면 원래 위치로 복귀
-        translateY.value = withSpring(0, { damping: 20 });
+        translateY.value = withSpring(0, { damping: 100 });
         setIsSheetMinimized(false);
+        setSelectedCategory('모자'); // 시트가 올라가면 '모자'를 기본 선택
       }
     })
     .onFinalize(() => {
       setIsHandleTouched(false);
     });
+
+  // 카테고리 탭을 누를 때 실행되는 함수
+  const handleTabPress = (category: ItemCategory) => {
+    // 시트를 위로 올립니다.
+    translateY.value = withSpring(0, { damping: 50 });
+    setIsSheetMinimized(false);
+    // 선택된 카테고리를 설정합니다.
+    setSelectedCategory(category);
+  };
+
+
 
   // // --- API 연동 로직 ---
   // // 컴포넌트가 마운트될 때 상점 아이템 목록을 불러옵니다.
@@ -304,7 +318,7 @@ export default function MyPageScreen() {
                 <Pressable
                   key={category}
                   style={[styles.tab, selectedCategory === category && styles.activeTab]}
-                  onPress={() => setSelectedCategory(category)}
+                  onPress={() => handleTabPress(category)}
                 >
                   <ThemedText style={[styles.tabText, selectedCategory === category && styles.activeTabText]}>
                     {category}
@@ -317,7 +331,7 @@ export default function MyPageScreen() {
             {loading ? <ActivityIndicator style={{marginTop: 20}} /> : (
               <FlatList
                 // 선택된 카테고리에 따라 shopItems 필터링
-                data={shopItems.filter(item => item.type.toLowerCase() === CATEGORY_MAP[selectedCategory])}
+                data={selectedCategory ? shopItems.filter(item => item.type.toLowerCase() === CATEGORY_MAP[selectedCategory]) : []}
                 renderItem={renderItem}
                 keyExtractor={(item) => String(item.item_id)}
                 numColumns={3}
@@ -334,7 +348,7 @@ export default function MyPageScreen() {
           {isSheetMinimized && !isHandleTouched && (
             <Pressable 
               style={styles.inventoryButton} 
-              onPress={() => { translateY.value = withSpring(0); setIsSheetMinimized(false); }}>
+              onPress={() => router.push('/inventory')}>
               <ThemedText style={styles.inventoryButtonText}>인벤토리 &gt;</ThemedText>
             </Pressable>
           )}
@@ -387,11 +401,11 @@ const styles = StyleSheet.create({
   },
   carrotContainer: {
     position: 'absolute',
-    top: 10, // 위쪽 여백을 줄입니다.
-    left: 10, // 왼쪽 여백을 줄입니다.
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    top: 0,
+    left: 20,
+    paddingVertical: 8,
+    // 배경색을 투명하게 하여 텍스트만 보이도록 합니다.
+    backgroundColor: 'transparent',
   },
   carrotText: {
     fontSize: 18,
@@ -477,12 +491,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   itemList: {
-    padding: 10,
+    padding: 10, // 컨테이너 패딩 제거
+    marginHorizontal: 5, // 좌우 마진 추가
   },
   itemContainer: {
-    flex: 1 / 3,
+    width: '30.33%', // 100% / 3 = 33.33% 에서 마진을 제외한 값으로 조정
     alignItems: 'center',
-    margin: 5,
+    marginHorizontal: '1.5%', // 각 아이템의 좌우 마진 (1.5% + 1.5% = 3%)
+    marginVertical: 8, // 상하 마진
     padding: 10,
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
@@ -557,7 +573,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#f2f2f2', 
   },
   purchaseButton: {
     backgroundColor: '#E8730D8A',
