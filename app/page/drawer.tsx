@@ -1,9 +1,9 @@
-import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import HomeContent from './home';
+import React from 'react';
 import CategoryContent from './category';
-import TodosScreen from './todos';
 import CustomDrawerContent from './CustomDrawerContent';
+import HomeContent from './home';
+import TodosScreen from './todos';
 
 const Drawer = createDrawerNavigator();
 

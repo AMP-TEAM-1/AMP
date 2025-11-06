@@ -1,17 +1,13 @@
-//UI 개발 및 테스트를 위해 로컬 JSON 파일(shopItems.json)을 임시 데이터로 사용하고 있으며,
-// 실제 서버와 통신하는 API 연동 로직은 주석 처리되어 있습니다.
-
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useCallback, useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Pressable, FlatList, useWindowDimensions, Alert, Modal, ActivityIndicator, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import axios from 'axios';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, Image, Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import axios from 'axios';
-import { tokenStorage } from './storage';
-import { router } from 'expo-router';
-import * as RawShopData from './shopItems.json'; // 임시 추가c
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { tokenStorage } from '../storage';
 
 const rabbitImage = require('../assets/images/item/rabbit.png');
 
@@ -37,9 +33,6 @@ const snowmanBg = require('../assets/images/item/snowman-bg.png');
 const birthdayBg = require('../assets/images/item/birthday-bg.png');
 const cakeBg = require('../assets/images/item/cake-bg.png');
 const stairsBg = require('../assets/images/item/stairs-bg.png');
-
-// 기존의 RAW_ITEMS 상수는 제거하고 아래 코드로 대체
-const RAW_ITEMS = RawShopData;
 
 // --- 상수 및 타입 정의 ---
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -148,36 +141,32 @@ export default function MyPageScreen() {
 
 
 
-  // // --- API 연동 로직 ---
-  // // 컴포넌트가 마운트될 때 상점 아이템 목록을 불러옵니다.
-  // const fetchShopItems = useCallback(async () => {
-  //   setLoading(true);
-  //   try {
-  //     const headers = await getAuthHeaders();
-  //     const response = await axios.get(`${API_URL}/api/v1/shop/items`, { headers });
-  //     // TODO: 서버에서 emoji 정보를 주지 않는 경우, type에 따라 프론트에서 매핑 필요
-  //     const itemsWithEmoji = response.data.map((item: Item) => ({...item, emoji: '👒'}));
-  //     setShopItems(itemsWithEmoji);
-  //     // TODO: 사용자 정보 API에서 당근 개수(carrots)를 가져와 setCarrots로 설정해야 합니다.
-  //     // 예: const userRes = await axios.get(`${API_URL}/api/v1/users/me`, { headers });
-  //     //     setCarrots(userRes.data.carrots);
-  //     setCarrots(120); // 임시 데이터
-  //   } catch (error) {
-  //     console.error("상점 목록 로딩 실패:", error);
-  //     Alert.alert("오류", "아이템 목록을 불러오는 데 실패했습니다.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [getAuthHeaders]);
+  // --- API 연동 로직 ---
+  // 컴포넌트가 마운트될 때 상점 아이템 목록을 불러옵니다.
+  const fetchShopItems = useCallback(async () => {
+     setLoading(true);
+     try {
+       const headers = await getAuthHeaders();
+       const response = await axios.get(`${API_URL}/api/v1/shop/items`, { headers });
+       // TODO: 서버에서 emoji 정보를 주지 않는 경우, type에 따라 프론트에서 매핑 필요
+       const itemsWithEmoji = response.data.map((item: Item) => ({...item, emoji: '👒'}));
+       setShopItems(itemsWithEmoji);
+       const userRes = await axios.get(`${API_URL}/api/v1/users/me`, { headers });
+       setCarrots(userRes.data.carrots);
+     } catch (error) {
+       console.error("상점 목록 로딩 실패:", error);
+       Alert.alert("오류", "아이템 목록을 불러오는 데 실패했습니다.");
+     } finally {
+       setLoading(false);
+     }
+   }, [getAuthHeaders]);
 
-  // useEffect(() => {
-  //   fetchShopItems();
-  // }, [fetchShopItems]);
+   useEffect(() => {
+     fetchShopItems();
+   }, [fetchShopItems]);
 
-  // 로컬 JSON 데이터를 사용하도록 수정
   useEffect(() => {
-    // const allItems = Object.entries(RAW_ITEMS).flatMap(([category, items]) => items.map(item => ({ ...item, item_id: item.id, type: CATEGORY_MAP[category as ItemCategory] })));
-    const allItems = Object.entries(RAW_ITEMS.default).flatMap(([category, items]) => 
+    const allItems = Object.entries(RAW_ITEMS).flatMap(([category, items]) => items.map(item => ({ ...item, item_id: item.id, type: CATEGORY_MAP[category as ItemCategory] })));
       (items as any[]).map(item => ({ 
         ...item, 
         item_id: item.id, 
