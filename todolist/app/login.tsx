@@ -156,7 +156,8 @@ export default function LoginScreen() {
               marginTop: height * 0.12,
             },
           ]}
-          onPress={() => router.replace('./home')} // ✅ 임시: 직접 홈으로 이동
+          //onPress={() => router.replace('./home')} // ✅ 임시: 직접 홈으로 이동
+          onPress= {handleLogin} // 실제 로그인
           disabled={isLoading}
         >
           {isLoading ? (
