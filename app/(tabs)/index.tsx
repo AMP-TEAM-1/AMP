@@ -1,8 +1,8 @@
-import React from 'react';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Image, useWindowDimensions } from 'react-native';
+import React from 'react';
+import { Image, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 
 // 백엔드 서버 주소 설정 (환경 변수로 관리 권장)
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -91,7 +91,6 @@ export default function LoginScreen() {
           회원가입
         </ThemedText>
       </Pressable>
->>>>>>> 6ecc05e916ef1bb0d6d3d0bec755b2a3964923a8
     </ThemedView>
   );
 }
@@ -100,44 +99,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-<<<<<<< HEAD
-    padding: 24,
-    backgroundColor: '#f5f5f5', // 밝은 배경색
-    gap: 16,
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  input: {
-    height: 50,
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  button: {
-    height: 50,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  buttonPressed: {
-    backgroundColor: '#0056b3',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  linkContainer: {
-    marginTop: 16,
-    alignItems: 'center',
-=======
     alignItems: 'center',
     backgroundColor: '#fff',
   },
@@ -150,6 +111,5 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFB347',
     textAlign: 'center',
->>>>>>> 6ecc05e916ef1bb0d6d3d0bec755b2a3964923a8
   },
 });
