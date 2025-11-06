@@ -81,3 +81,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: str | None = None
+
+class PurchaseRequest(BaseModel):
+    item_id: int

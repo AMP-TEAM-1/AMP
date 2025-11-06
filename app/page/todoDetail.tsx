@@ -3,9 +3,9 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { tokenStorage } from './storage';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { tokenStorage } from '../storage';
 
 // --- 상수 정의 ---
 // 백엔드 API 서버 주소. 환경 변수에서 가져오거나 기본값을 사용합니다.
