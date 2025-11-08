@@ -1,5 +1,6 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
@@ -10,11 +11,13 @@ import {
   Modal,
   Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import CategoryContent from './category';
 import MyPageScreen from './mypage';
 import TodosScreen from './todos';
 
@@ -750,7 +753,6 @@ export default function AppDrawer() {
       <Drawer.Screen name="Todos" component={TodosScreen} />
       <Drawer.Screen name="MyPage" component={MyPageScreen} />
       <Drawer.Screen name="Category" component={CategoryContent} />
-      <Drawer.Screen name="MyPage" component={MyPageScreen} />
       <Drawer.Screen name="Info">
         {(props) => <InformationContent {...props} userName={userName} setUserName={setUserName} />}
       </Drawer.Screen>
