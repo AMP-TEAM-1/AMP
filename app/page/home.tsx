@@ -14,6 +14,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import MyPageScreen from './mypage';
 import TodosScreen from './todos';
 
 const Drawer = createDrawerNavigator();
@@ -486,7 +487,7 @@ function CustomDrawerContent({ userName, ...props }: any) {
       {/* <DrawerItem label="할일 목록" onPress={() => props.navigation.navigate('Todos')} /> */}
 
       <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 8 }} />
-      <DrawerItem label="마이페이지" onPress={() => props.navigation.navigate('Home')} />
+      <DrawerItem label="마이페이지" onPress={() => props.navigation.navigate('MyPage')} />
 
       <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 8 }} />
 
@@ -507,6 +508,7 @@ export default function AppDrawer() {
     >
       <Drawer.Screen name="Home" component={HomeContent} />
       <Drawer.Screen name="Todos" component={TodosScreen} />
+      <Drawer.Screen name="MyPage" component={MyPageScreen} />
       <Drawer.Screen name="Category" component={CategoryContent} />
       <Drawer.Screen name="Info">
         {(props) => <InformationContent {...props} userName={userName} setUserName={setUserName} />}

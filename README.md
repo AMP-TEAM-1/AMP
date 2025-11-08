@@ -12,6 +12,10 @@ pip uninstall bcrypt
 pip install bcrypt==4.1.2
 해서 bcrypt 라이브러리는 따로 재설치.
 
+# 설치
+npm install --save-dev babel-plugin-module-resolver
++) 
+
 # 실행(cmd)
 uvicorn app.main:app --reload
 npm start 
