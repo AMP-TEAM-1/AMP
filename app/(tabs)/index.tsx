@@ -36,6 +36,7 @@ export default function LoginScreen() {
       </ThemedText>
 
       <Image
+        //source={require('@/assets/images/item/rabbit.png')}
         source={require('../../assets/images/item/rabbit.png')}
         style={{
           width: width * 0.6,
@@ -57,7 +58,7 @@ export default function LoginScreen() {
             marginTop: height * 0.04,
           },
         ]}
-        onPress={() => router.push('/login')}
+        onPress={() => router.push('/page/login')}
       >
         <ThemedText
           style={{ color: '#000', fontSize: width * 0.04, fontWeight: 'bold' }}
@@ -78,7 +79,7 @@ export default function LoginScreen() {
             marginTop: height * 0.015,
           },
         ]}
-        onPress={() => router.push('/signup')}
+        onPress={() => router.push('/page/signup')}
       >
         <ThemedText
           style={{

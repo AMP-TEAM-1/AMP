@@ -16,6 +16,7 @@ export default function CustomDrawerContent(props: any) {
 
       <DrawerItem label="오늘의 할 일" onPress={() => navigation.navigate('Home')} />
       <DrawerItem label="카테고리" onPress={() => navigation.navigate('Category')} />
+        <DrawerItem label="마이페이지" onPress={() => navigation.navigate('MyPage')} />
       <DrawerItem label="할일 목록" onPress={() => navigation.navigate('Todos')} />
 
       <DrawerItem
