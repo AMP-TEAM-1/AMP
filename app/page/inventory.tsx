@@ -27,10 +27,10 @@ type Item = { id: string; item_id: number; name: string; price: number; type: st
 
 // 이미지 매핑 (mypage.tsx와 동일하게 유지)
 const imageMap: { [key: string]: any } = {
-    'h1': require('../assets/images/item/strawHat.png'),
-    'h2': require('../assets/images/item/cowboyHat.png'),
-    'h3': require('../assets/images/item/chefsHat.png'),
-    'h4': require('../assets/images/item/santa-hat.png'),
+    'h1': require('../../assets/images/item/strawHat.png'),
+    'h2': require('../../assets/images/item/cowboyHat.png'),
+    'h3': require('../../assets/images/item/chefsHat.png'),
+    'h4': require('../../assets/images/item/santa-hat.png'),
     'h5': require('../assets/images/item/birthdayHat.png'),
     'h6': require('../assets/images/item/crown.png'),
     'a1': require('../assets/images/item/heart-accessory.png'),
