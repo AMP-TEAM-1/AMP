@@ -109,3 +109,114 @@ def get_user_inventory(db: Session, user_id: int) -> List[models.Inventory]:
     # User 모델에 'inventory' 관계 필드가 있다면, user.inventory로 바로 접근 가능합니다.
     # 여기서는 Inventory 테이블을 직접 쿼리합니다.
     return db.query(models.Inventory).filter(models.Inventory.user_id == user_id).all()
+
+def update_user_inventory(db: Session, user_id: int, item_id: int, is_equipped: bool) -> models.Inventory | None:
+    """
+    사용자의 인벤토리 아이템 장착 상태를 업데이트합니다.
+    """
+    # 1. 업데이트할 인벤토리 아이템 조회
+    inventory_item = db.query(models.Inventory).filter(
+        models.Inventory.user_id == user_id,
+        models.Inventory.item_id == item_id
+    ).first()
+
+    if not inventory_item:
+        return None
+
+    # 2. 장착(equip)하는 경우
+    if is_equipped:
+        # 2-1. 현재 아이템의 타입(hat, accessory) 조회
+        item_to_equip = db.query(models.Item).filter(models.Item.id == item_id).first()
+        if not item_to_equip:
+            return None # 아이템 정보가 없으면 중단
+        
+        item_type = item_to_equip.item_type
+
+        # 2-2. 동일한 타입의 다른 장착된 아이템을 해제(unequip) 처리
+        currently_equipped_items = db.query(models.Inventory).join(models.Item).filter(
+            models.Inventory.user_id == user_id,
+            models.Inventory.is_equipped == True,
+            models.Item.item_type == item_type,
+            models.Inventory.item_id != item_id # 현재 장착하려는 아이템 제외
+        ).all()
+
+        for equipped_item in currently_equipped_items:
+            equipped_item.is_equipped = False
+
+        # 2-3. User 모델의 equipped_..._id 필드 업데이트
+        user = db.query(models.User).filter(models.User.id == user_id).first()
+        if user:
+            if item_type == 'hat':
+                user.equipped_hat_id = item_id
+            elif item_type == 'accessory':
+                user.equipped_acc_id = item_id
+
+    # 3. 장착 해제(unequip)하는 경우
+    else:
+        # 3-1. User 모델의 equipped_..._id 필드 초기화
+        user = db.query(models.User).filter(models.User.id == user_id).first()
+        if user:
+            item_to_unequip = db.query(models.Item).filter(models.Item.id == item_id).first()
+            if item_to_unequip:
+                if item_to_unequip.item_type == 'hat' and user.equipped_hat_id == item_id:
+                    user.equipped_hat_id = None
+                elif item_to_unequip.item_type == 'accessory' and user.equipped_acc_id == item_id:
+                    user.equipped_acc_id = None
+
+    # 4. 현재 아이템의 is_equipped 상태 업데이트
+    inventory_item.is_equipped = is_equipped
+    
+    db.commit()
+    db.refresh(inventory_item)
+    
+    return inventory_item
+
+# 상점 아이템 구매 로직 데이터 일관성 준수
+def purchase_item_transaction(
+    db: Session, 
+    user_id: int, 
+    item_id: int
+) -> models.User | None:
+    """
+    사용자의 잔액을 차감하고 인벤토리에 아이템을 추가하는 트랜잭션 로직
+    """
+    # 1. 아이템 정보 조회 (가격 확인)
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        return None  # 아이템을 찾을 수 없음 (라우터에서 404 처리)
+
+    item_price = item.price
+    
+    # 2. 사용자 정보 조회 (잔액 확인)
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        return None  # 사용자를 찾을 수 없음 (라우터에서 404 처리)
+
+    # 3. 잔액 확인 및 차감
+    if user.carrot_balance < item_price:
+        # 잔액 부족 시 트랜잭션 중단 및 실패 반환 (라우터에서 400 처리)
+        return False  # 잔액 부족을 나타내는 별도의 값 반환 (예: False)
+    
+    # 3-1. 잔액 차감 (업데이트)
+    user.carrot_balance -= item_price
+    
+    # 4. 인벤토리 추가
+    # 중복 구매 방지 로직은 Inventory 모델 설계에 따라 달라집니다.
+    # 여기서는 새로운 Inventory 객체를 생성한다고 가정합니다.
+    db_inventory = models.Inventory(
+        user_id=user_id, 
+        item_id=item_id, 
+        is_equipped=False
+    )
+    db.add(db_inventory)
+    
+    # 5. DB 트랜잭션 커밋
+    try:
+        db.commit()
+    except Exception as e:
+        # 오류 발생 시 롤백하여 데이터 무결성 보장
+        db.rollback()
+        raise e
+        
+    db.refresh(user)
+    return user
