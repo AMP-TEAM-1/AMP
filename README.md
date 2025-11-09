@@ -29,7 +29,7 @@ index.tsx(엡)에서 email,pw 입력 -> FastAPI(서버)에서 main.py에서 DB �
 위 사진처럼 회원가입 시 DB 테이블에 저장됨
 
 # DB(supabase)
-postgresql://postgres:Bumchang123!@#@db.mvbaafdzacuqookgqqvt.supabase.co:5432/postgres
+postgresql://postgres.mvbaafdzacuqookgqqvt:Bumchang123%21%40%23@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres
 host : db.mvbaafdzacuqookgqqvt.supabase.co
 port : 5432
 database : postgres
