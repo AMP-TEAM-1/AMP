@@ -17,7 +17,7 @@ npm install --save-dev babel-plugin-module-resolver
 +) 
 
 # 실행(cmd)
-uvicorn app.main:app --reload
+uvicorn app.api.main:app --reload
 npm start 
 
 # 작동원리
@@ -27,6 +27,17 @@ index.tsx(엡)에서 email,pw 입력 -> FastAPI(서버)에서 main.py에서 DB �
 # 부가 설명
 ![DB사진](./db.png)
 위 사진처럼 회원가입 시 DB 테이블에 저장됨
+
+# DB(supabase)
+postgresql://postgres:Bumchang123!@#@db.mvbaafdzacuqookgqqvt.supabase.co:5432/postgres
+host : db.mvbaafdzacuqookgqqvt.supabase.co
+port : 5432
+database : postgres
+user : postgres
+
+supabase 접속 명령어(cmd)
+set PGPASSWORD=Bumchang123!@#
+psql "host=db.mvbaafdzacuqookgqqvt.supabase.co port=5432 user=postgres dbname=postgres sslmode=require"
 
 ## 전체 파일 구조
 
