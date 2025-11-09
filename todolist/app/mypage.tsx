@@ -1,9 +1,5 @@
 //UI 개발 및 테스트를 위해 로컬 JSON 파일(shopItems.json)을 임시 데이터로 사용하고 있으며,
-<<<<<<< HEAD
-// 실제 서버와 통신하는 API 연동 로직은 주석 처리되어 있습니다. 
-=======
 // 실제 서버와 통신하는 API 연동 로직은 주석 처리되어 있습니다.
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -14,12 +10,8 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import axios from 'axios';
 import { tokenStorage } from './storage';
-<<<<<<< HEAD
-import * as RawShopData from './shopItems.json'; // 임시 추가
-=======
 import { router } from 'expo-router';
 import * as RawShopData from './shopItems.json'; // 임시 추가c
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
 
 const rabbitImage = require('../assets/images/item/rabbit.png');
 
@@ -91,11 +83,7 @@ const imageMap: { [key: string]: any } = {
 
 export default function MyPageScreen() {
   const { height: screenHeight } = useWindowDimensions();
-<<<<<<< HEAD
-  const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('모자');
-=======
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory | null>(null);
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
   const [carrots, setCarrots] = useState(0); // 당근 개수 (서버에서 가져올 예정)
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
@@ -137,27 +125,18 @@ export default function MyPageScreen() {
         // 아래로 충분히 스와이프하면 시트를 최소화합니다.
         translateY.value = withSpring(partialHeight, { damping: 90 });
         setIsSheetMinimized(true);
-<<<<<<< HEAD
-      } else {
-        // 그렇지 않으면 원래 위치로 복귀
-        translateY.value = withSpring(0, { damping: 20 });
-        setIsSheetMinimized(false);
-=======
         setSelectedCategory(null); // 시트가 내려가면 카테고리 선택 해제
       } else {
         // 그렇지 않으면 원래 위치로 복귀
         translateY.value = withSpring(0, { damping: 100 });
         setIsSheetMinimized(false);
         setSelectedCategory('모자'); // 시트가 올라가면 '모자'를 기본 선택
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
       }
     })
     .onFinalize(() => {
       setIsHandleTouched(false);
     });
 
-<<<<<<< HEAD
-=======
   // 카테고리 탭을 누를 때 실행되는 함수
   const handleTabPress = (category: ItemCategory) => {
     // 시트를 위로 올립니다.
@@ -169,7 +148,6 @@ export default function MyPageScreen() {
 
 
 
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
   // // --- API 연동 로직 ---
   // // 컴포넌트가 마운트될 때 상점 아이템 목록을 불러옵니다.
   // const fetchShopItems = useCallback(async () => {
@@ -340,11 +318,7 @@ export default function MyPageScreen() {
                 <Pressable
                   key={category}
                   style={[styles.tab, selectedCategory === category && styles.activeTab]}
-<<<<<<< HEAD
-                  onPress={() => setSelectedCategory(category)}
-=======
                   onPress={() => handleTabPress(category)}
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
                 >
                   <ThemedText style={[styles.tabText, selectedCategory === category && styles.activeTabText]}>
                     {category}
@@ -357,11 +331,7 @@ export default function MyPageScreen() {
             {loading ? <ActivityIndicator style={{marginTop: 20}} /> : (
               <FlatList
                 // 선택된 카테고리에 따라 shopItems 필터링
-<<<<<<< HEAD
-                data={shopItems.filter(item => item.type.toLowerCase() === CATEGORY_MAP[selectedCategory])}
-=======
                 data={selectedCategory ? shopItems.filter(item => item.type.toLowerCase() === CATEGORY_MAP[selectedCategory]) : []}
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
                 renderItem={renderItem}
                 keyExtractor={(item) => String(item.item_id)}
                 numColumns={3}
@@ -378,11 +348,7 @@ export default function MyPageScreen() {
           {isSheetMinimized && !isHandleTouched && (
             <Pressable 
               style={styles.inventoryButton} 
-<<<<<<< HEAD
-              onPress={() => { translateY.value = withSpring(0); setIsSheetMinimized(false); }}>
-=======
               onPress={() => router.push('/inventory')}>
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
               <ThemedText style={styles.inventoryButtonText}>인벤토리 &gt;</ThemedText>
             </Pressable>
           )}
@@ -435,19 +401,11 @@ const styles = StyleSheet.create({
   },
   carrotContainer: {
     position: 'absolute',
-<<<<<<< HEAD
-    top: 10, // 위쪽 여백을 줄입니다.
-    left: 10, // 왼쪽 여백을 줄입니다.
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-=======
     top: 0,
     left: 20,
     paddingVertical: 8,
     // 배경색을 투명하게 하여 텍스트만 보이도록 합니다.
     backgroundColor: 'transparent',
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
   },
   carrotText: {
     fontSize: 18,
@@ -533,14 +491,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   itemList: {
-<<<<<<< HEAD
-    padding: 10,
-  },
-  itemContainer: {
-    flex: 1 / 3,
-    alignItems: 'center',
-    margin: 5,
-=======
     padding: 10, // 컨테이너 패딩 제거
     marginHorizontal: 5, // 좌우 마진 추가
   },
@@ -549,7 +499,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: '1.5%', // 각 아이템의 좌우 마진 (1.5% + 1.5% = 3%)
     marginVertical: 8, // 상하 마진
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
     padding: 10,
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
@@ -624,11 +573,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-<<<<<<< HEAD
-    backgroundColor: '#f2f2f2',
-=======
     backgroundColor: '#f2f2f2', 
->>>>>>> 3477f8af9195ee7d8c8d9914fb98d71ccd05c40e
   },
   purchaseButton: {
     backgroundColor: '#E8730D8A',

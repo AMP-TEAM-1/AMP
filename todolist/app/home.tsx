@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CategoryContent from './category';
 import MyPageScreen from './mypage';
+import AlarmPage from './alarm';
 
 const Drawer = createDrawerNavigator();
 
@@ -240,17 +241,17 @@ function HomeContent() {
             }}
             showsHorizontalScrollIndicator={false}
           />
-          <View style={{ alignItems: 'center', marginTop: 3, }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <View style={{ alignItems: 'center', marginTop: 3 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={{ fontSize: 18, color: '#333', fontWeight: '700' }}>
-                {currentTodos.length}
+                {currentTodos.filter(todo => !todo.checked).length} {/* 완료 안 된 할일만 계산 */}
               </Text>
               <Ionicons name="checkmark-outline" size={22} color="#000" />
             </View>
           </View>
         </View>
 
-        <View style={{ height: 50, marginTop: 10 }}>
+        <View style={{ height: 45 }}>
           <FlatList
             data={[{ id: 'all', text: 'ALL', isAll: true }, ...categories]}
             horizontal
@@ -483,8 +484,11 @@ function HomeContent() {
               {/* 알림 설정 */}
               <Pressable
                 style={{ paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
-                onPress={() => {}}
-              >
+                onPress={() => {
+                  setActionModalVisible(false); // 모달 닫기
+                  navigation.navigate('Alarm'); // Alarm 페이지로 이동}}
+                  }}
+                >
                 <Ionicons name="notifications-outline" size={20} color="black" style={{ marginRight: 10 }} />
                 <Text style={{ fontSize: 17, color: 'black' }}>알림 설정</Text>
               </Pressable>
@@ -739,6 +743,7 @@ export default function AppDrawer() {
       <Drawer.Screen name="Info">
         {(props) => <InformationContent {...props} userName={userName} setUserName={setUserName} />}
       </Drawer.Screen>
+      <Drawer.Screen name="Alarm" component={AlarmPage} />
     </Drawer.Navigator>
   );
 }
