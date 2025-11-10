@@ -22,6 +22,7 @@ export type InventoryItem = {
 // 프론트엔드에서 사용할 통합 아이템 타입 (이미지 경로 등 추가 정보 포함)
 export type Item = (ShopItem | InventoryItem) & {
   image: any; // require()의 반환 타입
+  is_owned?: boolean; // 아이템 보유 여부
 };
 
 // --- 상수 정의 ---
