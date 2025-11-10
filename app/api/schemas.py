@@ -50,6 +50,18 @@ class ItemBase(BaseModel):
     item_type: str # 'hat' 또는 'accessory'
     image_url: str
 
+class ItemResponse(BaseModel):
+    name: str
+    price: int
+    image_url: str
+    item_id: int = Field(..., alias='id')
+    type: str = Field(..., alias='item_type')
+    class Config:
+        from_attributes = True
+        populate_by_name = True
+        # 🔥 응답 시 alias 필드명 사용 (id → item_id, item_type → type)
+        by_alias = True
+
 class Item(ItemBase):
     id: int
     class Config:

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Dict, Any
 from .database import get_db
 from . import crud, models, schemas
 from .auth import get_current_user
@@ -10,16 +10,27 @@ router = APIRouter()
 class CarrotUpdate(schemas.BaseModel):
     amount: int  # 잔액 변경량 (양수: 증가, 음수: 감소)
 
-@router.get("/shop/items", response_model=List[schemas.Item])
+@router.get("/shop/items")
 def read_shop_items(
-    db: Session = Depends(get_db),  # 데이터베이스 세션 의존성 주입
-):
+    db: Session = Depends(get_db),
+) -> List[Dict[str, Any]]:
     """
     상점에 진열된 모든 물품 목록을 조회합니다.
     """
     try:
         items = crud.get_all_shop_items(db)
-        return items
+        result = []
+        for item in items:
+            result.append({
+                "name": item.name,
+                "price": item.price,
+                "image_url": item.image_url,
+                "item_id": item.id,  # id → item_id 변환
+                "type": item.item_type  # item_type → type 변환
+            })
+        
+        return result
+        
     except Exception as e:
         print(f"상점 물품 조회 중 오류 발생: {e}")
         raise HTTPException(status_code=500, detail="아이템 목록을 불러오는 데 실패했습니다.")
