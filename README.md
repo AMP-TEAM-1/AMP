@@ -9,7 +9,7 @@ npx expo install expo-secure-store
 npm install axios   
 -> 모두 설치 한 후에 
 pip uninstall bcrypt
-pip install bcrypt==4.1.2
+pip install "bcrypt==3.2.2"
 해서 bcrypt 라이브러리는 따로 재설치.
 
 # 설치

@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from datetime import date
 from typing import List
 from . import models, schemas, security
 
@@ -23,9 +24,22 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
 def get_todos(db: Session, user_id: int, skip: int = 0, limit: int = 100):
     return db.query(models.Todo).filter(models.Todo.owner_id == user_id).offset(skip).limit(limit).all()
 
+# 🥕 사용자 ID와 날짜로 Todo 목록 조회 함수
+def get_todos_by_date(db: Session, user_id: int, target_date: date):
+    return db.query(models.Todo).filter(models.Todo.owner_id == user_id, models.Todo.date == target_date).all()
+
 # 사용자 ID로 Todo 생성 함수
 def create_user_todo(db: Session, todo: schemas.TodoCreate, user_id: int):
-    db_todo = models.Todo(**todo.dict(), owner_id=user_id)
+    # 🥕 category_ids를 제외한 나머지 데이터로 Todo 객체 우선 생성
+    todo_data = todo.dict(exclude={'category_ids'})
+    db_todo = models.Todo(**todo_data, owner_id=user_id)
+
+    # 🥕 category_ids가 있으면 카테고리 연결
+    if todo.category_ids:
+        categories = db.query(models.Category).filter(models.Category.id.in_(todo.category_ids)).all()
+        if categories:
+            db_todo.categories.extend(categories)
+
     db.add(db_todo)
     db.commit()
     db.refresh(db_todo)
@@ -38,6 +52,14 @@ def get_todo(db: Session, todo_id: int):
 # ID로 할일 항목 업데이트 함수
 def update_todo(db: Session, todo_id: int, todo: schemas.TodoUpdate):
     db_todo = db.query(models.Todo).filter(models.Todo.id == todo_id).first()
+
+    # 🥕 카테고리 연결 업데이트
+    if todo.category_ids is not None:
+        # 기존 카테고리 연결을 모두 지우고 새로 설정
+        db_todo.categories.clear()
+        categories = db.query(models.Category).filter(models.Category.id.in_(todo.category_ids)).all()
+        db_todo.categories.extend(categories)
+
     if db_todo:
         update_data = todo.dict(exclude_unset=True)
         for key, value in update_data.items():
@@ -55,6 +77,38 @@ def delete_todo(db: Session, todo_id: int):
     # 삭제 후에는 객체가 세션에서 만료되므로, 삭제 성공 여부를 boolean 등으로 반환하거나
     # 삭제된 객체 정보를 담은 dict를 반환할 수 있습니다. 여기서는 삭제된 객체를 반환합니다.
     return db_todo
+
+# --- Category CRUD 함수 ---
+
+def get_categories_by_user(db: Session, user_id: int):
+    return db.query(models.Category).filter(models.Category.owner_id == user_id).all()
+
+def create_category(db: Session, category: schemas.CategoryCreate, user_id: int):
+    db_category = models.Category(**category.dict(), owner_id=user_id)
+    db.add(db_category)
+    db.commit()
+    db.refresh(db_category)
+    return db_category
+
+def update_category(db: Session, category_id: int, category: schemas.CategoryCreate):
+    db_category = db.query(models.Category).filter(models.Category.id == category_id).first()
+    if db_category:
+        db_category.text = category.text
+        db.commit()
+        db.refresh(db_category)
+    return db_category
+
+def delete_category(db: Session, category_id: int):
+    db_category = db.query(models.Category).filter(models.Category.id == category_id).first()
+    if db_category:
+        # 🥕 이 카테고리에 연결된 모든 할 일을 삭제합니다.
+        # db_category.todos는 relationship을 통해 연결된 Todo 객체 목록입니다.
+        for todo in db_category.todos:
+            db.delete(todo)
+        # 카테고리 자체를 삭제합니다.
+        db.delete(db_category)
+        db.commit()
+    return db_category
 
 # 상점의 모든 물품을 조회하는 함수
 def get_all_shop_items(db: Session):

@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Time, DATETIME
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Time, DATETIME, Table
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -22,6 +22,13 @@ class User(Base):
     # 인벤토리와 관계 설정 (역참조)
     inventory = relationship("Inventory", back_populates="owner")
 
+# 🥕 할일-카테고리 다대다 관계를 위한 연결 테이블
+todo_category_association = Table(
+    'todo_category_association', Base.metadata,
+    Column('todo_id', Integer, ForeignKey('todos.id'), primary_key=True),
+    Column('category_id', Integer, ForeignKey('categories.id'), primary_key=True)
+)
+
 class Todo(Base):
     __tablename__ = "todos"
 
@@ -29,12 +36,30 @@ class Todo(Base):
     title = Column(String, index=True) # 할일 제목
     completed = Column(Boolean, default=False) # 완료 여부
     owner_id = Column(Integer, ForeignKey("users.id")) # 소유자 ID
+    date = Column(DATETIME, index=True, nullable=False) # 🥕 추가한 날짜
 
     owner = relationship("User", back_populates="todos") # 소유자 정보
+    # 🥕 카테고리와의 다대다 관계 설정
+    categories = relationship(
+        "Category",
+        secondary=todo_category_association,
+        back_populates="todos"
+    )
 
     # ⏰ 알람 시간 필드 추가
     alarm_time = Column(Time, nullable=True) # Python time 객체로 저장
     # 혹은 Column(String)으로 "06:20" 문자열 저장도 가능
+
+# 🥕 카테고리 모델 추가
+class Category(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    text = Column(String, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+
+    owner = relationship("User")
+    todos = relationship("Todo", secondary=todo_category_association, back_populates="categories")
 
 # 1. 물품 모델 (Item Model)
 class Item(Base):

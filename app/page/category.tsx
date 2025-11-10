@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useContext, useEffect, useState } from 'react';
 import {
@@ -12,66 +12,77 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { tokenStorage } from '../storage';
 import { ColorContext } from './ColorContext';
 
-
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 export default function CategoryContent() {
   const { colors } = useContext(ColorContext);
   const navigation = useNavigation<any>();
   const [boxes, setBoxes] = useState<{ id: number; text: string; editing: boolean }[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const getAuthHeaders = async () => {
+    const token = await tokenStorage.getItem();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const headers = await getAuthHeaders();
+      const response = await axios.get(`${API_URL}/categories/`, { headers });
+      setBoxes(response.data.map((cat: any) => ({ ...cat, editing: false })));
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ✅ 박스 추가 시 자동 편집 모드로 생성
-  const handleAddBox = () => {
-    const newBox = { id: Date.now(), text: '', editing: true };
-    setBoxes(prev => {
-      const updated = prev.map(box => ({ ...box, editing: false }));
-      return [...updated, newBox];
-    });
+  const handleAddBox = async () => {
+    try {
+      const headers = await getAuthHeaders();
+      const response = await axios.post(`${API_URL}/categories/`, { text: '새 카테고리' }, { headers });
+      const newCategory = { ...response.data, editing: true };
+      setBoxes(prev => [...prev.map(b => ({...b, editing: false})), newCategory]);
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
   };
 
   const handleTextChange = (id: number, newText: string) => {
-    setBoxes(prev =>
-      prev.map(box =>
-        box.id === id ? { ...box, text: newText } : box
-      )
-    );
+    setBoxes(prev => prev.map(box => (box.id === id ? { ...box, text: newText } : box)));
   };
 
-  const handleDeleteBox = (id: number) => {
-    setBoxes(prev => prev.filter(box => box.id !== id));
+  const handleDeleteBox = async (id: number) => {
+    try {
+      const headers = await getAuthHeaders();
+      await axios.delete(`${API_URL}/categories/${id}`, { headers });
+      setBoxes(prev => prev.filter(box => box.id !== id));
+    } catch (error) {
+      console.error('Error deleting category:', error);
+    }
   };
 
   const handleBoxPress = (id: number) => {
-    setBoxes(prev =>
-      prev.map(box =>
-        box.id === id ? { ...box, editing: true } : { ...box, editing: false }
-      )
-    );
+    setBoxes(prev => prev.map(box => (box.id === id ? { ...box, editing: true } : { ...box, editing: false })));
   };
 
-  const handleCancelEdit = (id: number) => {
-    setBoxes(prev =>
-      prev.map(box =>
-        box.id === id ? { ...box, editing: false } : box
-      )
-    );
+  const handleSaveEdit = async (id: number, text: string) => {
+    try {
+      const headers = await getAuthHeaders();
+      await axios.put(`${API_URL}/categories/${id}`, { text }, { headers });
+      setBoxes(prev => prev.map(box => (box.id === id ? { ...box, editing: false } : box)));
+    } catch (error) {
+      console.error('Error updating category:', error);
+    }
   };
 
   useEffect(() => {
-  AsyncStorage.setItem('categories', JSON.stringify(boxes));
-  }, [boxes]);
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      const saved = await AsyncStorage.getItem('categories');
-      if (saved) {
-        setBoxes(JSON.parse(saved));
-      }
-    };
-    loadCategories();
-
-    const unsubscribe = navigation.addListener('focus', loadCategories); // 화면 이동 시 최신 값 로드
+    const unsubscribe = navigation.addListener('focus', fetchCategories); // 화면 이동 시 최신 값 로드
     return unsubscribe;
   }, [navigation]);
 
@@ -123,7 +134,7 @@ export default function CategoryContent() {
                       placeholderTextColor="#999"
                       value={item.text}
                       onChangeText={text => handleTextChange(item.id, text)}
-                      onBlur={() => handleCancelEdit(item.id)}
+                      onBlur={() => handleSaveEdit(item.id, item.text)}
                       maxLength={13}
                       autoFocus={item.editing}
                     />
