@@ -1,7 +1,8 @@
+#  SQLAlchemy 데이터베이스 모델 정의
+
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Time, DATETIME, Table
 from sqlalchemy.orm import relationship
 from .database import Base
-
 
 class User(Base):
     __tablename__ = "users"

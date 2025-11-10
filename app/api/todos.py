@@ -1,3 +1,5 @@
+# 할 일 목록(to-do list) 기능과 관련된 API 엔드포인트 처리
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session 
 from datetime import date
