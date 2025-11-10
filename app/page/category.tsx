@@ -1,144 +1,167 @@
-import React, { useState, useEffect } from 'react';
-import {
-  SafeAreaView,
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { tokenStorage } from '../storage';
+import { ColorContext } from './ColorContext';
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 export default function CategoryContent() {
+  const { colors } = useContext(ColorContext);
   const navigation = useNavigation<any>();
   const [boxes, setBoxes] = useState<{ id: number; text: string; editing: boolean }[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const getAuthHeaders = async () => {
+    const token = await tokenStorage.getItem();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const headers = await getAuthHeaders();
+      const response = await axios.get(`${API_URL}/categories/`, { headers });
+      setBoxes(response.data.map((cat: any) => ({ ...cat, editing: false })));
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ✅ 박스 추가 시 자동 편집 모드로 생성
-  const handleAddBox = () => {
-    const newBox = { id: Date.now(), text: '', editing: true };
-    setBoxes(prev => {
-      const updated = prev.map(box => ({ ...box, editing: false }));
-      return [...updated, newBox];
-    });
+  const handleAddBox = async () => {
+    try {
+      const headers = await getAuthHeaders();
+      const response = await axios.post(`${API_URL}/categories/`, { text: '새 카테고리' }, { headers });
+      const newCategory = { ...response.data, editing: true };
+      setBoxes(prev => [...prev.map(b => ({...b, editing: false})), newCategory]);
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
   };
 
   const handleTextChange = (id: number, newText: string) => {
-    setBoxes(prev =>
-      prev.map(box =>
-        box.id === id ? { ...box, text: newText } : box
-      )
-    );
+    setBoxes(prev => prev.map(box => (box.id === id ? { ...box, text: newText } : box)));
   };
 
-  const handleDeleteBox = (id: number) => {
-    setBoxes(prev => prev.filter(box => box.id !== id));
+  const handleDeleteBox = async (id: number) => {
+    try {
+      const headers = await getAuthHeaders();
+      await axios.delete(`${API_URL}/categories/${id}`, { headers });
+      setBoxes(prev => prev.filter(box => box.id !== id));
+    } catch (error) {
+      console.error('Error deleting category:', error);
+    }
   };
 
   const handleBoxPress = (id: number) => {
-    setBoxes(prev =>
-      prev.map(box =>
-        box.id === id ? { ...box, editing: true } : { ...box, editing: false }
-      )
-    );
+    setBoxes(prev => prev.map(box => (box.id === id ? { ...box, editing: true } : { ...box, editing: false })));
   };
 
-  const handleCancelEdit = (id: number) => {
-    setBoxes(prev =>
-      prev.map(box =>
-        box.id === id ? { ...box, editing: false } : box
-      )
-    );
+  const handleSaveEdit = async (id: number, text: string) => {
+    try {
+      const headers = await getAuthHeaders();
+      await axios.put(`${API_URL}/categories/${id}`, { text }, { headers });
+      setBoxes(prev => prev.map(box => (box.id === id ? { ...box, editing: false } : box)));
+    } catch (error) {
+      console.error('Error updating category:', error);
+    }
   };
 
   useEffect(() => {
-  AsyncStorage.setItem('categories', JSON.stringify(boxes));
-  }, [boxes]);
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      const saved = await AsyncStorage.getItem('categories');
-      if (saved) {
-        setBoxes(JSON.parse(saved));
-      }
-    };
-    loadCategories();
-
-    const unsubscribe = navigation.addListener('focus', loadCategories); // 화면 이동 시 최신 값 로드
+    const unsubscribe = navigation.addListener('focus', fetchCategories); // 화면 이동 시 최신 값 로드
     return unsubscribe;
   }, [navigation]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* 상단 헤더 */}
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
-          <Ionicons name="menu" size={30} color="#000" />
+    <LinearGradient
+      colors={colors as [string, string, ...string[]]}
+      locations={[0, 0.35, 0.65, 1]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+      >
+      <SafeAreaView style={styles.container}>
+        {/* 상단 헤더 */}
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
+            <Ionicons name="menu" size={30} color="#000" />
+          </Pressable>
+
+          <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
+            <Text style={styles.myText}>마이</Text>
+          </Pressable>
+        </View>
+
+        {/* 제목 */}
+        <Text style={styles.titleText}>카테고리</Text>
+
+        {/* + 버튼 */}
+        <Pressable style={styles.addButton} onPress={handleAddBox}>
+          <Ionicons name="add" size={40} color="#000" />
         </Pressable>
 
-        <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
-          <Text style={styles.myText}>마이</Text>
-        </Pressable>
-      </View>
-
-      {/* 제목 */}
-      <Text style={styles.titleText}>카테고리</Text>
-
-      {/* + 버튼 */}
-      <Pressable style={styles.addButton} onPress={handleAddBox}>
-        <Ionicons name="add" size={40} color="#000" />
-      </Pressable>
-
-      {/* 회색 박스 목록 */}
-      <ScrollView contentContainerStyle={styles.boxContainer} keyboardShouldPersistTaps="handled">
-        {boxes.map(item => (
-          <View key={item.id} style={styles.boxRow}>
-            {/* 박스 선택 시 기본 노란 하이라이트 제거 */}
-            <Pressable
-              onPress={() => handleBoxPress(item.id)}
-              android_ripple={{ color: 'transparent' }} // ✅ 노란 하이라이트 제거
-              style={({ pressed }) => [
-                { opacity: pressed ? 0.8 : 1 }, // 눌렀을 때 살짝 투명하게만
-              ]}
-            >
-              <View style={[styles.dynamicBox, { width: Math.max(100, item.text.length * 18 + 40) }]}>
-                {item.editing ? (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="입력"
-                    placeholderTextColor="#999"
-                    value={item.text}
-                    onChangeText={text => handleTextChange(item.id, text)}
-                    onBlur={() => handleCancelEdit(item.id)}
-                    maxLength={13}
-                    autoFocus={item.editing}
-                  />
-                ) : (
-                  <Text style={styles.input}>{item.text || '입력'}</Text>
-                )}
-              </View>
-            </Pressable>
-
-            {item.editing && (
+        {/* 회색 박스 목록 */}
+        <ScrollView contentContainerStyle={styles.boxContainer} keyboardShouldPersistTaps="handled">
+          {boxes.map(item => (
+            <View key={item.id} style={styles.boxRow}>
+              {/* 박스 선택 시 기본 노란 하이라이트 제거 */}
               <Pressable
-                onPressIn={() => handleDeleteBox(item.id)}
-                style={styles.deleteButton}
+                onPress={() => handleBoxPress(item.id)}
+                android_ripple={{ color: 'transparent' }} // ✅ 노란 하이라이트 제거
+                style={({ pressed }) => [
+                  { opacity: pressed ? 0.8 : 1 }, // 눌렀을 때 살짝 투명하게만
+                ]}
               >
-                <Ionicons name="close" size={24} color="#000" />
+                <View style={[styles.dynamicBox, { width: Math.max(100, item.text.length * 18 + 40) }]}>
+                  {item.editing ? (
+                    <TextInput
+                      style={styles.input}
+                      placeholder="입력"
+                      placeholderTextColor="#999"
+                      value={item.text}
+                      onChangeText={text => handleTextChange(item.id, text)}
+                      onBlur={() => handleSaveEdit(item.id, item.text)}
+                      maxLength={13}
+                      autoFocus={item.editing}
+                    />
+                  ) : (
+                    <Text style={styles.input}>{item.text || '입력'}</Text>
+                  )}
+                </View>
               </Pressable>
-            )}
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+
+              {item.editing && (
+                <Pressable
+                  onPressIn={() => handleDeleteBox(item.id)}
+                  style={styles.deleteButton}
+                >
+                  <Ionicons name="close" size={24} color="#000" />
+                </Pressable>
+              )}
+            </View>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1 },
 
   header: {
     height: 80,
@@ -147,7 +170,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: 8,
     paddingHorizontal: 10,
-    backgroundColor: '#fff',
+
   },
 
   menuButton: {
@@ -213,11 +236,12 @@ const styles = StyleSheet.create({
 
   dynamicBox: {
     minHeight: 53,
-    backgroundColor: '#ddd',
+    backgroundColor: '#f6f6f6',
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 10,
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, elevation: 2, borderWidth: 1, borderColor: '#ccc'
   },
 
   input: {
