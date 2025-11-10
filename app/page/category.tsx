@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import {
-  SafeAreaView,
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { ColorContext } from './ColorContext';
+
 
 
 export default function CategoryContent() {
+  const { colors } = useContext(ColorContext);
   const navigation = useNavigation<any>();
   const [boxes, setBoxes] = useState<{ id: number; text: string; editing: boolean }[]>([]);
 
@@ -72,73 +76,81 @@ export default function CategoryContent() {
   }, [navigation]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* 상단 헤더 */}
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
-          <Ionicons name="menu" size={30} color="#000" />
+    <LinearGradient
+      colors={colors as [string, string, ...string[]]}
+      locations={[0, 0.35, 0.65, 1]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+      >
+      <SafeAreaView style={styles.container}>
+        {/* 상단 헤더 */}
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
+            <Ionicons name="menu" size={30} color="#000" />
+          </Pressable>
+
+          <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
+            <Text style={styles.myText}>마이</Text>
+          </Pressable>
+        </View>
+
+        {/* 제목 */}
+        <Text style={styles.titleText}>카테고리</Text>
+
+        {/* + 버튼 */}
+        <Pressable style={styles.addButton} onPress={handleAddBox}>
+          <Ionicons name="add" size={40} color="#000" />
         </Pressable>
 
-        <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
-          <Text style={styles.myText}>마이</Text>
-        </Pressable>
-      </View>
-
-      {/* 제목 */}
-      <Text style={styles.titleText}>카테고리</Text>
-
-      {/* + 버튼 */}
-      <Pressable style={styles.addButton} onPress={handleAddBox}>
-        <Ionicons name="add" size={40} color="#000" />
-      </Pressable>
-
-      {/* 회색 박스 목록 */}
-      <ScrollView contentContainerStyle={styles.boxContainer} keyboardShouldPersistTaps="handled">
-        {boxes.map(item => (
-          <View key={item.id} style={styles.boxRow}>
-            {/* 박스 선택 시 기본 노란 하이라이트 제거 */}
-            <Pressable
-              onPress={() => handleBoxPress(item.id)}
-              android_ripple={{ color: 'transparent' }} // ✅ 노란 하이라이트 제거
-              style={({ pressed }) => [
-                { opacity: pressed ? 0.8 : 1 }, // 눌렀을 때 살짝 투명하게만
-              ]}
-            >
-              <View style={[styles.dynamicBox, { width: Math.max(100, item.text.length * 18 + 40) }]}>
-                {item.editing ? (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="입력"
-                    placeholderTextColor="#999"
-                    value={item.text}
-                    onChangeText={text => handleTextChange(item.id, text)}
-                    onBlur={() => handleCancelEdit(item.id)}
-                    maxLength={13}
-                    autoFocus={item.editing}
-                  />
-                ) : (
-                  <Text style={styles.input}>{item.text || '입력'}</Text>
-                )}
-              </View>
-            </Pressable>
-
-            {item.editing && (
+        {/* 회색 박스 목록 */}
+        <ScrollView contentContainerStyle={styles.boxContainer} keyboardShouldPersistTaps="handled">
+          {boxes.map(item => (
+            <View key={item.id} style={styles.boxRow}>
+              {/* 박스 선택 시 기본 노란 하이라이트 제거 */}
               <Pressable
-                onPressIn={() => handleDeleteBox(item.id)}
-                style={styles.deleteButton}
+                onPress={() => handleBoxPress(item.id)}
+                android_ripple={{ color: 'transparent' }} // ✅ 노란 하이라이트 제거
+                style={({ pressed }) => [
+                  { opacity: pressed ? 0.8 : 1 }, // 눌렀을 때 살짝 투명하게만
+                ]}
               >
-                <Ionicons name="close" size={24} color="#000" />
+                <View style={[styles.dynamicBox, { width: Math.max(100, item.text.length * 18 + 40) }]}>
+                  {item.editing ? (
+                    <TextInput
+                      style={styles.input}
+                      placeholder="입력"
+                      placeholderTextColor="#999"
+                      value={item.text}
+                      onChangeText={text => handleTextChange(item.id, text)}
+                      onBlur={() => handleCancelEdit(item.id)}
+                      maxLength={13}
+                      autoFocus={item.editing}
+                    />
+                  ) : (
+                    <Text style={styles.input}>{item.text || '입력'}</Text>
+                  )}
+                </View>
               </Pressable>
-            )}
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+
+              {item.editing && (
+                <Pressable
+                  onPressIn={() => handleDeleteBox(item.id)}
+                  style={styles.deleteButton}
+                >
+                  <Ionicons name="close" size={24} color="#000" />
+                </Pressable>
+              )}
+            </View>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1 },
 
   header: {
     height: 80,
@@ -147,7 +159,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: 8,
     paddingHorizontal: 10,
-    backgroundColor: '#fff',
+
   },
 
   menuButton: {
@@ -213,11 +225,12 @@ const styles = StyleSheet.create({
 
   dynamicBox: {
     minHeight: 53,
-    backgroundColor: '#ddd',
+    backgroundColor: '#f6f6f6',
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 10,
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, elevation: 2, borderWidth: 1, borderColor: '#ccc'
   },
 
   input: {

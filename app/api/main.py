@@ -35,5 +35,9 @@ from .todos import router as todos_router
 app.include_router(todos_router)
 
 # MyPage 관련 라우터 등록
-from .mypage import router as mypage_router
+from .mypage_shop import router as mypage_router
 app.include_router(mypage_router)
+
+# inventory 관련 라우터 등록
+from .inventory import router as inventory_router
+app.include_router(inventory_router)
