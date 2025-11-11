@@ -1,3 +1,5 @@
+# 데이터베이스 모델에 대한 생성(Create), 읽기(Read), 업데이트(Update), 삭제(Delete) 함수 구현
+
 from sqlalchemy.orm import Session
 from datetime import date
 from typing import List

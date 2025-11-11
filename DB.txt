@@ -1,0 +1,15 @@
+# DB(supabase)
+postgresql://postgres.mvbaafdzacuqookgqqvt:Bumchang123%21%40%23@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres
+host : db.mvbaafdzacuqookgqqvt.supabase.co
+port : 5432
+database : postgres
+user : postgres
+
+supabase 접속 명령어(cmd)
+set PGPASSWORD=Bumchang123!@#
+psql "host=db.mvbaafdzacuqookgqqvt.supabase.co port=5432 user=postgres dbname=postgres sslmode=require"
+
+### 공인IP 관련 
+*** 로그인 테스트 시에 팀장에게 공인IP 알리기
+> https://whatismyipaddress.com/
+여기 접속하면 공인IP 알 수 있음

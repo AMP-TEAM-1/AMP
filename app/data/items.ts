@@ -30,7 +30,7 @@ export const CATEGORIES: ItemCategory[] = ['모자', '장신구', '배경'];
 
 export const CATEGORY_MAP: Record<ItemCategory, string> = {
   '모자': 'hat',
-  '장신구': 'accessory',
+  '장신구': 'accessories',
   '배경': 'background',
 };
 

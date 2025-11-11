@@ -1,3 +1,5 @@
+# Pydantic 스키마를 정의하여 데이터 유효성 검사 및 직렬화 수행
+
 from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
 from datetime import time, date
@@ -49,6 +51,18 @@ class ItemBase(BaseModel):
     price: int
     item_type: str # 'hat' 또는 'accessory'
     image_url: str
+
+class ItemResponse(BaseModel):
+    name: str
+    price: int
+    image_url: str
+    item_id: int = Field(..., alias='id')
+    type: str = Field(..., alias='item_type')
+    class Config:
+        from_attributes = True
+        populate_by_name = True
+        # 🔥 응답 시 alias 필드명 사용 (id → item_id, item_type → type)
+        by_alias = True # 별칭 포맷팅 설정
 
 class Item(ItemBase):
     id: int

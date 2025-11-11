@@ -1,3 +1,5 @@
+# 앱을 생성 및 API 라우터를 등록
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from . import models
