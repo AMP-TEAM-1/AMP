@@ -9,7 +9,7 @@ npx expo install expo-secure-store
 npm install axios   
 -> 모두 설치 한 후에 
 pip uninstall bcrypt
-pip install bcrypt==4.1.2
+pip install "bcrypt==3.2.2"
 해서 bcrypt 라이브러리는 따로 재설치.
 
 # 설치
@@ -19,6 +19,10 @@ npm install --save-dev babel-plugin-module-resolver
 # 실행(cmd)
 uvicorn app.api.main:app --reload
 npm start 
+
+# 가상환경 실행 
+venv\Scripts\activate
+deactivate
 
 # 작동원리
 index.tsx(엡)에서 email,pw 입력 -> FastAPI(서버)에서 main.py에서 DB 연결 후 이메일 일치한지 확인 -> security.py에서 비번 일치한지 확인 -> 토큰 생성 함수 호출(담긴 내용: 이메일, 서버만 알고 있는 SECRET_KEY로 이 정보들 암호화 후 JWT 토큰 생성 <=[.env]에서 확인 가능)

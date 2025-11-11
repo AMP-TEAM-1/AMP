@@ -1,3 +1,4 @@
+import { Item } from '@/data/items';
 import { router } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
@@ -10,6 +11,7 @@ const rabbitImage = require('../../assets/images/item/rabbit.png');
 
 interface CharacterViewProps {
   carrots: number;
+  equippedItems?: Item[];
   isSheetMinimized: boolean;
   isHandleTouched: boolean;
   animatedRabbitStyle: StyleProp<ViewStyle>;

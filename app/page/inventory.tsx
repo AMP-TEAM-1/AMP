@@ -7,18 +7,27 @@ import ItemListView from '@/components/ItemListView';
 import { ThemedText } from '@/components/themed-text';
 import { Item, ItemCategory } from '@/data/items';
 import { useInventory } from '@/hooks/useInventory';
+import { useUserStore } from '@/store/userStore';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function InventoryScreen() {
-  const { inventoryItems, carrots, loading, equipItem, fetchInventory } = useInventory();
+  // useInventory 대신 userStore 사용
+  const { 
+    inventoryItems, 
+    carrots, 
+    equipItem, 
+    fetchUserData 
+  } = useUserStore();
+
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory | null>('모자');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
+  // 화면이 포커스될 때마다 fetchUserData 호출
   useFocusEffect(
     useCallback(() => {
-      fetchInventory();
-    }, [fetchInventory])
+      fetchUserData();
+    }, [fetchUserData])
   );
 
   const handleItemPress = (item: Item) => {
@@ -73,14 +82,18 @@ export default function InventoryScreen() {
 
       <ItemListView
         title="인벤토리"
-        items={inventoryItems}
-        carrots={carrots}
-        loading={loading}
+        items={inventoryItems} 
+        carrots={carrots}   
+        loading={false} 
         selectedCategory={selectedCategory}
         onTabPress={handleTabPress}
         onItemPress={handleItemPress}
         selectedItemId={null}
-        renderItemFooter={(item) => <ThemedText style={styles.itemText}>{item.is_equipped ? '장착 중' : '보유 중'}</ThemedText>}
+        renderItemFooter={(item) => (
+          <ThemedText style={styles.itemText}>
+            {'is_equipped' in item ? (item.is_equipped ? '장착 중' : '보유 중') : '구매 가능'}
+          </ThemedText>
+        )}
       />
     </>
   );
