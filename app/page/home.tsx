@@ -168,12 +168,6 @@ function HomeContent() {
 
   // 완료 토글
   const handleCheck = async (id: number, currentCompleted: boolean) => {
-    // 🥕 이미 완료된 할 일은 다시 체크 해제할 수 없도록 막습니다.
-    if (currentCompleted) {
-      Alert.alert('완료', '이미 완료된 할 일입니다.');
-      return;
-    }
-
     setCurrentTodos(prev => prev.map(t => (t.id === id ? { ...t, completed: !currentCompleted } : t)));
     try {
       const headers = await getAuthHeaders();
@@ -433,7 +427,7 @@ function HomeContent() {
                           alignItems: 'center',
                           backgroundColor: item.completed ? '#1f7aeb' : 'transparent',
                         }}
-                        onPress={() => handleCheck(item.id, item.completed)} disabled={item.completed}
+                        onPress={() => handleCheck(item.id, item.completed)}
                       >
                         {item.completed && <Text style={{ color: 'white', fontWeight: 'bold' }}>✓</Text>}
                       </Pressable>

@@ -22,7 +22,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   fetchUserData: async () => {
     try {
       const headers = await getAuthHeaders();
-      const userRes = await axios.get(`${API_URL}/users/me/`);
+      const userRes = await axios.get(`${API_URL}/users/me/`, { headers });
       const inventoryRes = await axios.get(`${API_URL}/api/inventory`, { headers });
       
       set({ 
