@@ -10,13 +10,11 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { CATEGORY_MAP, Item, ItemCategory } from '@/data/items';
 import CategoryTabs from './CategoryTabs';
 import ItemGrid from './ItemGrid';
-import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 interface ItemListViewProps {
   title: string;
   items: Item[];
-  carrots: number;
   loading: boolean;
   selectedCategory: ItemCategory | null;
   selectedItemId: number | null;
@@ -28,7 +26,6 @@ interface ItemListViewProps {
 export default function ItemListView({
   title,
   items,
-  carrots,
   loading,
   selectedCategory,
   selectedItemId,
@@ -42,11 +39,7 @@ export default function ItemListView({
 
   return (
     <View style={styles.container}>
-      <ThemedView style={styles.container}>
-        {/* 보유한 당근 개수를 표시하는 영역 */}
-        <View style={styles.carrotInfoContainer}>
-          <ThemedText style={styles.carrotText}>🥕 {carrots}</ThemedText>
-        </View>
+      <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>
         <CategoryTabs selectedCategory={selectedCategory} onTabPress={onTabPress} />
 
         {loading ? (
@@ -66,6 +59,4 @@ export default function ItemListView({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  carrotInfoContainer: { paddingHorizontal: 20, paddingVertical: 8, alignItems: 'flex-start' },
-  carrotText: { fontSize: 18, fontWeight: 'bold' },
 });

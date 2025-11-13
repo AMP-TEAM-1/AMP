@@ -797,25 +797,22 @@ function CustomDrawerContent({ userName, ...props }: any) {
 // -------------------- Drawer 루트 --------------------
 export default function AppDrawer() {
   const [userName, setUserName] = useState('User');
-  const [colors, setColors] = useState(['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9']);
 
   return (
-    <ColorContext.Provider value={{ colors, setColors }}>
-      <Drawer.Navigator
-        drawerContent={(props) => <CustomDrawerContent {...props} userName={userName} />}
-        screenOptions={{ headerShown: false }}
-      >
-        <Drawer.Screen name="Home" component={HomeContent} />
-        <Drawer.Screen name="Todos" component={TodosScreen} />
-        <Drawer.Screen name="MyPage" component={MyPageScreen} />
-        <Drawer.Screen name="Category" component={CategoryContent} />
-        <Drawer.Screen name="Option" component={OptionContent} />
-        <Drawer.Screen name="Info">
-          {(props) => <InformationContent {...props} userName={userName} setUserName={setUserName} />}
-        </Drawer.Screen>
-        <Drawer.Screen name="Alarm" component={AlarmPage} />
-      </Drawer.Navigator>
-    </ColorContext.Provider>
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} userName={userName} />}
+      screenOptions={{ headerShown: false }}
+    >
+      <Drawer.Screen name="Home" component={HomeContent} />
+      <Drawer.Screen name="Todos" component={TodosScreen} />
+      <Drawer.Screen name="MyPage" component={MyPageScreen} />
+      <Drawer.Screen name="Category" component={CategoryContent} />
+      <Drawer.Screen name="Option" component={OptionContent} />
+      <Drawer.Screen name="Info">
+        {(props) => <InformationContent {...props} userName={userName} setUserName={setUserName} />}
+      </Drawer.Screen>
+      <Drawer.Screen name="Alarm" component={AlarmPage} />
+    </Drawer.Navigator>
   );
 }
 
