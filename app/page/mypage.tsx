@@ -1,7 +1,9 @@
 //UI 개발 및 테스트를 위해 로컬 JSON 파일(shopItems.json)을 임시 데이터로 사용하고 있으며,
 // 실제 서버와 통신하는 API 연동 로직은 주석 처리되어 있습니다.
-import AppHeader from '@/components/AppHeader';
 import { ThemedText } from '@/components/themed-text';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { Stack } from 'expo-router';
 
 import CharacterView from '@/components/CharacterView';
 import ConfirmationModal from '@/components/ConfirmationModal';
@@ -11,9 +13,11 @@ import { ThemedView } from '@/components/themed-view';
 import { Item } from '@/data/items';
 import { useShop } from '@/hooks/useShop';
 import { useShopBottomSheet } from '@/hooks/useShopBottomSheet';
-import { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useContext, useState } from 'react';
+import { Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ColorContext } from './ColorContext';
 
 export default function MyPageScreen() {
   const {
@@ -26,6 +30,8 @@ export default function MyPageScreen() {
     handleTabPress,
   } = useShopBottomSheet({ initialState: 'minimized' });
 
+  const navigation = useNavigation<any>();
+  const { colors } = useContext(ColorContext);
   const { shopItems, carrots, loading, purchaseItem } = useShop();
   const [isModalVisible, setIsModalVisible] = useState(false);
   // [수정] 컴포넌트가 직접 아이템 선택 상태를 관리합니다.
@@ -65,57 +71,82 @@ export default function MyPageScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ThemedView style={styles.container}>
-        <AppHeader title="마이페이지" titleStyle={{ fontFamily: 'Jua' }} />
-
-        <ConfirmationModal
-          visible={isModalVisible}
-          item={selectedItem}
-          onClose={cancelPurchase}
-          onConfirm={confirmPurchase}
-          onModalHide={handleModalHide}
-          mainText={`🥕 ${selectedItem?.price}`}
-          confirmButtonText="구매하기"
-          cancelButtonText="취소"
+    <LinearGradient
+      colors={colors as [string, string, ...string[]]}
+      locations={[0, 0.35, 0.65, 1]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            title: '마이페이지',
+            headerTitleAlign: 'center',
+            headerTransparent: true,
+            headerShadowVisible: false,
+            headerLeft: () => (
+              <Pressable onPress={() => navigation.toggleDrawer()} style={{ paddingLeft: 10 }}>
+                <Ionicons name="menu" size={28} color="black" />
+              </Pressable>
+            ),
+            headerTitleStyle: {
+              fontFamily: 'Jua',
+              fontSize: 20,
+              color: '#000',
+            },
+          }}
         />
+        <ThemedView style={styles.container}>
+          <ConfirmationModal
+            visible={isModalVisible}
+            item={selectedItem}
+            onClose={cancelPurchase}
+            onConfirm={confirmPurchase}
+            onModalHide={handleModalHide}
+            mainText={`🥕 ${selectedItem?.price}`}
+            confirmButtonText="구매하기"
+            cancelButtonText="취소"
+          />
 
-        {/* 하단 아이템 상점 (Bottom Sheet) */}
-        <ShopBottomSheet
-          panGesture={panGesture}
-          animatedStyle={animatedSheetStyle}
-          loading={loading}
-          shopItems={shopItems}
-          selectedCategory={selectedCategory}
-          selectedItemId={selectedItem?.item_id} // 이 prop이 ShopBottomSheet에 전달되어야 합니다.
-          onTabPress={handleTabPress}
-          onItemPress={openPurchaseModal}
-          renderItemFooter={(item) =>
-            item.is_owned ? (
-              <ThemedText style={styles.itemText}>보유 중</ThemedText>
-            ) : (
-              <ThemedText style={styles.itemText}>🥕 {item.price}</ThemedText>
-            )
-          }
-        />
+          {/* 하단 아이템 상점 (Bottom Sheet) */}
+          <ShopBottomSheet
+            panGesture={panGesture}
+            animatedStyle={animatedSheetStyle}
+            loading={loading}
+            shopItems={shopItems}
+            selectedCategory={selectedCategory}
+            selectedItemId={selectedItem?.item_id} // 이 prop이 ShopBottomSheet에 전달되어야 합니다.
+            onTabPress={handleTabPress}
+            onItemPress={openPurchaseModal}
+            renderItemFooter={(item) =>
+              item.is_owned ? (
+                <ThemedText style={styles.itemText}>보유 중</ThemedText>
+              ) : (
+                <ThemedText style={styles.itemText}>🥕 {item.price}</ThemedText>
+              )
+            }
+          />
 
-        {/* 상단 영역 (캐릭터, 재화) */}
-        <CharacterView
-          carrots={carrots}
-          isSheetMinimized={isSheetMinimized}
-          isHandleTouched={isHandleTouched}
-          animatedRabbitStyle={animatedRabbitStyle}
-        />
+          {/* 상단 영역 (캐릭터, 재화) */}
+          <CharacterView
+            carrots={carrots}
+            isSheetMinimized={isSheetMinimized}
+            isHandleTouched={isHandleTouched}
+            animatedRabbitStyle={animatedRabbitStyle}
+          />
 
-        <Toast message={toastMessage} />
-      </ThemedView>
-    </SafeAreaView>
+          <Toast message={toastMessage} />
+        </ThemedView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, backgroundColor: '#fff', paddingTop: 4 },
+  safeArea: { flex: 1, backgroundColor: 'transparent' },
+  container: { flex: 1, backgroundColor: 'transparent', paddingTop: 4 },
   itemText: {
     fontSize: 12,
     fontFamily: 'Jua',
