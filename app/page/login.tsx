@@ -179,7 +179,8 @@ export default function LoginScreen() {
                 borderRadius: width * 0.08,
               },
             ]}
-            onPress={handleLogin}
+            onPress={() => router.push('/page/home')}
+            //onPress={handleLogin}
             disabled={isLoading}
           >
             {isLoading ? (
