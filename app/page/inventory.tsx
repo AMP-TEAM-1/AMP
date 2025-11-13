@@ -44,7 +44,13 @@ export default function InventoryScreen() {
   };
 
   return (
-    <LinearGradient colors={colors as [string, string, ...string[]]} style={{ flex: 1 }}>
+    <LinearGradient
+      colors={colors as [string, string, ...string[]]}
+      locations={[0, 0.35, 0.65, 1]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
       <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
         {/* ItemListView에서 분리된 헤더를 여기서 직접 정의합니다. */}
         <Stack.Screen
