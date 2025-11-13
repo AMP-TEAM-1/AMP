@@ -1,13 +1,28 @@
+# Pydantic 스키마를 정의하여 데이터 유효성 검사 및 직렬화 수행
+
 from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
-from datetime import time
+from datetime import time, date
+
+# --- Category Schemas ---
+class CategoryBase(BaseModel):
+    text: str
+
+class CategoryCreate(CategoryBase):
+    pass
+
+class Category(CategoryBase):
+    id: int
+    class Config:
+        from_attributes = True
 
 # --- Todo Schemas ---
 class TodoBase(BaseModel):
     title: str
+    date: date # 🥕 날짜 필드 추가
 
 class TodoCreate(TodoBase):
-    pass
+    category_ids: Optional[List[int]] = None # 🥕 카테고리 ID 목록 추가
 
     # ⏰ 알람 시간 필드 추가
     # DB에 String으로 저장할 경우 Optional[str]
@@ -17,11 +32,15 @@ class TodoCreate(TodoBase):
 class TodoUpdate(BaseModel):
     title: Optional[str] = None
     completed: Optional[bool] = None
+    category_ids: Optional[List[int]] = None # 🥕 카테고리 ID 목록으로 수정
+    date: Optional[date] = None # 🥕 날짜도 수정 가능하도록 추가
 
 class Todo(TodoBase):
     id: int
     completed: bool
     owner_id: int
+    categories: List[Category] = [] # 🥕 연결된 카테고리 정보 포함
+    alarm_time: Optional[time] = None
 
     class Config:
         from_attributes = True
@@ -32,6 +51,18 @@ class ItemBase(BaseModel):
     price: int
     item_type: str # 'hat' 또는 'accessory'
     image_url: str
+
+class ItemResponse(BaseModel):
+    name: str
+    price: int
+    image_url: str
+    item_id: int = Field(..., alias='id')
+    type: str = Field(..., alias='item_type')
+    class Config:
+        from_attributes = True
+        populate_by_name = True
+        # 🔥 응답 시 alias 필드명 사용 (id → item_id, item_type → type)
+        by_alias = True # 별칭 포맷팅 설정
 
 class Item(ItemBase):
     id: int

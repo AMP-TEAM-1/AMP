@@ -1,3 +1,5 @@
+# 앱을 생성 및 API 라우터를 등록
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from . import models
@@ -37,3 +39,7 @@ app.include_router(todos_router)
 # MyPage 관련 라우터 등록
 from .mypage_shop import router as mypage_router
 app.include_router(mypage_router)
+
+# inventory 관련 라우터 등록
+from .inventory import router as inventory_router
+app.include_router(inventory_router)

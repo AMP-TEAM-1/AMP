@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+# 할 일 목록(to-do list) 기능과 관련된 API 엔드포인트 처리
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy.orm import Session 
+from datetime import date
 from . import crud, models, schemas
 from .database import get_db
 from .auth import get_current_user
@@ -27,19 +30,25 @@ def create_todo_for_user(
 # --- 할일(Todo) 목록 조회 API ---
 @router.get("/todos/", response_model=list[schemas.Todo])
 def read_todos(
-    skip: int = 0,  # 페이징을 위한 시작 위치 (쿼리 파라미터)
-    limit: int = 100,  # 한 번에 가져올 최대 개수 (쿼리 파라미터)
+    request: Request, # 🕵️‍♂️ [로그] 요청 객체를 받아 헤더를 확인합니다.
+    target_date: date, # 🥕 쿼리 파라미터로 날짜를 받음
     db: Session = Depends(get_db),  # 데이터베이스 세션 의존성 주입
     current_user: models.User = Depends(get_current_user),  # 현재 로그인된 사용자 정보 의존성 주입
 ):
     """
-    현재 로그인된 사용자의 모든 할일 목록을 조회합니다.
-    - `skip`, `limit`: 페이징 처리를 위한 쿼리 파라미터입니다.
+    현재 로그인된 사용자의 특정 날짜에 해당하는 할일 목록을 조회합니다.
+    - `request`: FastAPI의 요청 객체로, 헤더 정보를 포함합니다.
+    - `target_date`: 조회할 날짜 (YYYY-MM-DD 형식)
     - `db`: 데이터베이스 작업을 위한 세션입니다.
     - `current_user`: JWT 토큰을 통해 인증된 사용자 정보입니다.
     """
-    # crud 함수를 호출하여 해당 사용자의 할일 목록을 데이터베이스에서 가져옵니다.
-    todos = crud.get_todos(db, user_id=current_user.id, skip=skip, limit=limit)
+    # 🕵️‍♂️ [로그] 백엔드에서 받은 요청 헤더와 인증된 사용자 정보를 출력합니다.
+    print(f"[todos.py - read_todos] 요청 헤더: {request.headers}")
+    print(f"[todos.py - read_todos] 인증된 사용자: {current_user.email} (ID: {current_user.id})")
+    # 🥕 날짜를 기준으로 할일을 조회하는 crud 함수 호출
+    todos = crud.get_todos_by_date(db, user_id=current_user.id, target_date=target_date)
+    if todos is None:
+        return []
     return todos
 
 # --- 특정 할일(Todo) 조회 API ---
@@ -163,3 +172,43 @@ def uncomplete_todo(
     db.commit()
     db.refresh(current_user)
     return current_user
+
+# --- Category APIs ---
+
+@router.get("/categories/", response_model=list[schemas.Category])
+def read_categories(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    return crud.get_categories_by_user(db, user_id=current_user.id)
+
+@router.post("/categories/", response_model=schemas.Category)
+def create_category(
+    category: schemas.CategoryCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    return crud.create_category(db=db, category=category, user_id=current_user.id)
+
+@router.put("/categories/{category_id}", response_model=schemas.Category)
+def update_category(
+    category_id: int,
+    category: schemas.CategoryCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    db_category = db.query(models.Category).filter(models.Category.id == category_id).first()
+    if db_category and db_category.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return crud.update_category(db=db, category_id=category_id, category=category)
+
+@router.delete("/categories/{category_id}", response_model=schemas.Category)
+def delete_category(
+    category_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    db_category = db.query(models.Category).filter(models.Category.id == category_id).first()
+    if db_category and db_category.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return crud.delete_category(db=db, category_id=category_id)

@@ -1,3 +1,5 @@
+# 인벤토리 아이템과 관련된 API 엔드포인트를 처리
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List

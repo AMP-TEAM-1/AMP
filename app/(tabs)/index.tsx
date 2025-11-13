@@ -1,106 +1,125 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React from 'react';
-import { Image, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import React, { useContext } from 'react';
+import { Image, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { ColorContext } from '../page/ColorContext';
 
-// 백엔드 서버 주소 설정 (환경 변수로 관리 권장)
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-export default function LoginScreen() {
-  const { width, height } = useWindowDimensions(); // ✅ 실시간 반응형 크기
+export default function InitScreen() {
+  const { colors } = useContext(ColorContext);
+  const { width, height } = useWindowDimensions();
 
   return (
-    <ThemedView
-      style={[
-        styles.container,
-        { padding: width * 0.06, gap: height * 0.02 },
-      ]}
+    <LinearGradient
+      colors={colors as [string, string, ...string[]]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.gradientContainer}
     >
-      <ThemedText
+      <ThemedView
         style={[
-          styles.slogan,
-          { fontSize: width * 0.055, marginBottom: height * 0.012 },
+          styles.container,
+          { backgroundColor: 'transparent', padding: width * 0.06, gap: height * 0.02 },
         ]}
       >
-        당신만의 스마트 비서 투두리스트
-      </ThemedText>
-
-      <ThemedText
-        style={[
-          styles.slogan2,
-          { fontSize: width * 0.1, marginBottom: height * 0.05 },
-        ]}
-      >
-        캐롯
-      </ThemedText>
-
-      <Image
-        source={require('../../assets/images/item/rabbit.png')}
-        style={{
-          width: width * 0.6,
-          height: height * 0.3,
-          marginBottom: height * 0.05,
-        }}
-        resizeMode="contain"
-      />
-
-      <Pressable
-        style={({ pressed }) => [
-          {
-            width: width * 0.85,
-            height: height * 0.06,
-            backgroundColor: pressed ? '#D3D3D3' : '#FFB347',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: width * 0.08,
-            marginTop: height * 0.04,
-          },
-        ]}
-        onPress={() => router.push('/login')}
-      >
+        {/* 텍스트 영역 */}
         <ThemedText
-          style={{ color: '#000', fontSize: width * 0.04, fontWeight: 'bold' }}
+          style={[
+            styles.slogan,
+            { fontSize: width * 0.055, marginBottom: height * 0.012 },
+          ]}
         >
-          로그인
+          당신만의 스마트 비서 투두리스트
         </ThemedText>
-      </Pressable>
 
-      <Pressable
-        style={({ pressed }) => [
-          {
-            width: width * 0.85,
-            height: height * 0.06,
-            backgroundColor: pressed ? '#D3D3D3' : '#FFE0A3',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: width * 0.08,
-            marginTop: height * 0.015,
-          },
-        ]}
-        onPress={() => router.push('/signup')}
-      >
         <ThemedText
+          style={[
+            styles.slogan2,
+            { fontSize: width * 0.1, marginBottom: height * 0.05 },
+          ]}
+        >
+          캐롯
+        </ThemedText>
+
+        {/* 이미지 */}
+        <Image
+          source={require('../../assets/images/item/rabbit.png')}
           style={{
-            color: '#000',
-            fontSize: width * 0.04,
-            fontWeight: '700',
-            textAlign: 'center',
+            width: width * 0.6,
+            height: height * 0.3,
+            marginBottom: height * 0.05,
           }}
+          resizeMode="contain"
+        />
+
+        {/* 버튼 컨테이너 */}
+        <View
+          style={[
+            styles.whiteBox,
+            {
+              width: width * 0.9,
+              paddingVertical: height * 0.03,
+              borderRadius: width * 0.05,
+            },
+          ]}
         >
-          회원가입
-        </ThemedText>
-      </Pressable>
-    </ThemedView>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              {
+                backgroundColor: pressed ? '#D3D3D3' : '#FFB347',
+                width: width * 0.8,
+                height: height * 0.06,
+              },
+            ]}
+            onPress={() => router.push('/page/login')}
+          >
+            <ThemedText
+              style={{ color: '#000', fontSize: width * 0.04, fontWeight: 'bold' }}
+            >
+              로그인
+            </ThemedText>
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              {
+                backgroundColor: pressed ? '#D3D3D3' : '#FFE0A3',
+                width: width * 0.8,
+                height: height * 0.06,
+                marginTop: height * 0.015,
+              },
+            ]}
+            onPress={() => router.push('/page/signup')}
+          >
+            <ThemedText
+              style={{
+                color: '#000',
+                fontSize: width * 0.04,
+                fontWeight: '700',
+                textAlign: 'center',
+              }}
+            >
+              회원가입
+            </ThemedText>
+          </Pressable>
+        </View>
+      </ThemedView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradientContainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   slogan: {
     fontWeight: '700',
@@ -109,7 +128,23 @@ const styles = StyleSheet.create({
   },
   slogan2: {
     fontWeight: '700',
-    color: '#FFB347',
+    color: '#FF8C42',
     textAlign: 'center',
+  },
+  whiteBox: {
+    backgroundColor: '#FFFFFF', // ✅ 버튼 배경 흰색
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4, // ✅ 약간의 그림자 효과 (Android)
+    shadowColor: '#000', // ✅ 그림자 (iOS)
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    opacity: 0.8
+  },
+  button: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
   },
 });

@@ -1,12 +1,9 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Link, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Ionicons } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
 export const unstable_settings = {
   // Set the initial route to the login screen.
   initialRouteName: '(tabs)',
