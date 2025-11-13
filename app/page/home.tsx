@@ -9,6 +9,7 @@ import {
   Alert,
   Dimensions,
   FlatList,
+  Image,
   Modal,
   Platform,
   Pressable,
@@ -241,13 +242,23 @@ function HomeContent() {
                 width: 40,
                 height: 40,
                 borderRadius: 20,
-                backgroundColor: '#aaa',
+                borderWidth: 1,
+                borderColor: '#aaa',
+                backgroundColor: '#fff',
                 justifyContent: 'center',
                 alignItems: 'center',
+                overflow: 'hidden',
               }}
             >
-              <Text style={{ color: '#000', fontWeight: '600' }}>마이</Text>
-            </Pressable>
+              <Image
+                source={require('../../assets/images/item/rabbit_logo.png')} // ✅ 여기에 저장한 파일 경로
+                style={{
+                  width: 40,
+                  height: 40,
+                  resizeMode: 'cover',
+                }}
+              />
+            </Pressable>  
           </View>
 
           {/* 무한 달력 */}
@@ -634,7 +645,37 @@ function HomeContent() {
 // -------------------- 사용자 정보 수정 컴포넌트 --------------------
 function InformationContent({ userName, setUserName }: { userName: string; setUserName: (v: string) => void }) {
   const navigation = useNavigation<any>();
+  const [localName, setLocalName] = useState(userName);
   const { colors } = React.useContext(ColorContext);
+  const [email, setEmail] = useState(''); // 이메일 상태 추가
+
+
+  const getAuthHeaders = async () => {
+    const token = await tokenStorage.getItem();
+    console.log('[home.tsx] token:', token ? 'exists' : 'missing');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await axios.get(`${API_URL}/users/me/`, { headers });
+        if (res.data) {
+          if (res.data.name) {
+            setUserName(res.data.name);
+            setLocalName(res.data.name);
+          }
+          if (res.data.email) {
+            setEmail(res.data.email); // 이메일 상태 업데이트
+          }
+        }
+      } catch (err) {
+        console.error('[fetchUserName] error:', err);
+      }
+    };
+    fetchUserName();
+  }, []);
 
   const handleLogout = () => {
     console.log('로그아웃 클릭됨');
@@ -669,28 +710,47 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
           <View style={{ paddingHorizontal: 16, gap: 16 }}>
             <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이메일</Text>
             <View style={styles.infoBox}>
-              <Text style={{ fontSize: 16, color: '#000' }}>user@example.com</Text>
-            </View>
-
-            <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 10 }}>비밀번호</Text>
-            <View style={styles.infoBox}>
-              <Text style={{ fontSize: 16, color: '#000' }}>********</Text>
+              <Text style={{ fontSize: 16, color: '#000' }}>{email}</Text>
             </View>
 
             <View>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 10 }}>이름</Text>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이름</Text>
               <TextInput
-                style={styles.infoBox}
-                value={userName}
-                onChangeText={(t) => setUserName(t)}
+                style={{
+                  height: 50,
+                  backgroundColor: '#fff',
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                  borderRadius: 8,
+                  paddingHorizontal: 12,
+                  marginTop: 8,
+                  fontSize: 16,
+                  color: '#000',
+                }}
+                value={localName}
+                onChangeText={setLocalName}
                 placeholder="이름 입력"
-                maxLength={30}
-                placeholderTextColor="#999"
               />
+
+              <Pressable
+                style={{
+                  backgroundColor: '#1f7aeb',
+                  paddingVertical: 14,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  marginTop: 50,
+                }}
+                onPress={() => {
+                  setUserName(localName); // Drawer에 반영
+                }}
+              >
+                <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600', }}>저장</Text>
+              </Pressable>
+              
             </View>
           </View>
 
-          <View style={{ paddingHorizontal: 80, marginTop: 30 }}>
+          <View style={{ paddingHorizontal: 80, marginTop: 10 }}>
             <Pressable
               onPress={handleLogout}
               style={{
@@ -880,25 +940,22 @@ function CustomDrawerContent({ userName, ...props }: any) {
 // -------------------- Drawer 루트 --------------------
 export default function AppDrawer() {
   const [userName, setUserName] = useState('User');
-  const [colors, setColors] = useState(['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9']);
 
   return (
-    <ColorContext.Provider value={{ colors, setColors }}>
-      <Drawer.Navigator
-        drawerContent={(props) => <CustomDrawerContent {...props} userName={userName} />}
-        screenOptions={{ headerShown: false }}
-      >
-        <Drawer.Screen name="Home" component={HomeContent} />
-        <Drawer.Screen name="Todos" component={TodosScreen} />
-        <Drawer.Screen name="MyPage" component={MyPageScreen} />
-        <Drawer.Screen name="Category" component={CategoryContent} />
-        <Drawer.Screen name="Option" component={OptionContent} />
-        <Drawer.Screen name="Info">
-          {(props) => <InformationContent {...props} userName={userName} setUserName={setUserName} />}
-        </Drawer.Screen>
-        <Drawer.Screen name="Alarm" component={AlarmPage} />
-      </Drawer.Navigator>
-    </ColorContext.Provider>
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} userName={userName} />}
+      screenOptions={{ headerShown: false }}
+    >
+      <Drawer.Screen name="Home" component={HomeContent} />
+      <Drawer.Screen name="Todos" component={TodosScreen} />
+      <Drawer.Screen name="MyPage" component={MyPageScreen} />
+      <Drawer.Screen name="Category" component={CategoryContent} />
+      <Drawer.Screen name="Option" component={OptionContent} />
+      <Drawer.Screen name="Info">
+        {(props) => <InformationContent {...props} userName={userName} setUserName={setUserName} />}
+      </Drawer.Screen>
+      <Drawer.Screen name="Alarm" component={AlarmPage} />
+    </Drawer.Navigator>
   );
 }
 
@@ -992,7 +1049,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 10,
-    shadowColor: '#000',
+    shadowColor: '#8e8e8eff',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 5,

@@ -112,6 +112,7 @@ def delete_category(db: Session, category_id: int):
         db.commit()
     return db_category
 
+
 # 상점의 모든 물품을 조회하는 함수
 def get_all_shop_items(db: Session):
     """
