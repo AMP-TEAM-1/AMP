@@ -2,13 +2,14 @@ import { ThemedText } from '@/components/themed-text';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, Stack } from 'expo-router';
+import { Link, router, Stack } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Pressable,
   StyleSheet,
+  Text,
   TextInput,
   useWindowDimensions,
   View,
@@ -198,6 +199,21 @@ export default function LoginScreen() {
             )}
           </Pressable>
         </View>
+
+        {/* 회원가입 유도 문구 */}
+        <View style={styles.signupContainer}>
+          <Text style={styles.normalText}>
+            계정이 없으신가요?{' '}
+          </Text>
+          <Link href="/page/signup" asChild>
+            <Pressable>
+              <Text style={styles.signupText}>
+                회원가입
+              </Text>
+            </Pressable>
+          </Link>
+        </View>
+
       </LinearGradient>
     </>
   );
@@ -249,5 +265,18 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  signupContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  normalText: {
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  signupText: {
+    color: '#FF8C42',
+    fontWeight: 'bold',
   },
 });
