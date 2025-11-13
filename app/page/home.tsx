@@ -664,7 +664,7 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
             계정 정보
           </Text>
 
-          <View style={{ height: 2, backgroundColor: '#000' }} />
+          <View style={{ height: 2, backgroundColor: '#000', marginVertical: 8 }} />
 
           <View style={{ paddingHorizontal: 16, gap: 16 }}>
             <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이메일</Text>
@@ -714,11 +714,12 @@ function OptionContent() {
   const navigation = useNavigation<any>();
 
   const gradients = [
-    ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'],
-    ['#A1C4FD', '#C2E9FB', '#C2E9FB', '#A1C4FD'],
-    ['#FBC2EB', '#E6E6FA', '#E6E6FA', '#FBC2EB'],
-    ['#FF9A9E', '#FAD0C4', '#FAD0C4', '#FF9A9E'],
-    ['#fff'],
+    ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'], // 기본(주황)
+    ['#A1C4FD', '#d1f0feff', '#d1f0feff', '#A1C4FD'], // 파랑
+    ['#FBC2EB', '#E6E6FA', '#E6E6FA', '#FBC2EB'], // 보라
+    ['#FF9A9E', '#FAD0C4', '#FAD0C4', '#FF9A9E'], // 분홍
+    ['#51ff44ff', '#b9ff8dff', '#b9ff8dff', '#51ff44ff'], // 초록
+    ['#fff'], // 흰색
   ];
 
   return (
@@ -731,6 +732,7 @@ function OptionContent() {
     >
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
+          {/* 상단 헤더 */}
           <View style={styles.header}>
             <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
               <Ionicons name="menu" size={30} color="#000" />
@@ -739,40 +741,84 @@ function OptionContent() {
             <View style={{ width: 28 }} />
           </View>
 
-          <Text style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>배경 색상 선택</Text>
-          <View style={{ height: 2, backgroundColor: '#000' }} />
+          {/* 타이틀 */}
+          <Text style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
+            배경 색상 선택
+          </Text>
+          <View style={{ height: 2, backgroundColor: '#000', marginVertical: 8 }} />
 
+          {/* 색상 옵션 (3x2 그리드) */}
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            {gradients.map((grad, idx) => (
-              <Pressable
-                key={idx}
-                onPress={() => setColors(grad)}
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'flex-start', // ✅ 위쪽으로 정렬
+                alignItems: 'center',
+                marginTop: 80, // ✅ 위쪽 여백 (값은 조정 가능)
+              }}
+            >
+              <View
                 style={{
-                  width: 200,
-                  height: 50,
-                  borderRadius: 12,
-                  marginBottom: 15,
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
                   justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: '#fff',
-                  shadowColor: '#000',
-                  shadowOpacity: 0.1,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowRadius: 5,
-                  elevation: 3,
-                  borderWidth: 1,
-                  borderColor: '#ccc',
+                  gap: 15,
+                  width: '90%',
                 }}
               >
-                <Text style={{ fontSize: 18 }}>옵션 {idx + 1}</Text>
-              </Pressable>
-            ))}
+                {gradients.map((grad, idx) => (
+                  <Pressable
+                    key={idx}
+                    onPress={() => setColors(grad)}
+                    style={{
+                      width: '30%',
+                      aspectRatio: 2.2,
+                      borderRadius: 12,
+                      overflow: 'hidden', // ✅ 그라데이션이 모서리 밖으로 안 나가게
+                      shadowColor: '#000',
+                      shadowOpacity: 0.1,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowRadius: 5,
+                      elevation: 3,
+                      borderWidth: 1,
+                      borderColor: '#000',
+                    }}
+                  >
+                    {/* 색상 미리보기 */}
+                    <LinearGradient
+                      colors={grad as [string, string, ...string[]]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontWeight: '600',
+                          color: grad.length === 1 ? '#000' : '#333',
+                          paddingHorizontal: 8,
+                          paddingVertical: 3,
+                          borderRadius: 6,
+                        }}
+                      >
+                        색상 {idx + 1}
+                      </Text>
+                    </LinearGradient>
+                  </Pressable>
+                ))}
+              </View>  
+            </View>
           </View>
         </View>
       </SafeAreaView>
     </LinearGradient>
   );
 }
+
 
 // -------------------- CustomDrawerContent --------------------
 function CustomDrawerContent({ userName, ...props }: any) {
@@ -784,14 +830,16 @@ function CustomDrawerContent({ userName, ...props }: any) {
 
       <DrawerItem
         label="오늘의 할 일"
+        labelStyle={{ color: 'black' }}
         onPress={() => props.navigation.navigate('Home')}
-        icon={({ color, size }) => <Ionicons name="time-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="time-outline" size={size} color='blue' />}
       />
 
       <DrawerItem
         label="카테고리"
+        labelStyle={{ color: 'black' }}
         onPress={() => props.navigation.navigate('Category')}
-        icon={({ color, size }) => <Ionicons name="menu-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="menu-outline" size={size} color='blue' />}
       />
 
       <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
@@ -800,8 +848,9 @@ function CustomDrawerContent({ userName, ...props }: any) {
 
       <DrawerItem
         label="마이페이지"
+        labelStyle={{ color: 'black' }}
         onPress={() => props.navigation.navigate('MyPage')}
-        icon={({ color, size }) => <MaterialIcons name="emoji-emotions" size={size} color={color} />}
+        icon={({ size }) => <MaterialIcons name="emoji-emotions" size={size} color='blue' />}
       />
 
       <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
@@ -810,14 +859,16 @@ function CustomDrawerContent({ userName, ...props }: any) {
 
       <DrawerItem
         label="계정 정보"
+        labelStyle={{ color: 'black' }}
         onPress={() => props.navigation.navigate('Info')}
-        icon={({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="person-outline" size={size} color='blue' />}
       />
 
       <DrawerItem
-        label="시스템"
+        label="테마"
+        labelStyle={{ color: 'black' }}
         onPress={() => props.navigation.navigate('Option')}
-        icon={({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="settings-outline" size={size} color='blue' />}
       />
     </DrawerContentScrollView>
   );
@@ -852,7 +903,7 @@ export default function AppDrawer() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 24 },
   header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 0 },
-  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 90 },
+  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 20, },
   drawerHeader: { padding: 16, marginBottom: 8 },
   userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 15 },
   menuButton: { marginRight: 8 },
@@ -866,7 +917,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#aaa',
   },
   calendarHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 8, marginBottom: 8 },
   monthText: { fontSize: 19, fontWeight: '700' },
