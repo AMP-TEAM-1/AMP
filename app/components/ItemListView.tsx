@@ -67,5 +67,5 @@ export default function ItemListView({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   carrotInfoContainer: { paddingHorizontal: 20, paddingVertical: 8, alignItems: 'flex-start' },
-  carrotText: { fontSize: 18, fontWeight: 'bold', fontFamily: 'Jua' },
+  carrotText: { fontSize: 18, fontWeight: 'bold' },
 });

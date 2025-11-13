@@ -84,5 +84,5 @@ const styles = StyleSheet.create({
     height: '90%',
   },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 },
-  emptyText: { fontFamily: 'Jua', color: '#B3B3B3', fontSize: 16 },
+  emptyText: { color: '#B3B3B3', fontSize: 16 },
 });

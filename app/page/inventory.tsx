@@ -55,8 +55,8 @@ export default function InventoryScreen() {
             </Pressable>
           ),
           headerTitleStyle: {
-            fontFamily: 'Jua',
             fontSize: 20,
+            fontFamily: 'Cafe24Ssurround',
           },
         }}
       />
@@ -87,5 +87,5 @@ export default function InventoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  itemText: { fontSize: 12, fontFamily: 'Jua' },
+  itemText: { fontSize: 12 },
 });

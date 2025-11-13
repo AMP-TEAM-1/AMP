@@ -10,15 +10,14 @@ import {
   Dimensions,
   FlatList,
   Modal,
-  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
-  View,
+  View
 } from 'react-native';
+import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
 import AlarmPage from './alarm';
 import CategoryContent from './category';
@@ -226,9 +225,9 @@ function HomeContent() {
             >
               <Ionicons name="menu" size={30} color="#000" />
             </Pressable>
-            <Text style={styles.dateText}>
+            <ThemedText style={styles.dateText}>
               {today.getMonth() + 1}. {today.getDate()}. ({['일','월','화','수','목','금','토'][today.getDay()]})
-            </Text>
+            </ThemedText>
             <Pressable
               onPress={() => navigation.navigate('MyPage')}
               style={{
@@ -240,7 +239,7 @@ function HomeContent() {
                 alignItems: 'center',
               }}
             >
-              <Text style={{ color: '#000', fontWeight: '600' }}>마이</Text>
+              <ThemedText style={{ color: '#000', fontWeight: '600' }}>마이</ThemedText>
             </Pressable>
           </View>
 
@@ -248,10 +247,10 @@ function HomeContent() {
           <View style={styles.calendarContainer}>
             <View style={styles.calendarHeader}>
               <Pressable onPress={handleGoToday} style={styles.goTodayButton}>
-                <Text style={styles.goTodayText}>오늘</Text>
+                <ThemedText style={styles.goTodayText}>오늘</ThemedText>
               </Pressable>
               <View style={{ flex: 1, alignItems: 'center' }}>
-                <Text style={styles.monthText}>{formatMonthYear(selected)}</Text>
+                <ThemedText style={styles.monthText}>{formatMonthYear(selected)}</ThemedText>
               </View>
               <View style={{ width: 60 }} />
             </View>
@@ -279,12 +278,12 @@ function HomeContent() {
                       isSelected && styles.dateButtonSelected,
                     ]}
                   >
-                    <Text style={[styles.weekdayText, isSelected && styles.weekdaySelected]}>
+                    <ThemedText style={[styles.weekdayText, isSelected && styles.weekdaySelected]}>
                       {['일','월','화','수','목','금','토'][item.getDay()]}
-                    </Text>
-                    <Text style={[styles.dateNumber, isSelected && styles.dateNumberSelected]}>
+                    </ThemedText>
+                    <ThemedText style={[styles.dateNumber, isSelected && styles.dateNumberSelected]}>
                       {item.getDate()}
-                    </Text>
+                    </ThemedText>
                   </Pressable>
                 );
               }}
@@ -292,9 +291,9 @@ function HomeContent() {
             />
             <View style={{ alignItems: 'center', marginTop: 3 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ fontSize: 18, color: '#333', fontWeight: '700' }}>
+                <ThemedText style={{ fontSize: 18, color: '#333', fontWeight: '700' }}>
                   {currentTodos.filter(todo => !todo.completed).length}
-                </Text>
+                </ThemedText>
                 <Ionicons name="checkmark-outline" size={22} color="#000" />
               </View>
             </View>
@@ -313,35 +312,6 @@ function HomeContent() {
                 const isAll = item.id === -1;
                 const isSelected = (isAll && selectedCategory === 'all') || (!isAll && selectedCategory === item.id);
 
-                return (
-                  <Pressable onPress={() => setSelectedCategory(isAll ? 'all' : item.id)}>
-                    <View
-                      style={[
-                        styles.categoryBox,
-                        isAll
-                          ? {
-                              width: 80,
-                              backgroundColor: isSelected ? '#1f7aeb' : '#fff',
-                              borderColor: '#000',
-                              borderWidth: 1,
-                              shadowColor: '#000',
-                              shadowOffset: { width: 0, height: 3 },
-                              shadowOpacity: 0.4,
-                              shadowRadius: 3,
-                              elevation: 5,
-                            }
-                          : {
-                              width: Math.max(80, item.text.length * 18 + 40),
-                              backgroundColor: isSelected ? '#1f7aeb' : '#FFE0A3',
-                            },
-                      ]}
-                    >
-                      <Text style={[styles.categoryText, { color: isSelected ? '#fff' : '#000' }]}>
-                        {item.text}
-                      </Text>
-                    </View>
-                  </Pressable>
-                );
               }}
             />
           </View>
@@ -383,21 +353,21 @@ function HomeContent() {
                         }}
                       />
                     ) : (
-                      <Text
+                      <ThemedText
                         style={[
                           styles.itemTitle,
                           item.completed && { textDecorationLine: 'line-through', color: '#888' },
                         ]}
                       >
                         {item.title}
-                      </Text>
+                      </ThemedText>
                     )}
 
                     {item.categories && item.categories.length > 0 && (
                       <View style={{ flexDirection: 'row', marginTop: 2, marginLeft: 10, gap: 6, flexWrap: 'wrap' }}>
                         {item.categories.map(({ id, text }) => (
                           <View key={id} style={{ paddingHorizontal: 6, paddingVertical: 2, backgroundColor: '#FFE0A3', borderRadius: 6 }}>
-                            <Text style={{ fontSize: 13, color: '#1f7aeb' }}>{text}</Text>
+                            <ThemedText style={{ fontSize: 13, color: '#1f7aeb' }}>{text}</ThemedText>
                           </View>
                         ))}
                       </View>
@@ -429,7 +399,7 @@ function HomeContent() {
                         }}
                         onPress={() => handleCheck(item.id, item.completed)}
                       >
-                        {item.completed && <Text style={{ color: 'white', fontWeight: 'bold' }}>✓</Text>}
+                        {item.completed && <ThemedText style={{ color: 'white', fontWeight: 'bold' }}>✓</ThemedText>}
                       </Pressable>
                     </View>
                   </View>
@@ -471,7 +441,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="pencil-outline" size={20} color="blue" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'blue' }}>수정하기</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'blue' }}>수정하기</ThemedText>
                 </Pressable>
 
                 <View style={{ height: 1, backgroundColor: '#ccc', width: '100%', marginVertical: 4 }} />
@@ -485,7 +455,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="book-outline" size={20} color="green" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'green' }}>카테고리 설정</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'green' }}>카테고리 설정</ThemedText>
                 </Pressable>
 
                 <View style={{ height: 1, backgroundColor: '#ccc', width: '100%', marginVertical: 4 }} />
@@ -499,7 +469,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="notifications-outline" size={20} color="black" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'black' }}>알림 설정</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'black' }}>알림 설정</ThemedText>
                 </Pressable>
 
                 <View style={{ height: 1, backgroundColor: '#ccc', width: '100%', marginVertical: 4 }} />
@@ -523,7 +493,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="trash-outline" size={20} color="red" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'red' }}>삭제하기</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'red' }}>삭제하기</ThemedText>
                 </Pressable>
               </View>
 
@@ -540,7 +510,7 @@ function HomeContent() {
                   style={{ paddingVertical: 14, alignItems: 'center', justifyContent: 'center' }}
                   onPress={() => setActionModalVisible(false)}
                 >
-                  <Text style={{ fontSize: 17, color: '#000' }}>취소</Text>
+                  <ThemedText style={{ fontSize: 17, color: '#000' }}>취소</ThemedText>
                 </Pressable>
               </View>
             </View>
@@ -567,7 +537,7 @@ function HomeContent() {
                 maxHeight: 400,
               }}
             >
-              <Text style={{ fontSize: 18, fontWeight: '700', textAlign: 'center', marginBottom: 12 }}>카테고리 관리</Text>
+              <ThemedText style={{ fontSize: 18, fontWeight: '700', textAlign: 'center', marginBottom: 12 }}>카테고리 관리</ThemedText>
 
               <ScrollView style={{ marginTop: 12 }}>
                 {categories.map(cat => (
@@ -592,9 +562,9 @@ function HomeContent() {
                       }
                     }}
                   >
-                    <Text style={{ fontSize: 16 }}>
+                    <ThemedText style={{ fontSize: 16 }}>
                       {cat.text} {actionTodo?.categories.some(c => c.id === cat.id) ? '✅' : ''}
-                    </Text>
+                    </ThemedText>
                   </Pressable>
                 ))}
 
@@ -614,7 +584,7 @@ function HomeContent() {
                     }
                   }}
                 >
-                  <Text style={{ fontSize: 16 }}>카테고리 초기화</Text>
+                  <ThemedText style={{ fontSize: 16 }}>카테고리 초기화</ThemedText>
                 </Pressable>
               </ScrollView>
             </View>
@@ -650,29 +620,29 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
             <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
               <Ionicons name="menu" size={30} color="#000" />
             </Pressable>
-            <Text style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</Text>
+            <ThemedText style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</ThemedText>
             <View style={{ width: 28 }} />
           </View>
 
-          <Text style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
+          <ThemedText style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
             계정 정보
-          </Text>
+          </ThemedText>
 
           <View style={{ height: 2, backgroundColor: '#000' }} />
 
           <View style={{ paddingHorizontal: 16, gap: 16 }}>
-            <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이메일</Text>
+            <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이메일</ThemedText>
             <View style={styles.infoBox}>
-              <Text style={{ fontSize: 16, color: '#000' }}>user@example.com</Text>
+              <ThemedText style={{ fontSize: 16, color: '#000' }}>user@example.com</ThemedText>
             </View>
 
-            <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 10 }}>비밀번호</Text>
+            <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 10 }}>비밀번호</ThemedText>
             <View style={styles.infoBox}>
-              <Text style={{ fontSize: 16, color: '#000' }}>********</Text>
+              <ThemedText style={{ fontSize: 16, color: '#000' }}>********</ThemedText>
             </View>
 
             <View>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 10 }}>이름</Text>
+              <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 10 }}>이름</ThemedText>
               <TextInput
                 style={styles.infoBox}
                 value={userName}
@@ -694,7 +664,7 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
                 alignItems: 'center',
               }}
             >
-              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>로그아웃</Text>
+              <ThemedText style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>로그아웃</ThemedText>
             </Pressable>
           </View>
         </View>
@@ -729,11 +699,11 @@ function OptionContent() {
             <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
               <Ionicons name="menu" size={30} color="#000" />
             </Pressable>
-            <Text style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</Text>
+            <ThemedText style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</ThemedText>
             <View style={{ width: 28 }} />
           </View>
 
-          <Text style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>배경 색상 선택</Text>
+          <ThemedText style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>배경 색상 선택</ThemedText>
           <View style={{ height: 2, backgroundColor: '#000' }} />
 
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -758,7 +728,7 @@ function OptionContent() {
                   borderColor: '#ccc',
                 }}
               >
-                <Text style={{ fontSize: 18 }}>옵션 {idx + 1}</Text>
+                <ThemedText style={{ fontSize: 18 }}>옵션 {idx + 1}</ThemedText>
               </Pressable>
             ))}
           </View>
@@ -773,44 +743,51 @@ function CustomDrawerContent({ userName, ...props }: any) {
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
       <View style={styles.drawerHeader}>
-        <Text style={styles.userText}>{userName}</Text>
+        <ThemedText style={styles.userText}>{userName}</ThemedText>
       </View>
 
       <DrawerItem
         label="오늘의 할 일"
         onPress={() => props.navigation.navigate('Home')}
+        labelStyle={{ fontFamily: 'Cafe24Ssurround' }}
         icon={({ color, size }) => <Ionicons name="time-outline" size={size} color={color} />}
       />
 
       <DrawerItem
         label="카테고리"
         onPress={() => props.navigation.navigate('Category')}
+        labelStyle={{ fontFamily: 'Cafe24Ssurround' }}
         icon={({ color, size }) => <Ionicons name="menu-outline" size={size} color={color} />}
       />
 
       <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
 
-      <Text style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>커스터마이징</Text>
+      <ThemedText style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>
+        커스터마이징
+      </ThemedText>
 
       <DrawerItem
         label="마이페이지"
         onPress={() => props.navigation.navigate('MyPage')}
+        labelStyle={{ fontFamily: 'Cafe24Ssurround' }}
         icon={({ color, size }) => <MaterialIcons name="emoji-emotions" size={size} color={color} />}
       />
 
       <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
 
-      <Text style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>설정</Text>
+      <ThemedText style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>설정</ThemedText>
 
       <DrawerItem
         label="계정 정보"
         onPress={() => props.navigation.navigate('Info')}
+        labelStyle={{ fontFamily: 'Cafe24Ssurround' }}
         icon={({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />}
       />
 
       <DrawerItem
         label="시스템"
         onPress={() => props.navigation.navigate('Option')}
+        labelStyle={{ fontFamily: 'Cafe24Ssurround' }}
         icon={({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />}
       />
     </DrawerContentScrollView>
@@ -846,7 +823,7 @@ export default function AppDrawer() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 24 },
   header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 0 },
-  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 90 },
+  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 90, fontFamily: 'Cafe24Ssurround' },
   drawerHeader: { padding: 16, marginBottom: 8 },
   userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 15 },
   menuButton: { marginRight: 8 },
@@ -863,9 +840,9 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
   },
   calendarHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 8, marginBottom: 8 },
-  monthText: { fontSize: 19, fontWeight: '700' },
+  monthText: { fontSize: 19, fontWeight: '700', fontFamily: 'Cafe24Ssurround' },
   goTodayButton: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, marginTop: 7 },
-  goTodayText: { fontSize: 14, fontWeight: '600' },
+  goTodayText: { fontSize: 14, fontWeight: '600', fontFamily: 'Cafe24Ssurround' },
   dateButton: {
     width: 52,
     height: 52,
@@ -877,9 +854,9 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   dateButtonSelected: { backgroundColor: '#1f7aeb22', borderColor: '#1f7aeb' },
-  dateNumber: { fontSize: 16, fontWeight: '700', color: '#111' },
+  dateNumber: { fontSize: 16, fontWeight: '700', color: '#111', fontFamily: 'Cafe24Ssurround' },
   dateNumberSelected: { color: '#1f7aeb' },
-  weekdayText: { fontSize: 14, fontWeight: '600', color: '#000' },
+  weekdayText: { fontSize: 14, fontWeight: '600', color: '#000', fontFamily: 'Cafe24Ssurround' },
   weekdaySelected: { color: '#1f7aeb', fontWeight: '600' },
   input: { height: 56, marginTop: 12, paddingHorizontal: 16, fontSize: 16, borderRadius: 8, borderWidth: 1, borderColor: '#ddd', backgroundColor: '#fff' },
   addButton: { height: 30, width: 30, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', borderRadius: 30, borderWidth: 3, borderColor: '#000' },
@@ -898,7 +875,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  itemTitle: { fontSize: 19, fontWeight: '600' },
+  itemTitle: { fontSize: 19, fontWeight: '600', fontFamily: 'Cafe24Ssurround' },
   editButton: { backgroundColor: '#fff', width: 25, height: 25, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   deleteButton: { backgroundColor: '#ff4d4f', paddingVertical: 4, paddingHorizontal: 12, borderRadius: 6 },
   buttonText: { color: '#fff', fontWeight: '600' },
@@ -938,5 +915,5 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
   },
-  categoryText: { fontSize: 20, fontWeight: '700', color: '#000', textAlign: 'center' },
+  categoryText: { fontSize: 20, fontWeight: '700', color: '#000', textAlign: 'center', fontFamily: 'Cafe24Ssurround' },
 });

@@ -111,6 +111,5 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 12,
-    fontFamily: 'Jua',
   },
 });

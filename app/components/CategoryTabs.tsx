@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 16,
     color: '#333',
-    fontFamily: 'Jua', // Jua 폰트 적용
+    // fontFamily: 'Cafe24Ssurround', // 전역으로 적용되므로 제거
   },
   activeTabText: {
     color: '#fff',

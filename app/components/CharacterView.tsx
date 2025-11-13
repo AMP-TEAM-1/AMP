@@ -71,7 +71,6 @@ const styles = StyleSheet.create({
   },
   carrotText: {
     fontSize: 18,
-    fontFamily: 'Jua',
     fontWeight: 'bold',
   },
   inventoryButton: {
@@ -86,7 +85,6 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
   },
   inventoryButtonText: {
-    fontFamily: 'Jua',
     color: '#49454F',
   },
   rabbitContainer: {

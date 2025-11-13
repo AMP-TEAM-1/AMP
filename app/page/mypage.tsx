@@ -67,7 +67,7 @@ export default function MyPageScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ThemedView style={styles.container}>
-        <AppHeader title="마이페이지" titleStyle={{ fontFamily: 'Jua' }} />
+        <AppHeader title="마이페이지" />
 
         <ConfirmationModal
           visible={isModalVisible}
@@ -118,6 +118,5 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', paddingTop: 4 },
   itemText: {
     fontSize: 12,
-    fontFamily: 'Jua',
   },
 });
