@@ -217,7 +217,7 @@ function HomeContent() {
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.35, 0.65, 1]}
+      locations={[0, 0.3, 0.7, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -644,7 +644,7 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.35, 0.65, 1]}
+      locations={[0, 0.3, 0.7, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -714,18 +714,21 @@ function OptionContent() {
   const navigation = useNavigation<any>();
 
   const gradients = [
+    ['#ffafb2ff', '#ffe0d7ff', '#ffe0d7ff', '#ffafb2ff'], // 분홍
     ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'], // 기본(주황)
-    ['#A1C4FD', '#d1f0feff', '#d1f0feff', '#A1C4FD'], // 파랑
-    ['#FBC2EB', '#E6E6FA', '#E6E6FA', '#FBC2EB'], // 보라
-    ['#FF9A9E', '#FAD0C4', '#FAD0C4', '#FF9A9E'], // 분홍
-    ['#51ff44ff', '#b9ff8dff', '#b9ff8dff', '#51ff44ff'], // 초록
+    ['#fcff51ff', '#f8ffaaff', '#f8ffaaff', '#fcff51ff'], // 노랑
+    ['#51ff44ff', '#c6ffa3ff', '#c6ffa3ff', '#51ff44ff'], // 초록
+    ['#5ffff4ff', '#d2fffcff', '#d2fffcff', '#5ffff4ff'], // 하늘
+    ['#b7b8ffff', '#dbf2fcff', '#dbf2fcff', '#b7b8ffff'], // 파랑
+    ['#FBC2EB', '#fae6f9ff', '#fae6f9ff', '#FBC2EB'], // 보라
+    ['#b5b4b4ff', '#f6f6f6', '#f6f6f6', '#b5b4b4ff'], // 회색
     ['#fff'], // 흰색
   ];
 
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.35, 0.65, 1]}
+      locations={[0, 0.3, 0.7, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -903,7 +906,7 @@ export default function AppDrawer() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 24 },
   header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 0 },
-  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 20, },
+  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, },
   drawerHeader: { padding: 16, marginBottom: 8 },
   userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 15 },
   menuButton: { marginRight: 8 },
