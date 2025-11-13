@@ -13,7 +13,7 @@ interface ConfirmationModalProps {
   item: Item | null;
   onClose: () => void;
   onConfirm: () => void;
-  onModalHide?: () => void; // 모달이 완전히 사라진 후 호출될 함수 prop 추가
+  onModalHide?: () => void; // 선택적 prop으로 유지
   mainText: string;
   confirmButtonText: string;
   cancelButtonText?: string;
@@ -29,15 +29,26 @@ export default function ConfirmationModal({
   confirmButtonText,
   cancelButtonText = '취소',
 }: ConfirmationModalProps) {
+
+  // ✅ [수정] 닫기 버튼 클릭 시 실행될 헬퍼 함수
+  const handleCancel = () => {
+    // 1. 부모 컴포넌트의 닫기 상태 변경 함수 호출
+    onClose();
+    
+    // 2. 모달이 닫힌 후 정리 작업이 있다면 실행 (예: 선택된 아이템 초기화)
+    if (onModalHide) {
+      onModalHide();
+    }
+  };
+
   return (
     <Modal
       animationType="fade"
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
-      onModalHide={onModalHide} // Modal이 사라진 후 onModalHide 함수를 호출
+      onRequestClose={handleCancel} // ✅ 안드로이드 뒤로가기 버튼 대응
+      // ❌ 에러가 발생하던 onModalHide 속성 삭제됨
     >
-      {/* item이 null일 때 모달 내용이 렌더링되지 않도록 수정 */}
       {item && (
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -55,7 +66,9 @@ export default function ConfirmationModal({
               <Pressable style={[styles.modalButton, styles.confirmButton]} onPress={onConfirm}>
                 <ThemedText style={styles.modalButtonText}>{confirmButtonText}</ThemedText>
               </Pressable>
-              <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={onClose}>
+              
+              {/* ✅ 취소 버튼에 handleCancel 연결 */}
+              <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={handleCancel}>
                 <ThemedText style={[styles.modalButtonText, { color: '#4A4459' }]}>{cancelButtonText}</ThemedText>
               </Pressable>
             </View>

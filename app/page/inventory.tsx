@@ -6,7 +6,6 @@ import ConfirmationModal from '@/components/ConfirmationModal';
 import ItemListView from '@/components/ItemListView';
 import { ThemedText } from '@/components/themed-text';
 import { Item, ItemCategory } from '@/data/items';
-import { useInventory } from '@/hooks/useInventory';
 import { useUserStore } from '@/store/userStore';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -89,6 +88,7 @@ export default function InventoryScreen() {
         onTabPress={handleTabPress}
         onItemPress={handleItemPress}
         selectedItemId={null}
+        mode="inventory"
         renderItemFooter={(item) => (
           <ThemedText style={styles.itemText}>
             {'is_equipped' in item ? (item.is_equipped ? '장착 중' : '보유 중') : '구매 가능'}

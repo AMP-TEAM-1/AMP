@@ -22,10 +22,12 @@ interface ItemListViewProps {
   selectedItemId: number | null;
   onTabPress: (category: ItemCategory) => void;
   onItemPress: (item: Item) => void;
+  mode?: 'shop' | 'inventory';
   renderItemFooter: (item: Item) => React.ReactNode;
 }
 
 export default function ItemListView({
+  mode = 'shop',
   title,
   items,
   carrots,
@@ -53,6 +55,7 @@ export default function ItemListView({
           <ActivityIndicator style={{ flex: 1 }} size="large" />
         ) : (
           <ItemGrid
+            mode={mode}
             items={filteredItems}
             onItemPress={onItemPress}
             selectedItemId={selectedItemId}
