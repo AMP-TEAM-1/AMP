@@ -54,20 +54,29 @@ def get_todo(db: Session, todo_id: int):
 # ID로 할일 항목 업데이트 함수
 def update_todo(db: Session, todo_id: int, todo: schemas.TodoUpdate):
     db_todo = db.query(models.Todo).filter(models.Todo.id == todo_id).first()
+    if not db_todo:
+        return None
+
+    # 🥕 당근 지급/회수 로직
+    # completed 상태가 변경될 때만 당근 잔액을 조절합니다.
+    if todo.completed is not None and db_todo.completed != todo.completed:
+        amount = 30 if todo.completed else -30
+        update_carrot_balance(db, user_id=db_todo.owner_id, amount=amount)
 
     # 🥕 카테고리 연결 업데이트
     if todo.category_ids is not None:
         # 기존 카테고리 연결을 모두 지우고 새로 설정
         db_todo.categories.clear()
-        categories = db.query(models.Category).filter(models.Category.id.in_(todo.category_ids)).all()
-        db_todo.categories.extend(categories)
+        if todo.category_ids:
+            categories = db.query(models.Category).filter(models.Category.id.in_(todo.category_ids)).all()
+            db_todo.categories.extend(categories)
 
-    if db_todo:
-        update_data = todo.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(db_todo, key, value)
-        db.commit()
-        db.refresh(db_todo)
+    update_data = todo.dict(exclude_unset=True)
+    update_data.pop('category_ids', None)  # category_ids는 이미 처리했으므로 제외
+    for key, value in update_data.items():
+        setattr(db_todo, key, value)
+    db.commit()
+    db.refresh(db_todo)
     return db_todo
 
 # ID로 할일 항목 삭제 함수
