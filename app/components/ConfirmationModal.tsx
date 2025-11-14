@@ -101,7 +101,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     textAlign: 'center',
     fontSize: 22,
-    fontFamily: 'Jua',
   },
   modalButtonContainer: {
     flexDirection: 'row',
@@ -125,6 +124,5 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: 'white',
     fontSize: 16,
-    fontFamily: 'Jua',
   },
 });

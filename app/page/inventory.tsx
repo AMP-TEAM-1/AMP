@@ -66,7 +66,7 @@ export default function InventoryScreen() {
               </Pressable>
             ),
             headerTitleStyle: {
-              fontFamily: 'Jua',
+              fontFamily: 'Cafe24Ssurround',
               fontSize: 20,
               color: '#000',
             },
@@ -118,8 +118,8 @@ const styles = StyleSheet.create({
   },
   carrotText: {
     fontSize: 18,
-    fontFamily: 'Jua',
+    fontFamily: 'Cafe24Ssurround',
     fontWeight: 'bold',
   },
-  itemText: { fontSize: 12, fontFamily: 'Jua' },
+  itemText: { fontSize: 12, fontFamily: 'Cafe24Ssurround' },
 });
