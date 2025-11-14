@@ -30,7 +30,7 @@ export const CATEGORIES: ItemCategory[] = ['모자', '장신구', '배경'];
 
 export const CATEGORY_MAP: Record<ItemCategory, string> = {
   '모자': 'hat',
-  '장신구': 'accessories',
+  '장신구': 'accessory',
   '배경': 'background',
 };
 
@@ -78,21 +78,3 @@ export const imageMap: { [key: string]: any } = {
   'b5': require('../../assets/images/item/cake-bg.png'),
   'b6': require('../../assets/images/item/stairs-bg.png'),
 };
-
-// --- UI 테스트용 임시 데이터 ---
-export const mockShopItems: Item[] = [
-  { item_id: 1, name: '밀짚모자', price: 50, type: 'hat', image: imageMap['h1'] },
-  { item_id: 2, name: '카우보이 모자', price: 70, type: 'hat', image: imageMap['h2'] },
-  { item_id: 6, name: '왕관', price: 200, type: 'hat', image: imageMap['h6'] },
-  { item_id: 7, name: '하트 장식', price: 30, type: 'accessory', image: imageMap['a1'] },
-  { item_id: 8, name: '나비 넥타이', price: 40, type: 'accessory', image: imageMap['a2'] },
-  { item_id: 13, name: '튤립 배경', price: 100, type: 'background', image: imageMap['b1'] },
-];
-
-export const mockInventoryItems: Item[] = [
-  { item_id: 1, name: '밀짚모자', type: 'hat', is_equipped: true, image: imageMap['h1'] },
-  { item_id: 3, name: '요리사 모자', type: 'hat', is_equipped: false, image: imageMap['h3'] },
-  { item_id: 8, name: '나비 넥타이', type: 'accessory', is_equipped: true, image: imageMap['a2'] },
-  { item_id: 10, name: '땡땡이 리본', type: 'accessory', is_equipped: false, image: imageMap['a4'] },
-  { item_id: 18, name: '계단 배경', type: 'background', is_equipped: false, image: imageMap['b6'] },
-];

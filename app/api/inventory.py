@@ -26,6 +26,7 @@ def read_user_inventory(
 
 @router.put("/api/inventory/{item_id}/equip", response_model=schemas.Inventory)
 def update_inventory_item_status(
+    item_id: int,
     inventory_update: InventoryUpdate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
@@ -34,6 +35,14 @@ def update_inventory_item_status(
     사용자 인벤토리 아이템의 장착 상태를 업데이트합니다.
     동일한 타입의 다른 아이템이 장착되어 있다면 해제 처리합니다.
     """
+
+    # URL 경로의 item_id와 Body의 item_id가 다르면 400 에러 발생
+    if item_id != inventory_update.item_id:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"경로의 item_id({item_id})와 본문의 item_id({inventory_update.item_id})가 일치하지 않습니다."
+        )
+
     updated_item = crud.update_user_inventory(
         db,
         user_id=current_user.id,
