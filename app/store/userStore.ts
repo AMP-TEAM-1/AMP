@@ -8,8 +8,8 @@ interface UserState {
   inventoryItems: Item[];
   // 1. 상태를 초기화하는 함수 (로그인 시 또는 앱 시작 시 호출)
   fetchUserData: () => Promise<void>;
-  // 2. 아이템 구매 함수 (useShop -> 여기로 이동)
-  purchaseItem: (item: Item) => Promise<boolean>;
+  // 2. 아이템 구매 함수: 성공 시 true, 실패 시 에러 메시지(string) 반환
+  purchaseItem: (item: Item) => Promise<true | string>;
   // 3. 아이템 장착 함수 (useInventory -> 여기로 이동)
   equipItem: (item: Item) => Promise<boolean>;
 }
@@ -59,22 +59,38 @@ export const useUserStore = create<UserState>((set, get) => ({
   },
 
   // 2. 아이템 구매 로직 (기존 useShop에서 가져옴)
-  purchaseItem: async (item: Item) => {
+  purchaseItem: async (item: Item): Promise<true | string> => {
+    // [수정] API 호출 전, 프론트엔드에서 먼저 잔액을 확인합니다.
+    const currentCarrots = get().carrots;
+    if ('price' in item && currentCarrots < item.price) {
+      return "당근 잔액이 부족합니다.";
+    }
+
+    let errorMessage = "알 수 없는 오류로 구매에 실패했습니다.";
     try {
       const headers = await getAuthHeaders();
-      const response = await axios.post(
+      await axios.post(
         `${API_URL}/shop/purchase/?item_id=${item.item_id}`, 
         {}, 
         { headers }
       );
-      
-      // 구매 성공 시, 유저 데이터를 다시 불러와 상태를 동기화
-      await get().fetchUserData();
-      return true;
     } catch (error) {
       console.error("구매 실패", error);
-      return false;
+      // 백엔드 버그로 인해 성공해도 500 에러가 올 수 있으므로, 에러가 발생해도 일단 계속 진행합니다.
+      // 대신 실제 백엔드 에러 메시지를 저장해 둡니다.
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.detail || "구매 중 오류가 발생했습니다.";
+      }
     }
+
+    // 구매 요청 후, 성공/실패 여부와 관계없이 최신 유저 데이터를 다시 불러옵니다.
+    await get().fetchUserData();
+    // 다시 불러온 인벤토리 상태를 확인합니다.
+    const updatedInventory = get().inventoryItems;
+    const isPurchased = updatedInventory.some(invItem => invItem.item_id === item.item_id);
+
+    // 인벤토리에 아이템이 추가되었으면 성공(true), 아니면 저장해둔 에러 메시지를 반환합니다.
+    return isPurchased ? true : errorMessage;
   },
 
   // 3. 아이템 장착 로직 (기존 useInventory에서 가져옴)

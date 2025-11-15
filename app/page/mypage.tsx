@@ -26,9 +26,9 @@ export default function MyPageScreen() {
   } = useShopBottomSheet({ initialState: 'minimized' });
 
   // useShop 훅은 상점 아이템과 '구매' 기능만 담당
-  const { shopItems: originalShopItems, loading, purchaseItem } = useShop();
+  const { shopItems: originalShopItems, loading } = useShop();
   // 2. '당근'과 '장착된 아이템' 정보는 전역 스토어에서 직접 가져옴
-  const { carrots, inventoryItems } = useUserStore();
+  const { carrots, inventoryItems, purchaseItem } = useUserStore();
   const equippedItems = inventoryItems.filter(
     (item): item is InventoryItem & { image: any } => 'is_equipped' in item && item.is_equipped
   );
@@ -55,9 +55,17 @@ export default function MyPageScreen() {
   const confirmPurchase = async () => {
     if (!selectedItem) return;
     setIsModalVisible(false);
-    const success = await purchaseItem(selectedItem);
-    if (!success) {
-      setToastMessage('‘캐롯’이 부족해요. 할 일을 완료하고 더 모아볼까요?');
+    const result = await purchaseItem(selectedItem);
+    
+    // purchaseItem이 true가 아닌 문자열(에러 메시지)을 반환하면 실패로 간주
+    if (result !== true) {
+      // 백엔드에서 "잔액 부족" 에러를 받았을 때, 프론트에서 원하는 특정 메시지를 보여줍니다.
+      if (result === "당근 잔액이 부족합니다.") {
+        setToastMessage('‘캐롯’이 부족해요. 할 일을 완료하고 더 모아볼까요?');
+      } else {
+        // 그 외의 에러(이미 보유, 아이템 없음 등)는 백엔드 메시지를 그대로 사용합니다.
+        setToastMessage(result);
+      }
       // Toast가 사라진 후 메시지를 null로 초기화하여 다시 띄울 수 있게 함
       setTimeout(() => setToastMessage(null), 3300); // duration + animation time
       setSelectedItem(null); // 구매 실패 시 아이템 선택 해제
