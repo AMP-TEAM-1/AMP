@@ -71,7 +71,7 @@ class Item(ItemBase):
 
 class Inventory(BaseModel):
     # 인벤토리 목록 조회 시 필요한 정보
-    item: Item # Item 전체 정보 포함
+    item: ItemResponse 
     is_equipped: bool
     class Config:
         from_attributes = True

@@ -1,4 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
+import { useUserStore } from '@/store/userStore';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,6 +21,9 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 export default function LoginScreen() {
   const { width, height } = useWindowDimensions();
+  // 🥕 전역 스토어에서 사용자 데이터를 불러오는 함수를 가져옵니다.
+  const { fetchUserData } = useUserStore();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +53,9 @@ export default function LoginScreen() {
       console.log('[로그인 성공] 받은 토큰:', access_token);
 
       await tokenStorage.setItem(access_token);
+
+      // 🥕 로그인 성공 후, 전역 스토어의 사용자 데이터를 즉시 갱신합니다.
+      await fetchUserData();
 
       Alert.alert('성공', '로그인에 성공했습니다.');
       // 🥕 로그인 성공 후 drawer navigator의 기본 화면으로 이동하도록 경로를 수정합니다.

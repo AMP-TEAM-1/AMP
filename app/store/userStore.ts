@@ -1,5 +1,5 @@
 import { API_URL, getAuthHeaders } from '@/api'; // API 설정
-import { Item } from '@/data/items'; // Item 타입 경로
+import { Item, imageMap } from '@/data/items'; // Item 타입 경로
 import axios from 'axios';
 import { create } from 'zustand';
 
@@ -14,6 +14,18 @@ interface UserState {
   equipItem: (item: Item) => Promise<boolean>;
 }
 
+// 헬퍼 함수: 이미지 URL을 imageMap 키로 변환
+const getImageKey = (imageUrl: string): string => {
+  const filename = imageUrl.split('/').pop()?.replace('.png', '') || '';
+  const keyMap: { [key: string]: string } = {
+    'strawHat': 'h1', 'cowboyHat': 'h2', 'santa-hat': 'h3', 'birthdayHat': 'h4', 'chefsHat': 'h5', 'crown': 'h6',
+    'heart-accessory': 'a1', 'bowtie': 'a2', 'necktie': 'a3', 'scarf': 'a4', 'dot-ribbon': 'a5', 'ribbon': 'a6',
+    'tulip-bg': 'b1', 'cactus-bg': 'b2', 'snowman-bg': 'b3', 'birthday-bg': 'b4', 'cake-bg': 'b5', 'stairs-bg': 'b6'
+  };
+  return keyMap[filename] || imageUrl;
+};
+
+
 export const useUserStore = create<UserState>((set, get) => ({
   carrots: 0,
   inventoryItems: [],
@@ -22,12 +34,24 @@ export const useUserStore = create<UserState>((set, get) => ({
   fetchUserData: async () => {
     try {
       const headers = await getAuthHeaders();
-      const userRes = await axios.get(`${API_URL}/users/me/`);
+      const userRes = await axios.get(`${API_URL}/users/me/`, { headers });
       const inventoryRes = await axios.get(`${API_URL}/api/inventory`, { headers });
       
+      const transformedInventory = inventoryRes.data.map((invItem: any) => {
+        const imageKey = getImageKey(invItem.item.image_url);
+        return {
+          ...invItem.item,
+          item_id: invItem.item.item_id || invItem.item.id, 
+          type: invItem.item.type || invItem.item.item_type,
+          is_equipped: invItem.is_equipped,
+          is_owned: true,
+          image: imageMap[imageKey] || imageMap['h1'],
+        };
+      });
+
       set({ 
         carrots: userRes.data.carrot_balance,
-        inventoryItems: inventoryRes.data // (필요시 imageMap 매핑)
+        inventoryItems: transformedInventory 
       });
     } catch (e) {
       console.error("유저 데이터 로딩 실패", e);
@@ -44,10 +68,8 @@ export const useUserStore = create<UserState>((set, get) => ({
         { headers }
       );
       
-      // 구매 성공 시, 전역 상태의 당근 개수를 업데이트
-      set({ carrots: response.data.carrot_balance });
-      // 구매했으니 인벤토리 목록을 새로고침
-      await get().fetchUserData(); // (더 좋은 방법은 인벤토리에 아이템만 추가하는 것)
+      // 구매 성공 시, 유저 데이터를 다시 불러와 상태를 동기화
+      await get().fetchUserData();
       return true;
     } catch (error) {
       console.error("구매 실패", error);

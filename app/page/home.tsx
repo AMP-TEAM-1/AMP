@@ -21,6 +21,7 @@ import {
   View,
 } from 'react-native';
 import { tokenStorage } from '../storage';
+import { useUserStore } from '../store/userStore';
 import AlarmPage from './alarm';
 import CategoryContent from './category';
 import { ColorContext } from './ColorContext';
@@ -47,6 +48,9 @@ type Todo = {
 type Category = { id: number; text: string };
 
 function HomeContent() {
+  // 🥕 userStore에서 fetchUserData 함수를 가져옵니다.
+  const { fetchUserData } = useUserStore();
+
   const { colors } = React.useContext(ColorContext);
   const navigation = useNavigation<any>();
   const flatListRef = useRef<FlatList<number>>(null);
@@ -169,16 +173,12 @@ function HomeContent() {
 
   // 완료 토글
   const handleCheck = async (id: number, currentCompleted: boolean) => {
-    // 🥕 이미 완료된 할 일은 다시 체크 해제할 수 없도록 막습니다.
-    if (currentCompleted) {
-      Alert.alert('완료', '이미 완료된 할 일입니다.');
-      return;
-    }
-
     setCurrentTodos(prev => prev.map(t => (t.id === id ? { ...t, completed: !currentCompleted } : t)));
     try {
       const headers = await getAuthHeaders();
-      await axios.put(`${API_URL}/todos/${id}`, { completed: !currentCompleted }, { headers });
+      await axios.put(`${API_URL}/todos/${id}/`, { completed: !currentCompleted }, { headers });
+      // 🥕 할일 완료/해제 성공 시, 유저 데이터를 다시 불러와 당근 개수를 업데이트합니다.
+      await fetchUserData();
     } catch (err) {
       console.error('[handleCheck] error:', err);
       // 롤백
@@ -192,7 +192,7 @@ function HomeContent() {
   const saveTodo = async (id: number, newTitle: string) => {
     try {
       const headers = await getAuthHeaders();
-      await axios.put(`${API_URL}/todos/${id}`, { title: newTitle }, { headers });
+      await axios.put(`${API_URL}/todos/${id}/`, { title: newTitle }, { headers });
       setCurrentTodos(prev => prev.map(t => (t.id === id ? { ...t, title: newTitle } : t)));
     } catch (err) {
       console.error('[saveTodo] error:', err);
@@ -444,7 +444,7 @@ function HomeContent() {
                           alignItems: 'center',
                           backgroundColor: item.completed ? '#1f7aeb' : 'transparent',
                         }}
-                        onPress={() => handleCheck(item.id, item.completed)} disabled={item.completed}
+                        onPress={() => handleCheck(item.id, item.completed)}
                       >
                         {item.completed && <Text style={{ color: 'white', fontWeight: 'bold' }}>✓</Text>}
                       </Pressable>
@@ -512,7 +512,10 @@ function HomeContent() {
                   style={{ paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
                   onPress={() => {
                     setActionModalVisible(false);
-                    navigation.navigate('Alarm');
+                    // 🥕 알람 페이지로 이동 시, 현재 할 일의 ID를 파라미터로 전달합니다.
+                    if (actionTodo) {
+                      navigation.navigate('Alarm', { todoId: actionTodo.id, todoTitle: actionTodo.title });
+                    }
                   }}
                 >
                   <Ionicons name="notifications-outline" size={20} color="black" style={{ marginRight: 10 }} />
@@ -527,8 +530,8 @@ function HomeContent() {
                   onPress={async () => {
                     if (!actionTodo) return;
                     try {
-                      const headers = await getAuthHeaders();
-                      await axios.delete(`${API_URL}/todos/${actionTodo.id}`, { headers });
+                      const headers = await getAuthHeaders(); 
+                      await axios.delete(`${API_URL}/todos/${actionTodo.id}/`, { headers });
                       setCurrentTodos(prev => prev.filter(t => t.id !== actionTodo.id));
                     } catch (err) {
                       console.error('[deleteTodo] error:', err);
@@ -600,7 +603,7 @@ function HomeContent() {
 
                       try {
                         const headers = await getAuthHeaders();
-                        await axios.put(`${API_URL}/todos/${actionTodo.id}`, { category_ids: nextIds }, { headers });
+                        await axios.put(`${API_URL}/todos/${actionTodo.id}/`, { category_ids: nextIds }, { headers });
                         await fetchTodosByDate(selected);
                       } catch (err) {
                         console.error('[update categories] error:', err);
@@ -622,7 +625,7 @@ function HomeContent() {
                     if (!actionTodo) return;
                     try {
                       const headers = await getAuthHeaders();
-                      await axios.put(`${API_URL}/todos/${actionTodo.id}`, { category_ids: [] }, { headers });
+                      await axios.put(`${API_URL}/todos/${actionTodo.id}/`, { category_ids: [] }, { headers });
                       await fetchTodosByDate(selected);
                     } catch (err) {
                       console.error('[clear categories] error:', err);
