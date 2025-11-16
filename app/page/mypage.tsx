@@ -1,10 +1,9 @@
 //UI 개발 및 테스트를 위해 로컬 JSON 파일(shopItems.json)을 임시 데이터로 사용하고 있으며,
 // 실제 서버와 통신하는 API 연동 로직은 주석 처리되어 있습니다.
 import { ThemedText } from '@/components/themed-text';
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { Stack } from 'expo-router';
 
+import AppHeader from '@/components/AppHeader';
 import CharacterView from '@/components/CharacterView';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import ShopBottomSheet from '@/components/ShopBottomSheet';
@@ -15,7 +14,7 @@ import { useShop } from '@/hooks/useShop';
 import { useShopBottomSheet } from '@/hooks/useShopBottomSheet';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useContext, useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ColorContext } from './ColorContext';
 
@@ -79,26 +78,10 @@ export default function MyPageScreen() {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.safeArea}>
-        <Stack.Screen
-          options={{
-            headerShown: true,
-            title: '마이페이지',
-            headerTitleAlign: 'center',
-            headerTransparent: true,
-            headerShadowVisible: false,
-            headerLeft: () => (
-              <Pressable onPress={() => navigation.toggleDrawer()} style={{ paddingLeft: 10 }}>
-                <Ionicons name="menu" size={28} color="black" />
-              </Pressable>
-            ),
-            headerTitleStyle: {
-              fontFamily: 'Jua',
-              fontSize: 20,
-              color: '#000',
-            },
-          }}
-        />
         <ThemedView style={styles.container}>
+          {/* Stack.Screen 대신 AppHeader 컴포넌트를 사용합니다. */}
+          <AppHeader title="마이페이지" style={{ backgroundColor: 'transparent' }} />
+
           <ConfirmationModal
             visible={isModalVisible}
             item={selectedItem}
@@ -149,6 +132,5 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent', paddingTop: 4 },
   itemText: {
     fontSize: 12,
-    fontFamily: 'Jua',
   },
 });

@@ -117,7 +117,7 @@ export default function CategoryContent() {
             }}
           >
             <Image
-              source={require('../../assets/images/item/logo.png')} // ✅ 여기에 저장한 파일 경로
+              source={require('../../assets/images/item/rabbit_logo.png')} // ✅ 여기에 저장한 파일 경로
               style={{
                 width: 40,
                 height: 40,
