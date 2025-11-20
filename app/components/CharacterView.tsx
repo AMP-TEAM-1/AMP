@@ -1,4 +1,4 @@
-import { Item } from '@/data/items';
+import { baseItemStyle, Item, itemStyleMap } from '@/data/items';
 import { router } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
@@ -50,25 +50,12 @@ export default function CharacterView({
       <Animated.View style={[styles.rabbitContainer, animatedRabbitStyle]}>
         <Image source={rabbitImage} style={styles.rabbitImage} resizeMode="contain" />
         {/* 장착된 아이템들을 캐릭터 위에 겹쳐서 렌더링합니다. */}
-        {equippedItems.map((item) => {          
-          // ✅ [수정] 액세서리 종류에 따라 다른 스타일을 적용하는 함수
-          const getAccessoryStyle = (item: Item) => {
-            // TODO: 아래 ID를 실제 데이터베이스의 아이템 ID로 변경해주세요.
-            if (item.item_id === 4) { // 예: 하트 액세서리 ID가 101일 경우
-              return styles.heartAccessoryItem;
-            }
-            if (item.item_id === 5) { // 예: 나비넥타이 ID가 102일 경우
-              return styles.bowtieAccessoryItem;
-            }
-            return styles.accessoryItem; // 기본 액세서리 스타일
-          };
-          
-          // ✅ [수정] 아이템 타입에 따라 스타일을 결정하는 로직
-          const itemStyle = 
-            item.type === 'hat' ? styles.hatItem :
-            item.type === 'accessory' ? getAccessoryStyle(item) :
-            item.type === 'background' ? styles.backgroundItem :
-            {};
+        {equippedItems.map((item) => {
+          // 1. itemStyleMap에서 현재 아이템 ID에 해당하는 개별 스타일을 찾습니다.
+          const individualStyle = itemStyleMap[item.item_id];
+          // 2. 개별 스타일이 없으면, 아이템 타입에 맞는 기본 스타일을 사용합니다.
+          const typeStyle = baseItemStyle[item.type] || {};
+          const itemStyle = individualStyle || typeStyle;
           
           return (
             <Image key={item.item_id} source={item.image} style={[styles.equippedItem, itemStyle]} resizeMode="contain" />
@@ -129,36 +116,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
-  },
-  hatItem: {
-    // 모자 아이템의 위치와 크기 조정
-    width: '40%',
-    height: '40%',
-    top: '5%',
-  },
-  accessoryItem: {
-    // 장신구 아이템의 위치와 크기 조정
-    width: '25%',
-    height: '25%',
-    top: '52%',
-  },
-  // ✅ [추가] 하트 액세서리 전용 스타일
-  heartAccessoryItem: {
-    width: '17%',
-    height: '17%',
-    top: '63%',
-    left: '53%',
-  },
-  // ✅ [추가] 나비넥타이 전용 스타일
-  bowtieAccessoryItem: {
-    width: '25%',
-    height: '25%',
-    top: '52%',
-    // 기본 accessoryItem과 동일한 위치이므로 left, right 조정 불필요
-  },
-  backgroundItem: {
-    // 배경 아이템은 캐릭터 뒤에 위치하도록 zIndex 설정
-    zIndex: -1,
-    opacity: 0.8,
   },
 });
