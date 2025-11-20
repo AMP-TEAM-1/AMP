@@ -1,4 +1,6 @@
-from sqlalchemy.orm import Session
+# 데이터베이스 모델에 대한 생성(Create), 읽기(Read), 업데이트(Update), 삭제(Delete) 함수 구현
+
+from sqlalchemy.orm import Session, joinedload
 from datetime import date
 from typing import List
 from . import models, schemas, security
@@ -52,20 +54,29 @@ def get_todo(db: Session, todo_id: int):
 # ID로 할일 항목 업데이트 함수
 def update_todo(db: Session, todo_id: int, todo: schemas.TodoUpdate):
     db_todo = db.query(models.Todo).filter(models.Todo.id == todo_id).first()
+    if not db_todo:
+        return None
+
+    # 🥕 당근 지급/회수 로직
+    # completed 상태가 변경될 때만 당근 잔액을 조절합니다.
+    if todo.completed is not None and db_todo.completed != todo.completed:
+        amount = 30 if todo.completed else -30
+        update_carrot_balance(db, user_id=db_todo.owner_id, amount=amount)
 
     # 🥕 카테고리 연결 업데이트
     if todo.category_ids is not None:
         # 기존 카테고리 연결을 모두 지우고 새로 설정
         db_todo.categories.clear()
-        categories = db.query(models.Category).filter(models.Category.id.in_(todo.category_ids)).all()
-        db_todo.categories.extend(categories)
+        if todo.category_ids:
+            categories = db.query(models.Category).filter(models.Category.id.in_(todo.category_ids)).all()
+            db_todo.categories.extend(categories)
 
-    if db_todo:
-        update_data = todo.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(db_todo, key, value)
-        db.commit()
-        db.refresh(db_todo)
+    update_data = todo.dict(exclude_unset=True)
+    update_data.pop('category_ids', None)  # category_ids는 이미 처리했으므로 제외
+    for key, value in update_data.items():
+        setattr(db_todo, key, value)
+    db.commit()
+    db.refresh(db_todo)
     return db_todo
 
 # ID로 할일 항목 삭제 함수
@@ -109,6 +120,7 @@ def delete_category(db: Session, category_id: int):
         db.delete(db_category)
         db.commit()
     return db_category
+
 
 # 상점의 모든 물품을 조회하는 함수
 def get_all_shop_items(db: Session):
@@ -162,7 +174,10 @@ def get_user_inventory(db: Session, user_id: int) -> List[models.Inventory]:
     # 💡 Inventory 모델이 User 및 Item 모델과 관계를 맺고 있다고 가정합니다.
     # User 모델에 'inventory' 관계 필드가 있다면, user.inventory로 바로 접근 가능합니다.
     # 여기서는 Inventory 테이블을 직접 쿼리합니다.
-    return db.query(models.Inventory).filter(models.Inventory.user_id == user_id).all()
+    return db.query(models.Inventory)\
+        .options(joinedload(models.Inventory.item))\
+        .filter(models.Inventory.user_id == user_id)\
+        .all()
 
 def update_user_inventory(db: Session, user_id: int, item_id: int, is_equipped: bool) -> models.Inventory | None:
     """
@@ -204,6 +219,8 @@ def update_user_inventory(db: Session, user_id: int, item_id: int, is_equipped: 
                 user.equipped_hat_id = item_id
             elif item_type == 'accessory':
                 user.equipped_acc_id = item_id
+            elif item_type == 'background':
+                user.equipped_background_id = item_id
 
     # 3. 장착 해제(unequip)하는 경우
     else:
@@ -216,6 +233,8 @@ def update_user_inventory(db: Session, user_id: int, item_id: int, is_equipped: 
                     user.equipped_hat_id = None
                 elif item_to_unequip.item_type == 'accessory' and user.equipped_acc_id == item_id:
                     user.equipped_acc_id = None
+                elif item_to_unequip.item_type == 'background' and user.equipped_background_id == item_id:
+                    user.equipped_background_id = None
 
     # 4. 현재 아이템의 is_equipped 상태 업데이트
     inventory_item.is_equipped = is_equipped
@@ -230,47 +249,57 @@ def purchase_item_transaction(
     db: Session, 
     user_id: int, 
     item_id: int
-) -> models.User | None:
+) -> models.User | str:
     """
-    사용자의 잔액을 차감하고 인벤토리에 아이템을 추가하는 트랜잭션 로직
+    사용자의 잔액을 차감하고 인벤토리에 아이템을 추가하는 트랜잭션 로직.
+    성공 시 User 객체 반환, 실패 시 에러 메시지(str) 반환
     """
-    # 1. 아이템 정보 조회 (가격 확인)
+    # 1. 아이템 정보 및 사용자 정보 조회
     item = db.query(models.Item).filter(models.Item.id == item_id).first()
-    if not item:
-        return None  # 아이템을 찾을 수 없음 (라우터에서 404 처리)
-
-    item_price = item.price
-    
-    # 2. 사용자 정보 조회 (잔액 확인)
     user = db.query(models.User).filter(models.User.id == user_id).first()
-    if not user:
-        return None  # 사용자를 찾을 수 없음 (라우터에서 404 처리)
 
-    # 3. 잔액 확인 및 차감
-    if user.carrot_balance < item_price:
-        # 잔액 부족 시 트랜잭션 중단 및 실패 반환 (라우터에서 400 처리)
-        return False  # 잔액 부족을 나타내는 별도의 값 반환 (예: False)
+    if not item:
+        return "item_not_found"
+    if not user:
+        return "user_not_found"
+
+    # 2. 중복 구매 확인
+    existing_inventory = db.query(models.Inventory).filter(
+        models.Inventory.user_id == user_id,
+        models.Inventory.item_id == item_id
+    ).first()
+
+    if existing_inventory:
+        return "already_owned"
+
+    # 3. 잔액 확인
+    if user.carrot_balance < item.price:
+        return "not_enough_balance"
     
-    # 3-1. 잔액 차감 (업데이트)
-    user.carrot_balance -= item_price
-    
-    # 4. 인벤토리 추가
-    # 중복 구매 방지 로직은 Inventory 모델 설계에 따라 달라집니다.
-    # 여기서는 새로운 Inventory 객체를 생성한다고 가정합니다.
-    db_inventory = models.Inventory(
-        user_id=user_id, 
-        item_id=item_id, 
-        is_equipped=False
-    )
-    db.add(db_inventory)
-    
-    # 5. DB 트랜잭션 커밋
+    # 4. 트랜잭션 처리
     try:
-        db.commit()
-    except Exception as e:
-        # 오류 발생 시 롤백하여 데이터 무결성 보장
-        db.rollback()
-        raise e
+        # 잔액 차감
+        user.carrot_balance -= item.price
         
-    db.refresh(user)
-    return user
+        # 인벤토리 추가
+        new_inventory_item = models.Inventory(
+            user_id=user_id,
+            item_id=item_id,
+            is_equipped=False
+        )
+        db.add(new_inventory_item)
+        
+        db.commit()
+        
+        # 커밋 후 객체 refresh
+        db.refresh(user)
+        db.refresh(new_inventory_item)
+        
+        return user
+
+    except Exception as e:
+        db.rollback()
+        # 에러 로깅을 추가하면 디버깅에 도움이 됩니다.
+        # import logging
+        # logging.error(f"Purchase transaction failed: {e}")
+        return "transaction_failed"

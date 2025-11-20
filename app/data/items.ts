@@ -22,6 +22,7 @@ export type InventoryItem = {
 // 프론트엔드에서 사용할 통합 아이템 타입 (이미지 경로 등 추가 정보 포함)
 export type Item = (ShopItem | InventoryItem) & {
   image: any; // require()의 반환 타입
+  is_owned?: boolean; // 아이템 보유 여부
 };
 
 // --- 상수 정의 ---
@@ -77,21 +78,3 @@ export const imageMap: { [key: string]: any } = {
   'b5': require('../../assets/images/item/cake-bg.png'),
   'b6': require('../../assets/images/item/stairs-bg.png'),
 };
-
-// --- UI 테스트용 임시 데이터 ---
-export const mockShopItems: Item[] = [
-  { item_id: 1, name: '밀짚모자', price: 50, type: 'hat', image: imageMap['h1'] },
-  { item_id: 2, name: '카우보이 모자', price: 70, type: 'hat', image: imageMap['h2'] },
-  { item_id: 6, name: '왕관', price: 200, type: 'hat', image: imageMap['h6'] },
-  { item_id: 7, name: '하트 장식', price: 30, type: 'accessory', image: imageMap['a1'] },
-  { item_id: 8, name: '나비 넥타이', price: 40, type: 'accessory', image: imageMap['a2'] },
-  { item_id: 13, name: '튤립 배경', price: 100, type: 'background', image: imageMap['b1'] },
-];
-
-export const mockInventoryItems: Item[] = [
-  { item_id: 1, name: '밀짚모자', type: 'hat', is_equipped: true, image: imageMap['h1'] },
-  { item_id: 3, name: '요리사 모자', type: 'hat', is_equipped: false, image: imageMap['h3'] },
-  { item_id: 8, name: '나비 넥타이', type: 'accessory', is_equipped: true, image: imageMap['a2'] },
-  { item_id: 10, name: '땡땡이 리본', type: 'accessory', is_equipped: false, image: imageMap['a4'] },
-  { item_id: 18, name: '계단 배경', type: 'background', is_equipped: false, image: imageMap['b6'] },
-];

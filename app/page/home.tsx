@@ -9,23 +9,27 @@ import {
   Alert,
   Dimensions,
   FlatList,
+  Image,
   Modal,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  Text,
   TextInput,
-  View
+  View,
 } from 'react-native';
 import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
+import { useUserStore } from '../store/userStore';
 import AlarmPage from './alarm';
 import CategoryContent from './category';
 import { ColorContext } from './ColorContext';
 import MyPageScreen from './mypage';
 import TodosScreen from './todos';
 
-// 🥕 백엔드 서버 주소
+// 🥕 백엔드 서버 주소.
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 const Drawer = createDrawerNavigator();
@@ -45,6 +49,9 @@ type Todo = {
 type Category = { id: number; text: string };
 
 function HomeContent() {
+  // 🥕 userStore에서 fetchUserData 함수를 가져옵니다.
+  const { fetchUserData } = useUserStore();
+
   const { colors } = React.useContext(ColorContext);
   const navigation = useNavigation<any>();
   const flatListRef = useRef<FlatList<number>>(null);
@@ -170,7 +177,9 @@ function HomeContent() {
     setCurrentTodos(prev => prev.map(t => (t.id === id ? { ...t, completed: !currentCompleted } : t)));
     try {
       const headers = await getAuthHeaders();
-      await axios.put(`${API_URL}/todos/${id}`, { completed: !currentCompleted }, { headers });
+      await axios.put(`${API_URL}/todos/${id}/`, { completed: !currentCompleted }, { headers });
+      // 🥕 할일 완료/해제 성공 시, 유저 데이터를 다시 불러와 당근 개수를 업데이트합니다.
+      await fetchUserData();
     } catch (err) {
       console.error('[handleCheck] error:', err);
       // 롤백
@@ -184,7 +193,7 @@ function HomeContent() {
   const saveTodo = async (id: number, newTitle: string) => {
     try {
       const headers = await getAuthHeaders();
-      await axios.put(`${API_URL}/todos/${id}`, { title: newTitle }, { headers });
+      await axios.put(`${API_URL}/todos/${id}/`, { title: newTitle }, { headers });
       setCurrentTodos(prev => prev.map(t => (t.id === id ? { ...t, title: newTitle } : t)));
     } catch (err) {
       console.error('[saveTodo] error:', err);
@@ -210,7 +219,7 @@ function HomeContent() {
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.35, 0.65, 1]}
+      locations={[0, 0.3, 0.7, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -234,13 +243,23 @@ function HomeContent() {
                 width: 40,
                 height: 40,
                 borderRadius: 20,
-                backgroundColor: '#aaa',
+                borderWidth: 1,
+                borderColor: '#aaa',
+                backgroundColor: '#fff',
                 justifyContent: 'center',
                 alignItems: 'center',
+                overflow: 'hidden',
               }}
             >
-              <ThemedText style={{ color: '#000', fontWeight: '600' }}>마이</ThemedText>
-            </Pressable>
+              <Image
+                source={require('../../assets/images/item/rabbit_logo.png')} // ✅ 여기에 저장한 파일 경로
+                style={{
+                  width: 40,
+                  height: 40,
+                  resizeMode: 'cover',
+                }}
+              />
+            </Pressable>  
           </View>
 
           {/* 무한 달력 */}
@@ -312,6 +331,35 @@ function HomeContent() {
                 const isAll = item.id === -1;
                 const isSelected = (isAll && selectedCategory === 'all') || (!isAll && selectedCategory === item.id);
 
+                return (
+                  <Pressable onPress={() => setSelectedCategory(isAll ? 'all' : item.id)}>
+                    <View
+                      style={[
+                        styles.categoryBox,
+                        isAll
+                          ? {
+                              width: 80,
+                              backgroundColor: isSelected ? '#1f7aeb' : '#fff',
+                              borderColor: '#000',
+                              borderWidth: 1,
+                              shadowColor: '#000',
+                              shadowOffset: { width: 0, height: 3 },
+                              shadowOpacity: 0.4,
+                              shadowRadius: 3,
+                              elevation: 5,
+                            }
+                          : {
+                              width: Math.max(80, item.text.length * 18 + 40),
+                              backgroundColor: isSelected ? '#1f7aeb' : '#FFE0A3',
+                            },
+                      ]}
+                    >
+                      <Text style={[styles.categoryText, { color: isSelected ? '#fff' : '#000' }]}>
+                        {item.text}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
               }}
             />
           </View>
@@ -465,7 +513,10 @@ function HomeContent() {
                   style={{ paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
                   onPress={() => {
                     setActionModalVisible(false);
-                    navigation.navigate('Alarm');
+                    // 🥕 알람 페이지로 이동 시, 현재 할 일의 ID를 파라미터로 전달합니다.
+                    if (actionTodo) {
+                      navigation.navigate('Alarm', { todoId: actionTodo.id, todoTitle: actionTodo.title });
+                    }
                   }}
                 >
                   <Ionicons name="notifications-outline" size={20} color="black" style={{ marginRight: 10 }} />
@@ -480,8 +531,8 @@ function HomeContent() {
                   onPress={async () => {
                     if (!actionTodo) return;
                     try {
-                      const headers = await getAuthHeaders();
-                      await axios.delete(`${API_URL}/todos/${actionTodo.id}`, { headers });
+                      const headers = await getAuthHeaders(); 
+                      await axios.delete(`${API_URL}/todos/${actionTodo.id}/`, { headers });
                       setCurrentTodos(prev => prev.filter(t => t.id !== actionTodo.id));
                     } catch (err) {
                       console.error('[deleteTodo] error:', err);
@@ -553,7 +604,7 @@ function HomeContent() {
 
                       try {
                         const headers = await getAuthHeaders();
-                        await axios.put(`${API_URL}/todos/${actionTodo.id}`, { category_ids: nextIds }, { headers });
+                        await axios.put(`${API_URL}/todos/${actionTodo.id}/`, { category_ids: nextIds }, { headers });
                         await fetchTodosByDate(selected);
                       } catch (err) {
                         console.error('[update categories] error:', err);
@@ -575,7 +626,7 @@ function HomeContent() {
                     if (!actionTodo) return;
                     try {
                       const headers = await getAuthHeaders();
-                      await axios.put(`${API_URL}/todos/${actionTodo.id}`, { category_ids: [] }, { headers });
+                      await axios.put(`${API_URL}/todos/${actionTodo.id}/`, { category_ids: [] }, { headers });
                       await fetchTodosByDate(selected);
                     } catch (err) {
                       console.error('[clear categories] error:', err);
@@ -598,7 +649,37 @@ function HomeContent() {
 // -------------------- 사용자 정보 수정 컴포넌트 --------------------
 function InformationContent({ userName, setUserName }: { userName: string; setUserName: (v: string) => void }) {
   const navigation = useNavigation<any>();
+  const [localName, setLocalName] = useState(userName);
   const { colors } = React.useContext(ColorContext);
+  const [email, setEmail] = useState(''); // 이메일 상태 추가
+
+
+  const getAuthHeaders = async () => {
+    const token = await tokenStorage.getItem();
+    console.log('[home.tsx] token:', token ? 'exists' : 'missing');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await axios.get(`${API_URL}/users/me/`, { headers });
+        if (res.data) {
+          if (res.data.name) {
+            setUserName(res.data.name);
+            setLocalName(res.data.name);
+          }
+          if (res.data.email) {
+            setEmail(res.data.email); // 이메일 상태 업데이트
+          }
+        }
+      } catch (err) {
+        console.error('[fetchUserName] error:', err);
+      }
+    };
+    fetchUserName();
+  }, []);
 
   const handleLogout = () => {
     console.log('로그아웃 클릭됨');
@@ -608,7 +689,7 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.35, 0.65, 1]}
+      locations={[0, 0.3, 0.7, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -628,33 +709,52 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
             계정 정보
           </ThemedText>
 
-          <View style={{ height: 2, backgroundColor: '#000' }} />
+          <View style={{ height: 2, backgroundColor: '#000', marginVertical: 8 }} />
 
           <View style={{ paddingHorizontal: 16, gap: 16 }}>
             <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이메일</ThemedText>
             <View style={styles.infoBox}>
-              <ThemedText style={{ fontSize: 16, color: '#000' }}>user@example.com</ThemedText>
-            </View>
-
-            <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 10 }}>비밀번호</ThemedText>
-            <View style={styles.infoBox}>
-              <ThemedText style={{ fontSize: 16, color: '#000' }}>********</ThemedText>
+              <Text style={{ fontSize: 16, color: '#000' }}>{email}</Text>
             </View>
 
             <View>
-              <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 10 }}>이름</ThemedText>
+              <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이름</ThemedText>
               <TextInput
-                style={styles.infoBox}
-                value={userName}
-                onChangeText={(t) => setUserName(t)}
+                style={{
+                  height: 50,
+                  backgroundColor: '#fff',
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                  borderRadius: 8,
+                  paddingHorizontal: 12,
+                  marginTop: 8,
+                  fontSize: 16,
+                  color: '#000',
+                }}
+                value={localName}
+                onChangeText={setLocalName}
                 placeholder="이름 입력"
-                maxLength={30}
-                placeholderTextColor="#999"
               />
+
+              <Pressable
+                style={{
+                  backgroundColor: '#1f7aeb',
+                  paddingVertical: 14,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  marginTop: 50,
+                }}
+                onPress={() => {
+                  setUserName(localName); // Drawer에 반영
+                }}
+              >
+                <ThemedText style={{ color: '#fff', fontSize: 18, fontWeight: '600', }}>저장</ThemedText>
+              </Pressable>
+              
             </View>
           </View>
 
-          <View style={{ paddingHorizontal: 80, marginTop: 30 }}>
+          <View style={{ paddingHorizontal: 80, marginTop: 10 }}>
             <Pressable
               onPress={handleLogout}
               style={{
@@ -678,23 +778,28 @@ function OptionContent() {
   const navigation = useNavigation<any>();
 
   const gradients = [
-    ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'],
-    ['#A1C4FD', '#C2E9FB', '#C2E9FB', '#A1C4FD'],
-    ['#FBC2EB', '#E6E6FA', '#E6E6FA', '#FBC2EB'],
-    ['#FF9A9E', '#FAD0C4', '#FAD0C4', '#FF9A9E'],
-    ['#fff'],
+    ['#ffafb2ff', '#ffe0d7ff', '#ffe0d7ff', '#ffafb2ff'], // 분홍
+    ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'], // 기본(주황)
+    ['#fcff51ff', '#f8ffaaff', '#f8ffaaff', '#fcff51ff'], // 노랑
+    ['#51ff44ff', '#c6ffa3ff', '#c6ffa3ff', '#51ff44ff'], // 초록
+    ['#5ffff4ff', '#d2fffcff', '#d2fffcff', '#5ffff4ff'], // 하늘
+    ['#b7b8ffff', '#dbf2fcff', '#dbf2fcff', '#b7b8ffff'], // 파랑
+    ['#FBC2EB', '#fae6f9ff', '#fae6f9ff', '#FBC2EB'], // 보라
+    ['#b5b4b4ff', '#f6f6f6', '#f6f6f6', '#b5b4b4ff'], // 회색
+    ['#fff'], // 흰색
   ];
 
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.35, 0.65, 1]}
+      locations={[0, 0.3, 0.7, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
+          {/* 상단 헤더 */}
           <View style={styles.header}>
             <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
               <Ionicons name="menu" size={30} color="#000" />
@@ -703,40 +808,84 @@ function OptionContent() {
             <View style={{ width: 28 }} />
           </View>
 
-          <ThemedText style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>배경 색상 선택</ThemedText>
-          <View style={{ height: 2, backgroundColor: '#000' }} />
+          {/* 타이틀 */}
+          <ThemedText style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
+            배경 색상 선택
+          </ThemedText>
+          <View style={{ height: 2, backgroundColor: '#000', marginVertical: 8 }} />
 
+          {/* 색상 옵션 (3x2 그리드) */}
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            {gradients.map((grad, idx) => (
-              <Pressable
-                key={idx}
-                onPress={() => setColors(grad)}
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'flex-start', // ✅ 위쪽으로 정렬
+                alignItems: 'center',
+                marginTop: 80, // ✅ 위쪽 여백 (값은 조정 가능)
+              }}
+            >
+              <View
                 style={{
-                  width: 200,
-                  height: 50,
-                  borderRadius: 12,
-                  marginBottom: 15,
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
                   justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: '#fff',
-                  shadowColor: '#000',
-                  shadowOpacity: 0.1,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowRadius: 5,
-                  elevation: 3,
-                  borderWidth: 1,
-                  borderColor: '#ccc',
+                  gap: 15,
+                  width: '90%',
                 }}
               >
-                <ThemedText style={{ fontSize: 18 }}>옵션 {idx + 1}</ThemedText>
-              </Pressable>
-            ))}
+                {gradients.map((grad, idx) => (
+                  <Pressable
+                    key={idx}
+                    onPress={() => setColors(grad)}
+                    style={{
+                      width: '30%',
+                      aspectRatio: 2.2,
+                      borderRadius: 12,
+                      overflow: 'hidden', // ✅ 그라데이션이 모서리 밖으로 안 나가게
+                      shadowColor: '#000',
+                      shadowOpacity: 0.1,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowRadius: 5,
+                      elevation: 3,
+                      borderWidth: 1,
+                      borderColor: '#000',
+                    }}
+                  >
+                    {/* 색상 미리보기 */}
+                    <LinearGradient
+                      colors={grad as [string, string, ...string[]]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <ThemedText
+                        style={{
+                          fontSize: 16,
+                          fontWeight: '600',
+                          color: grad.length === 1 ? '#000' : '#333',
+                          paddingHorizontal: 8,
+                          paddingVertical: 3,
+                          borderRadius: 6,
+                        }}
+                      >
+                        색상 {idx + 1}
+                      </ThemedText>
+                    </LinearGradient>
+                  </Pressable>
+                ))}
+              </View>  
+            </View>
           </View>
         </View>
       </SafeAreaView>
     </LinearGradient>
   );
 }
+
 
 // -------------------- CustomDrawerContent --------------------
 function CustomDrawerContent({ userName, ...props }: any) {
@@ -748,29 +897,27 @@ function CustomDrawerContent({ userName, ...props }: any) {
 
       <DrawerItem
         label="오늘의 할 일"
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Home')}
-        labelStyle={{ fontFamily: 'Cafe24Ssurround' }}
-        icon={({ color, size }) => <Ionicons name="time-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="time-outline" size={size} color='blue' />}
       />
 
       <DrawerItem
         label="카테고리"
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Category')}
-        labelStyle={{ fontFamily: 'Cafe24Ssurround' }}
-        icon={({ color, size }) => <Ionicons name="menu-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="menu-outline" size={size} color='blue' />}
       />
 
       <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
 
-      <ThemedText style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>
-        커스터마이징
-      </ThemedText>
+      <ThemedText style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>커스터마이징</ThemedText>
 
       <DrawerItem
         label="마이페이지"
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('MyPage')}
-        labelStyle={{ fontFamily: 'Cafe24Ssurround' }}
-        icon={({ color, size }) => <MaterialIcons name="emoji-emotions" size={size} color={color} />}
+        icon={({ size }) => <MaterialIcons name="emoji-emotions" size={size} color='blue' />}
       />
 
       <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
@@ -779,16 +926,16 @@ function CustomDrawerContent({ userName, ...props }: any) {
 
       <DrawerItem
         label="계정 정보"
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Info')}
-        labelStyle={{ fontFamily: 'Cafe24Ssurround' }}
-        icon={({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="person-outline" size={size} color='blue' />}
       />
 
       <DrawerItem
-        label="시스템"
+        label="테마"
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Option')}
-        labelStyle={{ fontFamily: 'Cafe24Ssurround' }}
-        icon={({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="settings-outline" size={size} color='blue' />}
       />
     </DrawerContentScrollView>
   );
@@ -820,7 +967,7 @@ export default function AppDrawer() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 24 },
   header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 0 },
-  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 90, fontFamily: 'Cafe24Ssurround' },
+  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, fontFamily: 'Cafe24Ssurround' },
   drawerHeader: { padding: 16, marginBottom: 8 },
   userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 15 },
   menuButton: { marginRight: 8 },
@@ -834,7 +981,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#aaa',
   },
   calendarHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 8, marginBottom: 8 },
   monthText: { fontSize: 19, fontWeight: '700', fontFamily: 'Cafe24Ssurround' },
@@ -906,7 +1053,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 10,
-    shadowColor: '#000',
+    shadowColor: '#8e8e8eff',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 5,

@@ -41,7 +41,7 @@ export default function CategoryContent() {
     }
   };
 
-  // ✅ 박스 추가 시 자동 편집 모드로 생성
+  // ✅ 박스 추가 시 자동 편집 모드로 생성.
   const handleAddBox = async () => {
     try {
       const headers = await getAuthHeaders();

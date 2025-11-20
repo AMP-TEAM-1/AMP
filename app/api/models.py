@@ -1,7 +1,8 @@
+#  SQLAlchemy 데이터베이스 모델 정의
+
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Time, DATETIME, Table
 from sqlalchemy.orm import relationship
 from .database import Base
-
 
 class User(Base):
     __tablename__ = "users"
@@ -18,6 +19,7 @@ class User(Base):
     # 👒 현재 장착된 물품 ID 추가 (빠른 조회를 위함)
     equipped_hat_id = Column(Integer, ForeignKey("items.id"), nullable=True)
     equipped_acc_id = Column(Integer, ForeignKey("items.id"), nullable=True)
+    equipped_background_id = Column(Integer, ForeignKey("items.id"), nullable=True)
 
     # 인벤토리와 관계 설정 (역참조)
     inventory = relationship("Inventory", back_populates="owner")
@@ -69,7 +71,7 @@ class Item(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     price = Column(Integer, nullable=False) # 판매 가격 (당근)
-    item_type = Column(String, nullable=False) # 'hat' 또는 'accessory'
+    item_type = Column(String, nullable=False) # 'hat', 'accessory', 'background' 등
     image_url = Column(String) 
     
     # 이 물품을 소유한 인벤토리 목록을 참조 (역참조)

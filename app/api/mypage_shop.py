@@ -1,6 +1,8 @@
+# 사용자의 "마이페이지" 또는 상점 기능과 관련된 API 엔드포인트 처리
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Dict, Any
 from .database import get_db
 from . import crud, models, schemas
 from .auth import get_current_user
@@ -10,16 +12,27 @@ router = APIRouter()
 class CarrotUpdate(schemas.BaseModel):
     amount: int  # 잔액 변경량 (양수: 증가, 음수: 감소)
 
-@router.get("/shop/items", response_model=List[schemas.Item])
+@router.get("/shop/items")
 def read_shop_items(
-    db: Session = Depends(get_db),  # 데이터베이스 세션 의존성 주입
-):
+    db: Session = Depends(get_db),
+) -> List[Dict[str, Any]]:
     """
     상점에 진열된 모든 물품 목록을 조회합니다.
     """
     try:
         items = crud.get_all_shop_items(db)
-        return items
+        result = []
+        for item in items:
+            result.append({
+                "name": item.name,
+                "price": item.price,
+                "image_url": item.image_url,
+                "item_id": item.id,  # id → item_id 변환
+                "type": item.item_type  # item_type → type 변환
+            })
+        
+        return result
+        
     except Exception as e:
         print(f"상점 물품 조회 중 오류 발생: {e}")
         raise HTTPException(status_code=500, detail="아이템 목록을 불러오는 데 실패했습니다.")
@@ -60,16 +73,18 @@ def purchase_item(
     # 구매 트랜잭션 처리
     updated_user = crud.purchase_item_transaction(db, current_user.id, item_id)
     
-    if updated_user is None:
-        # Item 또는 User를 찾을 수 없음
-        item = db.query(models.Item).filter(models.Item.id == item_id).first()
-        if not item:
-             raise HTTPException(status_code=404, detail="아이템을 찾을 수 없습니다.")
-        # User가 None인 경우는 get_current_user에서 이미 처리되지만, 안전을 위해 404 처리
-        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.") 
-        
-    elif updated_user is False:
-        # 잔액 부족 (crud.purchase_item_transaction에서 정의된 반환 값)
-        raise HTTPException(status_code=400, detail="당근 잔액이 부족하여 아이템을 구매할 수 없습니다.")
-
-    return updated_user
+    # 문자열 에러 코드 처리
+    if isinstance(result, str):
+        if result == "item_not_found":
+            raise HTTPException(status_code=404, detail="아이템을 찾을 수 없습니다.")
+        elif result == "user_not_found":
+            raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+        elif result == "already_owned":
+            raise HTTPException(status_code=400, detail="이미 보유하고 있는 아이템입니다.")
+        elif result == "not_enough_balance":
+            raise HTTPException(status_code=400, detail="당근 잔액이 부족합니다.")
+        else:
+            raise HTTPException(status_code=500, detail="구매 처리 중 오류가 발생했습니다.")
+            
+    # 성공 시 (User 객체 반환)
+    return result

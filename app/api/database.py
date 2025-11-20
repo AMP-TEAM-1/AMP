@@ -1,3 +1,5 @@
+# 데이터베이스 연결 및 세션 관리
+
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
