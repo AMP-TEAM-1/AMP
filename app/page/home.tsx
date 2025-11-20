@@ -29,7 +29,7 @@ import { ColorContext } from './ColorContext';
 import MyPageScreen from './mypage';
 import TodosScreen from './todos';
 
-// 🥕 백엔드 서버 주소.
+// 🥕 백엔드 서버 주소
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 const Drawer = createDrawerNavigator();
