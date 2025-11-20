@@ -42,11 +42,11 @@ type Todo = {
   id: number;
   title: string;
   completed: boolean;
-  categories: { id: number; text: string }[];
+  categories: Category[];
   date?: string;
 };
 
-type Category = { id: number; text: string };
+type Category = { id: number; text: string; color?: string; };
 
 function HomeContent() {
   // 🥕 userStore에서 fetchUserData 함수를 가져옵니다.
@@ -76,6 +76,39 @@ function HomeContent() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | number>('all');
   const [actionTodo, setActionTodo] = useState<Todo | null>(null);
   const [categorySelectVisible, setCategorySelectVisible] = useState(false);
+
+  const categoryColors = [
+  '#FFE0A3',
+  '#A3D8FF',
+  '#FFA3A3',
+  '#C8FFA3',
+  '#E3A3FF',
+  '#FFD1A3',
+  '#A3FFE0',
+  ];
+
+  const [coloredCategories, setColoredCategories] = useState<Category[]>([]);
+
+  const colorMap = Object.fromEntries(
+    coloredCategories.map(cat => [cat.id, cat.color])
+  );
+
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      // 색상 배열 복사 후 섞기
+      const shuffled = [...categoryColors].sort(() => Math.random() - 0.5);
+
+      // categories 각각에 색상 부여
+      const result = categories.map((cat, index) => ({
+        ...cat,
+        color: shuffled[index % shuffled.length], // 색상 부족하면 순환
+      }));
+
+      setColoredCategories(result);
+    }
+  }, [categories]);
+
 
   // 인증 헤더
   const getAuthHeaders = async () => {
@@ -109,7 +142,19 @@ function HomeContent() {
         headers,
         params: { target_date: formatDate(date) },
       });
-      setCurrentTodos(res.data || []);
+
+      const todos: Todo[] = res.data;
+
+      // ⭐ 여기서 color 입혀주기
+      const mapped = todos.map(todo => ({
+        ...todo,
+        categories: todo.categories.map(cat => {
+          const colored = coloredCategories.find(c => c.id === cat.id);
+          return colored ? { ...cat, color: colored.color } : cat;
+        })
+      }));
+
+      setCurrentTodos(mapped || []);
     } catch (err) {
       console.error('[fetchTodosByDate] error:', err);
       setCurrentTodos([]);
@@ -321,7 +366,7 @@ function HomeContent() {
           {/* 카테고리 바 */}
           <View style={{ height: 45 }}>
             <FlatList
-              data={[{ id: -1, text: 'ALL' } as Category, ...categories]}
+              data={[{ id: -1, text: 'ALL', color: '#fff' } as Category, ...coloredCategories]}
               horizontal
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => String(item.id)}
@@ -350,7 +395,7 @@ function HomeContent() {
                             }
                           : {
                               width: Math.max(80, item.text.length * 18 + 40),
-                              backgroundColor: isSelected ? '#1f7aeb' : '#FFE0A3',
+                              backgroundColor: isSelected ? '#1f7aeb' : item.color, 
                             },
                       ]}
                     >
@@ -385,7 +430,17 @@ function HomeContent() {
                 const isEditing = editingTodoId === item.id;
 
                 return (
-                  <View style={styles.item}>
+                  <View style={[
+                    styles.item,
+                    item.categories.length > 0
+                      ? {
+                          borderLeftWidth: 8,
+                          borderLeftColor: coloredCategories.find(c => c.id === item.categories[0].id)?.color || '#ccc',
+                        }
+                      : {
+                          borderLeftWidth: 0,  // 카테고리 없으면 띠 제거
+                        },
+                  ]}>
                     {isEditing ? (
                       <TextInput
                         style={[styles.itemTitle, { flex: 1, borderBottomWidth: 1, borderColor: '#aaa' }]}
