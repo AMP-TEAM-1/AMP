@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     marginHorizontal: '1.5%',
     marginVertical: 8,
     padding: 10,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // 배경이 비치도록 반투명 흰색으로 변경
     borderRadius: 10,
   },
   itemSelected: {

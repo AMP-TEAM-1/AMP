@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { Pressable, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
+import React from 'react'; // ThemedText를 사용하기 위해 Text 임포트 제거
+import { Pressable, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
+import { ThemedText } from './themed-text';
 
 interface AppHeaderProps {
   title: string;
@@ -25,7 +26,7 @@ export default function AppHeader({ title, style, titleStyle }: AppHeaderProps) 
       </Pressable>
 
       {/* 중앙 제목 */}
-      <Text style={[styles.headerTitle, titleStyle]}>{title}</Text>
+      <ThemedText style={[styles.headerTitle, titleStyle]}>{title}</ThemedText>
 
       {/* 오른쪽 정렬을 위한 공간 채우기 (메뉴 버튼과 동일한 너비) */}
       <View style={{ width: 28 }} />
@@ -45,5 +46,5 @@ const styles = StyleSheet.create({
   menuButton: {
     padding: 4, // 아이콘 주변에 터치 영역을 확보하고 여백을 줍니다.
   },
-  headerTitle: { fontSize: 20, color: '#000', fontFamily: 'Jua' },
+  headerTitle: { fontSize: 20, color: '#000' },
 });

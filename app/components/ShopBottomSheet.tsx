@@ -88,10 +88,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '55%',
-    backgroundColor: 'white',
+    backgroundColor: 'transparent', // 배경을 투명하게 변경
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     shadowColor: '#000',
+    borderTopWidth: 1, // 상단 경계선 추가
+    borderTopColor: 'rgba(255, 255, 255, 0.3)', // 반투명 경계선 색상
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
@@ -111,6 +113,5 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 12,
-    fontFamily: 'Jua',
   },
 });

@@ -8,10 +8,10 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
 import { ColorContext } from './ColorContext';
 
@@ -41,7 +41,7 @@ export default function CategoryContent() {
     }
   };
 
-  // ✅ 박스 추가 시 자동 편집 모드로 생성
+  // ✅ 박스 추가 시 자동 편집 모드로 생성.
   const handleAddBox = async () => {
     try {
       const headers = await getAuthHeaders();
@@ -102,12 +102,12 @@ export default function CategoryContent() {
           </Pressable>
 
           <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
-            <Text style={styles.myText}>마이</Text>
+            <ThemedText style={styles.myText}>마이</ThemedText>
           </Pressable>
         </View>
 
         {/* 제목 */}
-        <Text style={styles.titleText}>카테고리</Text>
+        <ThemedText style={styles.titleText}>카테고리</ThemedText>
 
         {/* + 버튼 */}
         <Pressable style={styles.addButton} onPress={handleAddBox}>
@@ -139,7 +139,7 @@ export default function CategoryContent() {
                       autoFocus={item.editing}
                     />
                   ) : (
-                    <Text style={styles.input}>{item.text || '입력'}</Text>
+                    <ThemedText style={styles.input}>{item.text || '입력'}</ThemedText>
                   )}
                 </View>
               </Pressable>
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
 
   myText: {
     color: '#000',
-    fontWeight: '600',
+    fontWeight: '600', // ThemedText에서 fontFamily가 적용됩니다.
   },
 
   titleText: {
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     marginVertical: 10,
-  },
+  }, // ThemedText에서 fontFamily가 적용됩니다.
 
   addButton: {
     position: 'absolute',
@@ -250,6 +250,7 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     paddingVertical: 6,
+    fontFamily: 'Cafe24Ssurround', // TextInput과 Text에 공통으로 폰트 적용
   },
 
   deleteButton: {

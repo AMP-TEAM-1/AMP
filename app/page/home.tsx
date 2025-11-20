@@ -9,6 +9,7 @@ import {
   Alert,
   Dimensions,
   FlatList,
+  Image,
   Modal,
   Platform,
   Pressable,
@@ -19,6 +20,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
 import { useUserStore } from '../store/userStore';
 import AlarmPage from './alarm';
@@ -27,7 +29,7 @@ import { ColorContext } from './ColorContext';
 import MyPageScreen from './mypage';
 import TodosScreen from './todos';
 
-// 🥕 백엔드 서버 주소
+// 🥕 백엔드 서버 주소.
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 const Drawer = createDrawerNavigator();
@@ -40,11 +42,11 @@ type Todo = {
   id: number;
   title: string;
   completed: boolean;
-  categories: { id: number; text: string }[];
+  categories: Category[];
   date?: string;
 };
 
-type Category = { id: number; text: string };
+type Category = { id: number; text: string; color?: string; };
 
 function HomeContent() {
   // 🥕 userStore에서 fetchUserData 함수를 가져옵니다.
@@ -74,6 +76,39 @@ function HomeContent() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | number>('all');
   const [actionTodo, setActionTodo] = useState<Todo | null>(null);
   const [categorySelectVisible, setCategorySelectVisible] = useState(false);
+
+  const categoryColors = [
+  '#FFE0A3',
+  '#A3D8FF',
+  '#FFA3A3',
+  '#C8FFA3',
+  '#E3A3FF',
+  '#FFD1A3',
+  '#A3FFE0',
+  ];
+
+  const [coloredCategories, setColoredCategories] = useState<Category[]>([]);
+
+  const colorMap = Object.fromEntries(
+    coloredCategories.map(cat => [cat.id, cat.color])
+  );
+
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      // 색상 배열 복사 후 섞기
+      const shuffled = [...categoryColors].sort(() => Math.random() - 0.5);
+
+      // categories 각각에 색상 부여
+      const result = categories.map((cat, index) => ({
+        ...cat,
+        color: shuffled[index % shuffled.length], // 색상 부족하면 순환
+      }));
+
+      setColoredCategories(result);
+    }
+  }, [categories]);
+
 
   // 인증 헤더
   const getAuthHeaders = async () => {
@@ -107,7 +142,19 @@ function HomeContent() {
         headers,
         params: { target_date: formatDate(date) },
       });
-      setCurrentTodos(res.data || []);
+
+      const todos: Todo[] = res.data;
+
+      // ⭐ 여기서 color 입혀주기
+      const mapped = todos.map(todo => ({
+        ...todo,
+        categories: todo.categories.map(cat => {
+          const colored = coloredCategories.find(c => c.id === cat.id);
+          return colored ? { ...cat, color: colored.color } : cat;
+        })
+      }));
+
+      setCurrentTodos(mapped || []);
     } catch (err) {
       console.error('[fetchTodosByDate] error:', err);
       setCurrentTodos([]);
@@ -217,7 +264,7 @@ function HomeContent() {
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.35, 0.65, 1]}
+      locations={[0, 0.3, 0.7, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -232,32 +279,42 @@ function HomeContent() {
             >
               <Ionicons name="menu" size={30} color="#000" />
             </Pressable>
-            <Text style={styles.dateText}>
+            <ThemedText style={styles.dateText}>
               {today.getMonth() + 1}. {today.getDate()}. ({['일','월','화','수','목','금','토'][today.getDay()]})
-            </Text>
+            </ThemedText>
             <Pressable
               onPress={() => navigation.navigate('MyPage')}
               style={{
                 width: 40,
                 height: 40,
                 borderRadius: 20,
-                backgroundColor: '#aaa',
+                borderWidth: 1,
+                borderColor: '#aaa',
+                backgroundColor: '#fff',
                 justifyContent: 'center',
                 alignItems: 'center',
+                overflow: 'hidden',
               }}
             >
-              <Text style={{ color: '#000', fontWeight: '600' }}>마이</Text>
-            </Pressable>
+              <Image
+                source={require('../../assets/images/item/rabbit_logo.png')} // ✅ 여기에 저장한 파일 경로
+                style={{
+                  width: 40,
+                  height: 40,
+                  resizeMode: 'cover',
+                }}
+              />
+            </Pressable>  
           </View>
 
           {/* 무한 달력 */}
           <View style={styles.calendarContainer}>
             <View style={styles.calendarHeader}>
               <Pressable onPress={handleGoToday} style={styles.goTodayButton}>
-                <Text style={styles.goTodayText}>오늘</Text>
+                <ThemedText style={styles.goTodayText}>오늘</ThemedText>
               </Pressable>
               <View style={{ flex: 1, alignItems: 'center' }}>
-                <Text style={styles.monthText}>{formatMonthYear(selected)}</Text>
+                <ThemedText style={styles.monthText}>{formatMonthYear(selected)}</ThemedText>
               </View>
               <View style={{ width: 60 }} />
             </View>
@@ -285,12 +342,12 @@ function HomeContent() {
                       isSelected && styles.dateButtonSelected,
                     ]}
                   >
-                    <Text style={[styles.weekdayText, isSelected && styles.weekdaySelected]}>
+                    <ThemedText style={[styles.weekdayText, isSelected && styles.weekdaySelected]}>
                       {['일','월','화','수','목','금','토'][item.getDay()]}
-                    </Text>
-                    <Text style={[styles.dateNumber, isSelected && styles.dateNumberSelected]}>
+                    </ThemedText>
+                    <ThemedText style={[styles.dateNumber, isSelected && styles.dateNumberSelected]}>
                       {item.getDate()}
-                    </Text>
+                    </ThemedText>
                   </Pressable>
                 );
               }}
@@ -298,9 +355,9 @@ function HomeContent() {
             />
             <View style={{ alignItems: 'center', marginTop: 3 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ fontSize: 18, color: '#333', fontWeight: '700' }}>
+                <ThemedText style={{ fontSize: 18, color: '#333', fontWeight: '700' }}>
                   {currentTodos.filter(todo => !todo.completed).length}
-                </Text>
+                </ThemedText>
                 <Ionicons name="checkmark-outline" size={22} color="#000" />
               </View>
             </View>
@@ -309,7 +366,7 @@ function HomeContent() {
           {/* 카테고리 바 */}
           <View style={{ height: 45 }}>
             <FlatList
-              data={[{ id: -1, text: 'ALL' } as Category, ...categories]}
+              data={[{ id: -1, text: 'ALL', color: '#fff' } as Category, ...coloredCategories]}
               horizontal
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => String(item.id)}
@@ -338,7 +395,7 @@ function HomeContent() {
                             }
                           : {
                               width: Math.max(80, item.text.length * 18 + 40),
-                              backgroundColor: isSelected ? '#1f7aeb' : '#FFE0A3',
+                              backgroundColor: isSelected ? '#1f7aeb' : item.color, 
                             },
                       ]}
                     >
@@ -373,7 +430,17 @@ function HomeContent() {
                 const isEditing = editingTodoId === item.id;
 
                 return (
-                  <View style={styles.item}>
+                  <View style={[
+                    styles.item,
+                    item.categories.length > 0
+                      ? {
+                          borderLeftWidth: 8,
+                          borderLeftColor: coloredCategories.find(c => c.id === item.categories[0].id)?.color || '#ccc',
+                        }
+                      : {
+                          borderLeftWidth: 0,  // 카테고리 없으면 띠 제거
+                        },
+                  ]}>
                     {isEditing ? (
                       <TextInput
                         style={[styles.itemTitle, { flex: 1, borderBottomWidth: 1, borderColor: '#aaa' }]}
@@ -389,21 +456,21 @@ function HomeContent() {
                         }}
                       />
                     ) : (
-                      <Text
+                      <ThemedText
                         style={[
                           styles.itemTitle,
                           item.completed && { textDecorationLine: 'line-through', color: '#888' },
                         ]}
                       >
                         {item.title}
-                      </Text>
+                      </ThemedText>
                     )}
 
                     {item.categories && item.categories.length > 0 && (
                       <View style={{ flexDirection: 'row', marginTop: 2, marginLeft: 10, gap: 6, flexWrap: 'wrap' }}>
                         {item.categories.map(({ id, text }) => (
                           <View key={id} style={{ paddingHorizontal: 6, paddingVertical: 2, backgroundColor: '#FFE0A3', borderRadius: 6 }}>
-                            <Text style={{ fontSize: 13, color: '#1f7aeb' }}>{text}</Text>
+                            <ThemedText style={{ fontSize: 13, color: '#1f7aeb' }}>{text}</ThemedText>
                           </View>
                         ))}
                       </View>
@@ -435,7 +502,7 @@ function HomeContent() {
                         }}
                         onPress={() => handleCheck(item.id, item.completed)}
                       >
-                        {item.completed && <Text style={{ color: 'white', fontWeight: 'bold' }}>✓</Text>}
+                        {item.completed && <ThemedText style={{ color: 'white', fontWeight: 'bold' }}>✓</ThemedText>}
                       </Pressable>
                     </View>
                   </View>
@@ -477,7 +544,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="pencil-outline" size={20} color="blue" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'blue' }}>수정하기</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'blue' }}>수정하기</ThemedText>
                 </Pressable>
 
                 <View style={{ height: 1, backgroundColor: '#ccc', width: '100%', marginVertical: 4 }} />
@@ -491,7 +558,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="book-outline" size={20} color="green" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'green' }}>카테고리 설정</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'green' }}>카테고리 설정</ThemedText>
                 </Pressable>
 
                 <View style={{ height: 1, backgroundColor: '#ccc', width: '100%', marginVertical: 4 }} />
@@ -508,7 +575,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="notifications-outline" size={20} color="black" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'black' }}>알림 설정</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'black' }}>알림 설정</ThemedText>
                 </Pressable>
 
                 <View style={{ height: 1, backgroundColor: '#ccc', width: '100%', marginVertical: 4 }} />
@@ -532,7 +599,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="trash-outline" size={20} color="red" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'red' }}>삭제하기</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'red' }}>삭제하기</ThemedText>
                 </Pressable>
               </View>
 
@@ -549,7 +616,7 @@ function HomeContent() {
                   style={{ paddingVertical: 14, alignItems: 'center', justifyContent: 'center' }}
                   onPress={() => setActionModalVisible(false)}
                 >
-                  <Text style={{ fontSize: 17, color: '#000' }}>취소</Text>
+                  <ThemedText style={{ fontSize: 17, color: '#000' }}>취소</ThemedText>
                 </Pressable>
               </View>
             </View>
@@ -576,7 +643,7 @@ function HomeContent() {
                 maxHeight: 400,
               }}
             >
-              <Text style={{ fontSize: 18, fontWeight: '700', textAlign: 'center', marginBottom: 12 }}>카테고리 관리</Text>
+              <ThemedText style={{ fontSize: 18, fontWeight: '700', textAlign: 'center', marginBottom: 12 }}>카테고리 관리</ThemedText>
 
               <ScrollView style={{ marginTop: 12 }}>
                 {categories.map(cat => (
@@ -601,9 +668,9 @@ function HomeContent() {
                       }
                     }}
                   >
-                    <Text style={{ fontSize: 16 }}>
+                    <ThemedText style={{ fontSize: 16 }}>
                       {cat.text} {actionTodo?.categories.some(c => c.id === cat.id) ? '✅' : ''}
-                    </Text>
+                    </ThemedText>
                   </Pressable>
                 ))}
 
@@ -623,7 +690,7 @@ function HomeContent() {
                     }
                   }}
                 >
-                  <Text style={{ fontSize: 16 }}>카테고리 초기화</Text>
+                  <ThemedText style={{ fontSize: 16 }}>카테고리 초기화</ThemedText>
                 </Pressable>
               </ScrollView>
             </View>
@@ -637,7 +704,37 @@ function HomeContent() {
 // -------------------- 사용자 정보 수정 컴포넌트 --------------------
 function InformationContent({ userName, setUserName }: { userName: string; setUserName: (v: string) => void }) {
   const navigation = useNavigation<any>();
+  const [localName, setLocalName] = useState(userName);
   const { colors } = React.useContext(ColorContext);
+  const [email, setEmail] = useState(''); // 이메일 상태 추가
+
+
+  const getAuthHeaders = async () => {
+    const token = await tokenStorage.getItem();
+    console.log('[home.tsx] token:', token ? 'exists' : 'missing');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await axios.get(`${API_URL}/users/me/`, { headers });
+        if (res.data) {
+          if (res.data.name) {
+            setUserName(res.data.name);
+            setLocalName(res.data.name);
+          }
+          if (res.data.email) {
+            setEmail(res.data.email); // 이메일 상태 업데이트
+          }
+        }
+      } catch (err) {
+        console.error('[fetchUserName] error:', err);
+      }
+    };
+    fetchUserName();
+  }, []);
 
   const handleLogout = () => {
     console.log('로그아웃 클릭됨');
@@ -647,7 +744,7 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.35, 0.65, 1]}
+      locations={[0, 0.3, 0.7, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -659,41 +756,60 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
             <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
               <Ionicons name="menu" size={30} color="#000" />
             </Pressable>
-            <Text style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</Text>
+            <ThemedText style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</ThemedText>
             <View style={{ width: 28 }} />
           </View>
 
-          <Text style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
+          <ThemedText style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
             계정 정보
-          </Text>
+          </ThemedText>
 
-          <View style={{ height: 2, backgroundColor: '#000' }} />
+          <View style={{ height: 2, backgroundColor: '#000', marginVertical: 8 }} />
 
           <View style={{ paddingHorizontal: 16, gap: 16 }}>
-            <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이메일</Text>
+            <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이메일</ThemedText>
             <View style={styles.infoBox}>
-              <Text style={{ fontSize: 16, color: '#000' }}>user@example.com</Text>
-            </View>
-
-            <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 10 }}>비밀번호</Text>
-            <View style={styles.infoBox}>
-              <Text style={{ fontSize: 16, color: '#000' }}>********</Text>
+              <Text style={{ fontSize: 16, color: '#000' }}>{email}</Text>
             </View>
 
             <View>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 10 }}>이름</Text>
+              <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이름</ThemedText>
               <TextInput
-                style={styles.infoBox}
-                value={userName}
-                onChangeText={(t) => setUserName(t)}
+                style={{
+                  height: 50,
+                  backgroundColor: '#fff',
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                  borderRadius: 8,
+                  paddingHorizontal: 12,
+                  marginTop: 8,
+                  fontSize: 16,
+                  color: '#000',
+                }}
+                value={localName}
+                onChangeText={setLocalName}
                 placeholder="이름 입력"
-                maxLength={30}
-                placeholderTextColor="#999"
               />
+
+              <Pressable
+                style={{
+                  backgroundColor: '#1f7aeb',
+                  paddingVertical: 14,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  marginTop: 50,
+                }}
+                onPress={() => {
+                  setUserName(localName); // Drawer에 반영
+                }}
+              >
+                <ThemedText style={{ color: '#fff', fontSize: 18, fontWeight: '600', }}>저장</ThemedText>
+              </Pressable>
+              
             </View>
           </View>
 
-          <View style={{ paddingHorizontal: 80, marginTop: 30 }}>
+          <View style={{ paddingHorizontal: 80, marginTop: 10 }}>
             <Pressable
               onPress={handleLogout}
               style={{
@@ -703,7 +819,7 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
                 alignItems: 'center',
               }}
             >
-              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>로그아웃</Text>
+              <ThemedText style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>로그아웃</ThemedText>
             </Pressable>
           </View>
         </View>
@@ -717,59 +833,107 @@ function OptionContent() {
   const navigation = useNavigation<any>();
 
   const gradients = [
-    ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'],
-    ['#A1C4FD', '#C2E9FB', '#C2E9FB', '#A1C4FD'],
-    ['#FBC2EB', '#E6E6FA', '#E6E6FA', '#FBC2EB'],
-    ['#FF9A9E', '#FAD0C4', '#FAD0C4', '#FF9A9E'],
-    ['#fff'],
+    ['#ffafb2ff', '#ffe0d7ff', '#ffe0d7ff', '#ffafb2ff'], // 분홍
+    ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'], // 기본(주황)
+    ['#fcff51ff', '#f8ffaaff', '#f8ffaaff', '#fcff51ff'], // 노랑
+    ['#51ff44ff', '#c6ffa3ff', '#c6ffa3ff', '#51ff44ff'], // 초록
+    ['#5ffff4ff', '#d2fffcff', '#d2fffcff', '#5ffff4ff'], // 하늘
+    ['#b7b8ffff', '#dbf2fcff', '#dbf2fcff', '#b7b8ffff'], // 파랑
+    ['#FBC2EB', '#fae6f9ff', '#fae6f9ff', '#FBC2EB'], // 보라
+    ['#b5b4b4ff', '#f6f6f6', '#f6f6f6', '#b5b4b4ff'], // 회색
+    ['#fff'], // 흰색
   ];
 
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.35, 0.65, 1]}
+      locations={[0, 0.3, 0.7, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
+          {/* 상단 헤더 */}
           <View style={styles.header}>
             <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
               <Ionicons name="menu" size={30} color="#000" />
             </Pressable>
-            <Text style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</Text>
+            <ThemedText style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</ThemedText>
             <View style={{ width: 28 }} />
           </View>
 
-          <Text style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>배경 색상 선택</Text>
-          <View style={{ height: 2, backgroundColor: '#000' }} />
+          {/* 타이틀 */}
+          <ThemedText style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
+            배경 색상 선택
+          </ThemedText>
+          <View style={{ height: 2, backgroundColor: '#000', marginVertical: 8 }} />
 
+          {/* 색상 옵션 (3x2 그리드) */}
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            {gradients.map((grad, idx) => (
-              <Pressable
-                key={idx}
-                onPress={() => setColors(grad)}
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'flex-start', // ✅ 위쪽으로 정렬
+                alignItems: 'center',
+                marginTop: 80, // ✅ 위쪽 여백 (값은 조정 가능)
+              }}
+            >
+              <View
                 style={{
-                  width: 200,
-                  height: 50,
-                  borderRadius: 12,
-                  marginBottom: 15,
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
                   justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: '#fff',
-                  shadowColor: '#000',
-                  shadowOpacity: 0.1,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowRadius: 5,
-                  elevation: 3,
-                  borderWidth: 1,
-                  borderColor: '#ccc',
+                  gap: 15,
+                  width: '90%',
                 }}
               >
-                <Text style={{ fontSize: 18 }}>옵션 {idx + 1}</Text>
-              </Pressable>
-            ))}
+                {gradients.map((grad, idx) => (
+                  <Pressable
+                    key={idx}
+                    onPress={() => setColors(grad)}
+                    style={{
+                      width: '30%',
+                      aspectRatio: 2.2,
+                      borderRadius: 12,
+                      overflow: 'hidden', // ✅ 그라데이션이 모서리 밖으로 안 나가게
+                      shadowColor: '#000',
+                      shadowOpacity: 0.1,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowRadius: 5,
+                      elevation: 3,
+                      borderWidth: 1,
+                      borderColor: '#000',
+                    }}
+                  >
+                    {/* 색상 미리보기 */}
+                    <LinearGradient
+                      colors={grad as [string, string, ...string[]]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <ThemedText
+                        style={{
+                          fontSize: 16,
+                          fontWeight: '600',
+                          color: grad.length === 1 ? '#000' : '#333',
+                          paddingHorizontal: 8,
+                          paddingVertical: 3,
+                          borderRadius: 6,
+                        }}
+                      >
+                        색상 {idx + 1}
+                      </ThemedText>
+                    </LinearGradient>
+                  </Pressable>
+                ))}
+              </View>  
+            </View>
           </View>
         </View>
       </SafeAreaView>
@@ -777,50 +941,56 @@ function OptionContent() {
   );
 }
 
+
 // -------------------- CustomDrawerContent --------------------
 function CustomDrawerContent({ userName, ...props }: any) {
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
       <View style={styles.drawerHeader}>
-        <Text style={styles.userText}>{userName}</Text>
+        <ThemedText style={styles.userText}>{userName}</ThemedText>
       </View>
 
       <DrawerItem
         label="오늘의 할 일"
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Home')}
-        icon={({ color, size }) => <Ionicons name="time-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="time-outline" size={size} color='blue' />}
       />
 
       <DrawerItem
         label="카테고리"
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Category')}
-        icon={({ color, size }) => <Ionicons name="menu-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="menu-outline" size={size} color='blue' />}
       />
 
       <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
 
-      <Text style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>커스터마이징</Text>
+      <ThemedText style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>커스터마이징</ThemedText>
 
       <DrawerItem
         label="마이페이지"
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('MyPage')}
-        icon={({ color, size }) => <MaterialIcons name="emoji-emotions" size={size} color={color} />}
+        icon={({ size }) => <MaterialIcons name="emoji-emotions" size={size} color='blue' />}
       />
 
       <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
 
-      <Text style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>설정</Text>
+      <ThemedText style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>설정</ThemedText>
 
       <DrawerItem
         label="계정 정보"
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Info')}
-        icon={({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="person-outline" size={size} color='blue' />}
       />
 
       <DrawerItem
-        label="시스템"
+        label="테마"
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Option')}
-        icon={({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />}
+        icon={({ size }) => <Ionicons name="settings-outline" size={size} color='blue' />}
       />
     </DrawerContentScrollView>
   );
@@ -829,25 +999,22 @@ function CustomDrawerContent({ userName, ...props }: any) {
 // -------------------- Drawer 루트 --------------------
 export default function AppDrawer() {
   const [userName, setUserName] = useState('User');
-  const [colors, setColors] = useState(['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9']);
 
   return (
-    <ColorContext.Provider value={{ colors, setColors }}>
-      <Drawer.Navigator
-        drawerContent={(props) => <CustomDrawerContent {...props} userName={userName} />}
-        screenOptions={{ headerShown: false }}
-      >
-        <Drawer.Screen name="Home" component={HomeContent} />
-        <Drawer.Screen name="Todos" component={TodosScreen} />
-        <Drawer.Screen name="MyPage" component={MyPageScreen} />
-        <Drawer.Screen name="Category" component={CategoryContent} />
-        <Drawer.Screen name="Option" component={OptionContent} />
-        <Drawer.Screen name="Info">
-          {(props) => <InformationContent {...props} userName={userName} setUserName={setUserName} />}
-        </Drawer.Screen>
-        <Drawer.Screen name="Alarm" component={AlarmPage} />
-      </Drawer.Navigator>
-    </ColorContext.Provider>
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} userName={userName} />}
+      screenOptions={{ headerShown: false }}
+    >
+      <Drawer.Screen name="Home" component={HomeContent} />
+      <Drawer.Screen name="Todos" component={TodosScreen} />
+      <Drawer.Screen name="MyPage" component={MyPageScreen} />
+      <Drawer.Screen name="Category" component={CategoryContent} />
+      <Drawer.Screen name="Option" component={OptionContent} />
+      <Drawer.Screen name="Info">
+        {(props) => <InformationContent {...props} userName={userName} setUserName={setUserName} />}
+      </Drawer.Screen>
+      <Drawer.Screen name="Alarm" component={AlarmPage} />
+    </Drawer.Navigator>
   );
 }
 
@@ -855,7 +1022,7 @@ export default function AppDrawer() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 24 },
   header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 0 },
-  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 90 },
+  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, fontFamily: 'Cafe24Ssurround' },
   drawerHeader: { padding: 16, marginBottom: 8 },
   userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 15 },
   menuButton: { marginRight: 8 },
@@ -869,12 +1036,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#aaa',
   },
   calendarHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 8, marginBottom: 8 },
-  monthText: { fontSize: 19, fontWeight: '700' },
+  monthText: { fontSize: 19, fontWeight: '700', fontFamily: 'Cafe24Ssurround' },
   goTodayButton: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, marginTop: 7 },
-  goTodayText: { fontSize: 14, fontWeight: '600' },
+  goTodayText: { fontSize: 14, fontWeight: '600', fontFamily: 'Cafe24Ssurround' },
   dateButton: {
     width: 52,
     height: 52,
@@ -886,9 +1053,9 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   dateButtonSelected: { backgroundColor: '#1f7aeb22', borderColor: '#1f7aeb' },
-  dateNumber: { fontSize: 16, fontWeight: '700', color: '#111' },
+  dateNumber: { fontSize: 16, fontWeight: '700', color: '#111', fontFamily: 'Cafe24Ssurround' },
   dateNumberSelected: { color: '#1f7aeb' },
-  weekdayText: { fontSize: 14, fontWeight: '600', color: '#000' },
+  weekdayText: { fontSize: 14, fontWeight: '600', color: '#000', fontFamily: 'Cafe24Ssurround' },
   weekdaySelected: { color: '#1f7aeb', fontWeight: '600' },
   input: { height: 56, marginTop: 12, paddingHorizontal: 16, fontSize: 16, borderRadius: 8, borderWidth: 1, borderColor: '#ddd', backgroundColor: '#fff' },
   addButton: { height: 30, width: 30, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', borderRadius: 30, borderWidth: 3, borderColor: '#000' },
@@ -907,7 +1074,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  itemTitle: { fontSize: 19, fontWeight: '600' },
+  itemTitle: { fontSize: 19, fontWeight: '600', fontFamily: 'Cafe24Ssurround' },
   editButton: { backgroundColor: '#fff', width: 25, height: 25, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   deleteButton: { backgroundColor: '#ff4d4f', paddingVertical: 4, paddingHorizontal: 12, borderRadius: 6 },
   buttonText: { color: '#fff', fontWeight: '600' },
@@ -941,11 +1108,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 10,
-    shadowColor: '#000',
+    shadowColor: '#8e8e8eff',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
   },
-  categoryText: { fontSize: 20, fontWeight: '700', color: '#000', textAlign: 'center' },
+  categoryText: { fontSize: 20, fontWeight: '700', color: '#000', textAlign: 'center', fontFamily: 'Cafe24Ssurround' },
 });
