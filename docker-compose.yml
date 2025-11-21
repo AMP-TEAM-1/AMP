@@ -1,11 +1,22 @@
-# docker-compose.yml
-version: '3.8'
+version: "3.8"
+
 services:
-  backend:
+
+  frontend:
     build:
       context: .
-      dockerfile: ./app/api/Dockerfile 
+      dockerfile: frontend.Dockerfile
+    container_name: amp-frontend
+    ports:
+      - "3000:80"
+
+  backend:
+    build:
+      context: ./app/api
+      dockerfile: Dockerfile
+    container_name: amp-backend
     env_file:
       - ./.env
     ports:
       - "8000:8000"
+
