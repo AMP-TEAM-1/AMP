@@ -1,4 +1,4 @@
-import { Item } from '@/data/items';
+import { baseItemStyle, Item, itemStyleMap } from '@/data/items';
 import { router } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
@@ -24,6 +24,7 @@ interface CharacterViewProps {
  */
 export default function CharacterView({
   carrots,
+  equippedItems = [], // 기본값을 빈 배열로 설정
   isSheetMinimized,
   isHandleTouched,
   animatedRabbitStyle,
@@ -48,6 +49,18 @@ export default function CharacterView({
       {/* 애니메이션이 적용된 캐릭터 이미지 */}
       <Animated.View style={[styles.rabbitContainer, animatedRabbitStyle]}>
         <Image source={rabbitImage} style={styles.rabbitImage} resizeMode="contain" />
+        {/* 장착된 아이템들을 캐릭터 위에 겹쳐서 렌더링합니다. */}
+        {equippedItems.map((item) => {
+          // 1. itemStyleMap에서 현재 아이템 ID에 해당하는 개별 스타일을 찾습니다.
+          const individualStyle = itemStyleMap[item.item_id];
+          // 2. 개별 스타일이 없으면, 아이템 타입에 맞는 기본 스타일을 사용합니다.
+          const typeStyle = baseItemStyle[item.type] || {};
+          const itemStyle = individualStyle || typeStyle;
+          
+          return (
+            <Image key={item.item_id} source={item.image} style={[styles.equippedItem, itemStyle]} resizeMode="contain" />
+          );
+        })}
       </Animated.View>
     </View>
   );
@@ -73,6 +86,7 @@ const styles = StyleSheet.create({
   },
   carrotText: {
     fontSize: 18,
+    fontFamily: 'Jua',
     fontWeight: 'bold',
   },
   inventoryButton: {
@@ -87,6 +101,7 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
   },
   inventoryButtonText: {
+    fontFamily: 'Jua',
     color: '#49454F',
   },
   rabbitContainer: {
@@ -96,5 +111,10 @@ const styles = StyleSheet.create({
   rabbitImage: {
     width: 220,
     height: 220,
+  },
+  equippedItem: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
 });

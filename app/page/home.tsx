@@ -652,6 +652,7 @@ function HomeContent() {
                     style={{ paddingVertical: 12, paddingHorizontal: 20, borderBottomWidth: 1, borderColor: '#eee' }}
                     onPress={async () => {
                       if (!actionTodo) return;
+
                       const currentIds = actionTodo.categories.map(c => c.id);
                       const nextIds = currentIds.includes(cat.id)
                         ? currentIds.filter(id => id !== cat.id)
@@ -661,6 +662,10 @@ function HomeContent() {
                         const headers = await getAuthHeaders();
                         await axios.put(`${API_URL}/todos/${actionTodo.id}/`, { category_ids: nextIds }, { headers });
                         await fetchTodosByDate(selected);
+
+                        const updatedCategories = nextIds.map(id => categories.find(c => c.id === id)!);
+                        setActionTodo({ ...actionTodo, categories: updatedCategories });
+
                       } catch (err) {
                         console.error('[update categories] error:', err);
                         if (Platform.OS === 'web') window.alert('카테고리 업데이트 실패');
@@ -683,6 +688,8 @@ function HomeContent() {
                       const headers = await getAuthHeaders();
                       await axios.put(`${API_URL}/todos/${actionTodo.id}/`, { category_ids: [] }, { headers });
                       await fetchTodosByDate(selected);
+
+                      setActionTodo({ ...actionTodo, categories: [] });
                     } catch (err) {
                       console.error('[clear categories] error:', err);
                       if (Platform.OS === 'web') window.alert('카테고리 초기화 실패');
@@ -835,7 +842,7 @@ function OptionContent() {
   const gradients = [
     ['#ffafb2ff', '#ffe0d7ff', '#ffe0d7ff', '#ffafb2ff'], // 분홍
     ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'], // 기본(주황)
-    ['#fcff51ff', '#f8ffaaff', '#f8ffaaff', '#fcff51ff'], // 노랑
+    ['#fdff74ff', '#faffbeff', '#faffbeff', '#fdff74ff'], // 노랑
     ['#51ff44ff', '#c6ffa3ff', '#c6ffa3ff', '#51ff44ff'], // 초록
     ['#5ffff4ff', '#d2fffcff', '#d2fffcff', '#5ffff4ff'], // 하늘
     ['#b7b8ffff', '#dbf2fcff', '#dbf2fcff', '#b7b8ffff'], // 파랑

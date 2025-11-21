@@ -78,3 +78,38 @@ export const imageMap: { [key: string]: any } = {
   'b5': require('../../assets/images/item/cake-bg.png'),
   'b6': require('../../assets/images/item/stairs-bg.png'),
 };
+
+// --- 아이템별 스타일 정의 ---
+// 각 아이템의 고유 ID를 키로 사용하여 위치, 크기 등을 개별적으로 조정합니다.
+export const itemStyleMap: { [key: number]: any } = {
+  // 모자 (type: 'hat')
+  1: { width: '40%', height: '40%', top: '5%' }, // 밀짚모자
+  2: { width: '45%', height: '45%', top: '2%' }, // 카우보이모자
+  3: { width: '35%', height: '35%', top: '2%' }, // 요리사모자
+  4: { width: '50%', height: '50%', top: '-7%' }, // 산타모자
+  5: { width: '31%', height: '31%', top: '0%' }, // 생일모자
+  6: { width: '35%', height: '35%', top: '3%' }, // 왕관
+
+  // 장신구 (type: 'accessory')
+  7: { width: '17%', height: '17%', top: '63%', left: '53%' }, // 하트
+  8: { width: '25%', height: '25%', top: '51%' }, // 나비넥타이
+  9: { width: '20%', height: '20%', top: '60%' }, // 넥타이
+  10: { width: '35%', height: '35%', top: '50%', }, // 도트리본
+  11: { width: '40%', height: '40%', top: '50%' }, // 스카프
+  12: { width: '20%', height: '20%', top: '55%', }, // 리본
+
+  // 배경 (type: 'background')
+  13: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 튤립 배경
+  14: { zIndex: -1, opacity: 0.8, top: '-30%', width: '120%', height: '120%' }, // 선인장 배경
+  15: { zIndex: -1, opacity: 0.8, top: '-14%', left: '-15%' }, // 눈사람 배경
+  16: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 생일 배경
+  17: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 케이크 배경
+  18: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 계단 배경
+};
+
+// --- 아이템 타입별 기본 스타일 ---
+export const baseItemStyle: { [key: string]: any } = {
+  hat: { width: '40%', height: '40%', top: '5%' },
+  accessory: { width: '25%', height: '25%', top: '52%' },
+  background: { zIndex: -1, opacity: 0.8, top: '-10%' },
+};
