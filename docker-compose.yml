@@ -3,8 +3,9 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ./app/api
+      context: .
+      dockerfile: ./app/api/Dockerfile 
     env_file:
-      - ./app/api/.env
+      - ./.env
     ports:
       - "8000:8000"
