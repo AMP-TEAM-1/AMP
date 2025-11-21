@@ -1,0 +1,10 @@
+# docker-compose.yml
+version: '3.8'
+services:
+  backend:
+    build:
+      context: ./app/api
+    env_file:
+      - ./app/api/.env
+    ports:
+      - "8000:8000"
