@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { tokenStorage } from '../storage';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://16.176.233.151';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function LoginScreen() {
   const { width, height } = useWindowDimensions();

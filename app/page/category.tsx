@@ -15,7 +15,7 @@ import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
 import { ColorContext } from './ColorContext';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://16.176.233.151';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function CategoryContent() {
   const { colors } = useContext(ColorContext);

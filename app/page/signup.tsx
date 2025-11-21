@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 
 // 백엔드 서버 주소
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://16.176.233.151';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function SignupScreen() {
   const { width, height } = useWindowDimensions();

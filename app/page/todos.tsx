@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { tokenStorage } from '../storage';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://16.176.233.151';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 type Todo = {
 	id: number;

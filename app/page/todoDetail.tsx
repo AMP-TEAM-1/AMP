@@ -9,7 +9,7 @@ import { tokenStorage } from '../storage';
 
 // --- 상수 정의 ---
 // 백엔드 API 서버 주소. 환경 변수에서 가져오거나 기본값을 사용합니다.
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://16.176.233.151';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 // --- 컴포넌트 정의 ---
 export default function TodoDetailScreen() {
