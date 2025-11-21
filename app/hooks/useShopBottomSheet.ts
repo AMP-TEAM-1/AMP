@@ -2,7 +2,7 @@ import { ItemCategory } from '@/data/items';
 import { useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { Gesture } from 'react-native-gesture-handler';
-import { interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { interpolate, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 interface UseShopBottomSheetOptions {
   initialState?: 'expanded' | 'minimized';
@@ -15,7 +15,7 @@ export function useShopBottomSheet(options: UseShopBottomSheetOptions = {}) {
   const [isHandleTouched, setIsHandleTouched] = useState(false);
 
   // Bottom Sheet의 높이와 최소화되었을 때의 높이를 정의합니다.
-  const sheetHeight = screenHeight * 0.55;
+  const sheetHeight = screenHeight * 0.45;
 
   // 최소화 상태일 때 보여줄 높이를 정의합니다. 이 값은 화면 비율과 무관하게 일정해야 합니다.
   // 핸들 높이(약 30px) + 카테고리 탭 높이(약 45px) = 약 75px
@@ -31,7 +31,7 @@ export function useShopBottomSheet(options: UseShopBottomSheetOptions = {}) {
   // 드래그 제스처 정의
   const panGesture = Gesture.Pan()
     .onBegin(() => {
-      setIsHandleTouched(true);
+      runOnJS(setIsHandleTouched)(true);
     })
     .onStart(() => {
       context.value = { y: translateY.value }; // 제스처 시작 시 현재 위치 저장
@@ -45,19 +45,19 @@ export function useShopBottomSheet(options: UseShopBottomSheetOptions = {}) {
       if (event.translationY > sheetHeight / 3 || event.velocityY > 500) {
         // 아래로 충분히 스와이프하면 시트를 최소화합니다.
         translateY.value = withSpring(minimizedPosition, { damping: 90 });
-        setIsSheetMinimized(true);
-        setSelectedCategory(null); // 시트가 내려가면 카테고리 선택 해제
+        runOnJS(setIsSheetMinimized)(true);
+        runOnJS(setSelectedCategory)(null); // 시트가 내려가면 카테고리 선택 해제
       } else {
         // 그렇지 않으면 원래 위치로 복귀
         translateY.value = withSpring(0, { damping: 100 });
-        setIsSheetMinimized(false);
+        runOnJS(setIsSheetMinimized)(false);
         if (!selectedCategory) {
-          setSelectedCategory('모자'); // 시트가 올라가면 '모자'를 기본 선택
+          runOnJS(setSelectedCategory)('모자'); // 시트가 올라가면 '모자'를 기본 선택
         }
       }
     })
     .onFinalize(() => {
-      setIsHandleTouched(false);
+      runOnJS(setIsHandleTouched)(false);
     });
 
   // 카테고리 탭을 누를 때 실행되는 함수
@@ -74,13 +74,16 @@ export function useShopBottomSheet(options: UseShopBottomSheetOptions = {}) {
 
   // 토끼 캐릭터의 애니메이션 스타일
   const animatedRabbitStyle = useAnimatedStyle(() => {
-    // 바텀시트가 차지하지 않는 상단 영역의 높이
-    const topAreaHeight = screenHeight - sheetHeight;
-    // 헤더(60px)를 제외하고, 바텀시트 위쪽의 남은 공간
-    const remainingSpace = topAreaHeight - 60;
-    // 남은 공간에서 토끼 이미지(220px)를 중앙에 위치시키기 위한 Y 위치 계산
-    const expandedRabbitY = 60 + (remainingSpace - 220) / 2;
+    const headerHeight = 60; // 상단 헤더 높이
+    const rabbitImageHeight = 220; // 토끼 이미지 높이
 
+    // 바텀시트가 최대로 확장되었을 때의 상단 Y 좌표
+    const sheetTopY = screenHeight - sheetHeight;
+    // 헤더와 바텀시트 사이의 공간 높이
+    const availableSpace = sheetTopY - headerHeight;
+    // 헤더와 바텀시트 사이 공간의 중앙 Y좌표를 계산하고, 추가로 20px 위로 올립니다.
+    const expandedRabbitY = headerHeight + (availableSpace - rabbitImageHeight) / 2 - 30;
+    
     // 최소화 상태일 때의 토끼 Y 위치
     const minimizedRabbitY = screenHeight / 2 - 150;
 
