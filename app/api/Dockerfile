@@ -8,5 +8,5 @@ RUN pip install gunicorn
 
 COPY . .
 
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app", "-b", "0.0.0.0:8000"]
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app.api.main:app", "-b", "0.0.0.0:8000"]
 
