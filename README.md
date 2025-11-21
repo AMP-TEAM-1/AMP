@@ -20,7 +20,7 @@ uvicorn app.api.main:app --reload
 ### Frontend (React Native - Expo)
 새로운 터미널에서 다음 명령어를 실행하여 프론트엔드 앱을 시작합니다.
 ```bash
-npx expo start 
+npm start
 ```
 
 ## 프로젝트 구조 및 파일 역할

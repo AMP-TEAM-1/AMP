@@ -37,7 +37,7 @@ export default function InitScreen() {
         <ThemedText
           style={[
             styles.slogan2,
-            { fontSize: width * 0.1, marginBottom: height * 0.05 },
+            { fontSize: width * 0.1, lineHeight: width * 0.1, marginBottom: height * 0.05 },
           ]}
         >
           캐롯

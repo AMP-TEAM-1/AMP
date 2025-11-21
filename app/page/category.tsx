@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop:10,
   },
 
   myButton: {
@@ -193,6 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#aaa',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop:10,
   },
 
   myText: {

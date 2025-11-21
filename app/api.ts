@@ -5,7 +5,7 @@ import { tokenStorage } from './storage';
  * Android 에뮬레이터: http://10.0.2.2:8000
  * iOS 시뮬레이터/실제 기기: PC의 로컬 IP 주소 (예: http://192.168.0.5:8000)
  */
-export const API_URL = process.env.EXPO_PUBLIC_API_URL;
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 /**
  * SecureStore에서 인증 토큰을 비동기적으로 가져와 API 요청 헤더를 생성합니다.

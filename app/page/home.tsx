@@ -294,6 +294,7 @@ function HomeContent() {
                 justifyContent: 'center',
                 alignItems: 'center',
                 overflow: 'hidden',
+                marginTop:10,
               }}
             >
               <Image
@@ -652,6 +653,7 @@ function HomeContent() {
                     style={{ paddingVertical: 12, paddingHorizontal: 20, borderBottomWidth: 1, borderColor: '#eee' }}
                     onPress={async () => {
                       if (!actionTodo) return;
+
                       const currentIds = actionTodo.categories.map(c => c.id);
                       const nextIds = currentIds.includes(cat.id)
                         ? currentIds.filter(id => id !== cat.id)
@@ -661,6 +663,10 @@ function HomeContent() {
                         const headers = await getAuthHeaders();
                         await axios.put(`${API_URL}/todos/${actionTodo.id}/`, { category_ids: nextIds }, { headers });
                         await fetchTodosByDate(selected);
+
+                        const updatedCategories = nextIds.map(id => categories.find(c => c.id === id)!);
+                        setActionTodo({ ...actionTodo, categories: updatedCategories });
+
                       } catch (err) {
                         console.error('[update categories] error:', err);
                         if (Platform.OS === 'web') window.alert('카테고리 업데이트 실패');
@@ -683,6 +689,8 @@ function HomeContent() {
                       const headers = await getAuthHeaders();
                       await axios.put(`${API_URL}/todos/${actionTodo.id}/`, { category_ids: [] }, { headers });
                       await fetchTodosByDate(selected);
+
+                      setActionTodo({ ...actionTodo, categories: [] });
                     } catch (err) {
                       console.error('[clear categories] error:', err);
                       if (Platform.OS === 'web') window.alert('카테고리 초기화 실패');
@@ -835,13 +843,13 @@ function OptionContent() {
   const gradients = [
     ['#ffafb2ff', '#ffe0d7ff', '#ffe0d7ff', '#ffafb2ff'], // 분홍
     ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'], // 기본(주황)
-    ['#fcff51ff', '#f8ffaaff', '#f8ffaaff', '#fcff51ff'], // 노랑
+    ['#fdff74ff', '#faffbeff', '#faffbeff', '#fdff74ff'], // 노랑
     ['#51ff44ff', '#c6ffa3ff', '#c6ffa3ff', '#51ff44ff'], // 초록
     ['#5ffff4ff', '#d2fffcff', '#d2fffcff', '#5ffff4ff'], // 하늘
     ['#b7b8ffff', '#dbf2fcff', '#dbf2fcff', '#b7b8ffff'], // 파랑
     ['#FBC2EB', '#fae6f9ff', '#fae6f9ff', '#FBC2EB'], // 보라
     ['#b5b4b4ff', '#f6f6f6', '#f6f6f6', '#b5b4b4ff'], // 회색
-    ['#fff'], // 흰색
+    ['#fff', '#fff', '#fff', '#fff'], // 흰색
   ];
 
   return (
@@ -1022,10 +1030,10 @@ export default function AppDrawer() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 24 },
   header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 0 },
-  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, fontFamily: 'Cafe24Ssurround' },
+  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, marginTop:10, fontFamily: 'Cafe24Ssurround' },
   drawerHeader: { padding: 16, marginBottom: 8 },
-  userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 15 },
-  menuButton: { marginRight: 8 },
+  userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 30 },
+  menuButton: { marginRight: 8, marginTop:10, },
   calendarContainer: {
     backgroundColor: 'white',
     borderRadius: 12,
