@@ -30,7 +30,7 @@ import MyPageScreen from './mypage';
 import TodosScreen from './todos';
 
 // 🥕 백엔드 서버 주소.
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const Drawer = createDrawerNavigator();
 
@@ -294,6 +294,7 @@ function HomeContent() {
                 justifyContent: 'center',
                 alignItems: 'center',
                 overflow: 'hidden',
+                marginTop:10,
               }}
             >
               <Image
@@ -848,7 +849,7 @@ function OptionContent() {
     ['#b7b8ffff', '#dbf2fcff', '#dbf2fcff', '#b7b8ffff'], // 파랑
     ['#FBC2EB', '#fae6f9ff', '#fae6f9ff', '#FBC2EB'], // 보라
     ['#b5b4b4ff', '#f6f6f6', '#f6f6f6', '#b5b4b4ff'], // 회색
-    ['#fff'], // 흰색
+    ['#fff', '#fff', '#fff', '#fff'], // 흰색
   ];
 
   return (
@@ -1029,10 +1030,10 @@ export default function AppDrawer() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 24 },
   header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 0 },
-  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, fontFamily: 'Cafe24Ssurround' },
+  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, marginTop:10, fontFamily: 'Cafe24Ssurround' },
   drawerHeader: { padding: 16, marginBottom: 8 },
-  userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 15 },
-  menuButton: { marginRight: 8 },
+  userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 30 },
+  menuButton: { marginRight: 8, marginTop:10, },
   calendarContainer: {
     backgroundColor: 'white',
     borderRadius: 12,

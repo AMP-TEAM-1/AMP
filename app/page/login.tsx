@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { tokenStorage } from '../storage';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function LoginScreen() {
   const { width, height } = useWindowDimensions();
@@ -116,6 +116,7 @@ export default function LoginScreen() {
             styles.slogan,
             {
               fontSize: width * 0.09,
+              lineHeight: width * 0.1,
               marginBottom: height * 0.15,
               marginLeft: width * 0.06,
             },
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
   signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 30,
   },
   normalText: {
     color: '#000',

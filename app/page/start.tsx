@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useContext } from 'react';
 import { Image, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
-import { ColorContext } from '../page/ColorContext';
+import { ColorContext } from './ColorContext';
 
 
 export default function InitScreen() {
@@ -37,7 +37,7 @@ export default function InitScreen() {
         <ThemedText
           style={[
             styles.slogan2,
-            { fontSize: width * 0.1, marginBottom: height * 0.05 },
+            { fontSize: width * 0.1, lineHeight: width * 0.1, marginBottom: height * 0.05 },
           ]}
         >
           캐롯
