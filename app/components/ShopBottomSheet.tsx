@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '45%', // 높이를 45%로 통일
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', // 배경을 반투명한 흰색으로 변경
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // 배경을 반투명한 흰색으로 변경
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     borderTopWidth: 1, // 상단 경계선 추가
