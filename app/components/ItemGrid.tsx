@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     height: '90%',
   },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 },
-  emptyText: { fontFamily: 'Jua', color: '#B3B3B3', fontSize: 16 },
+  emptyText: { fontFamily: 'Cafe24Ssurround', color: '#B3B3B3', fontSize: 16 },
   equippedItemBorder: {
     borderWidth: 2,
     borderColor: '#FF7F50', 
@@ -141,6 +141,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     fontWeight: 'bold',
-    fontFamily: 'Jua',
+    fontFamily: 'Cafe24Ssurround',
   },
 });

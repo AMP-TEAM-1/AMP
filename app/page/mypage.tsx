@@ -5,14 +5,15 @@ import CharacterView from '@/components/CharacterView';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import ShopBottomSheet from '@/components/ShopBottomSheet';
 import Toast from '@/components/Toast';
-import { ThemedView } from '@/components/themed-view';
 import { InventoryItem, Item, ShopItem } from '@/data/items';
 import { useShop } from '@/hooks/useShop';
 import { useShopBottomSheet } from '@/hooks/useShopBottomSheet';
 import { useUserStore } from '@/store/userStore';
-import { useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useContext, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ColorContext } from './ColorContext';
 
 export default function MyPageScreen() {
   const {
@@ -24,6 +25,9 @@ export default function MyPageScreen() {
     isHandleTouched,
     handleTabPress,
   } = useShopBottomSheet({ initialState: 'minimized' });
+
+  const { colors } = useContext(ColorContext);
+  const insets = useSafeAreaInsets();
 
   // useShop 훅은 상점 아이템과 '구매' 기능만 담당
   const { shopItems: originalShopItems, loading } = useShop();
@@ -84,62 +88,70 @@ export default function MyPageScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ThemedView style={styles.container}>
-        <AppHeader title="마이페이지" titleStyle={{ fontFamily: 'Jua' }} />
-
-        <ConfirmationModal
-          visible={isModalVisible}
-          item={selectedItem}
-          onClose={cancelPurchase}
-          onConfirm={confirmPurchase}
-          onModalHide={handleModalHide}
-          mainText={selectedItem && isShopItem(selectedItem) ? `🥕 ${selectedItem.price}` : ''}
-          confirmButtonText="구매하기"
-          cancelButtonText="취소"
+    <LinearGradient
+      colors={colors as [string, string, ...string[]]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <AppHeader
+          title="마이페이지"
+          titleStyle={{ fontFamily: 'Cafe24Ssurround' }}
+          headerStyle={{ backgroundColor: 'transparent' }}
         />
-
-        {/* 하단 아이템 상점 (Bottom Sheet) */}
-        <ShopBottomSheet
-          panGesture={panGesture}
-          animatedStyle={animatedSheetStyle}
-          loading={loading}
-          shopItems={shopItems}
-          selectedCategory={selectedCategory}
-          selectedItemId={selectedItem?.item_id ?? null}
-          onTabPress={handleTabPress}
-          onItemPress={openPurchaseModal}
-          renderItemFooter={(item) =>
-            item.is_owned ? (
-              <ThemedText style={styles.itemText}>보유 중</ThemedText>
-            ) : (
-              isShopItem(item) && (
-                <ThemedText style={styles.itemText}>🥕 {item.price}</ThemedText>
+  
+          <ConfirmationModal
+            visible={isModalVisible}
+            item={selectedItem}
+            onClose={cancelPurchase}
+            onConfirm={confirmPurchase}
+            onModalHide={handleModalHide}
+            mainText={selectedItem && isShopItem(selectedItem) ? `🥕 ${selectedItem.price}` : ''}
+            confirmButtonText="구매하기"
+            cancelButtonText="취소"
+          />
+  
+          {/* 하단 아이템 상점 (Bottom Sheet) */}
+          <ShopBottomSheet
+            panGesture={panGesture}
+            animatedStyle={animatedSheetStyle}
+            loading={loading}
+            shopItems={shopItems}
+            selectedCategory={selectedCategory}
+            selectedItemId={selectedItem?.item_id ?? null}
+            onTabPress={handleTabPress}
+            onItemPress={openPurchaseModal}
+            renderItemFooter={(item) =>
+              item.is_owned ? (
+                <ThemedText style={styles.itemText}>보유 중</ThemedText>
+              ) : (
+                isShopItem(item) && (
+                  <ThemedText style={styles.itemText}>🥕 {item.price}</ThemedText>
+                )
               )
-            )
-          }
-        />
-
-        {/* 상단 영역 (캐릭터, 재화) */}
-        <CharacterView
-          carrots={carrots}
-          equippedItems={equippedItems} // 장착 아이템 목록 전달
-          isSheetMinimized={isSheetMinimized}
-          isHandleTouched={isHandleTouched}
-          animatedRabbitStyle={animatedRabbitStyle}
-        />
-
-        <Toast message={toastMessage} />
-      </ThemedView>
-    </SafeAreaView>
+            }
+          />
+  
+          {/* 상단 영역 (캐릭터, 재화) */}
+          <CharacterView
+            carrots={carrots}
+            equippedItems={equippedItems} // 장착 아이템 목록 전달
+            isSheetMinimized={isSheetMinimized}
+            isHandleTouched={isHandleTouched}
+            animatedRabbitStyle={animatedRabbitStyle}
+          />
+  
+          <Toast message={toastMessage} />
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, backgroundColor: '#fff', paddingTop: 4 },
+  container: { flex: 1, backgroundColor: 'transparent' },
   itemText: {
     fontSize: 12,
-    fontFamily: 'Jua',
+    fontFamily: 'Cafe24Ssurround',
   },
 });

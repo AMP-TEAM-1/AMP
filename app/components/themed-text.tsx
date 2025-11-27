@@ -20,7 +20,7 @@ export function ThemedText({
   return (
     <Text
       style={[
-        { color, fontFamily: 'Cafe24Ssurround' }, // ✅ 전역 폰트 적용
+        { color, fontFamily: 'Cafe24Ssurround' },
         type === 'default' ? styles.default : undefined,
         type === 'title' ? styles.title : undefined,
         type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
