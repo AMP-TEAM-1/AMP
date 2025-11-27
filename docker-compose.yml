@@ -1,22 +1,10 @@
-version: "3.8"
-
 services:
-
-  frontend:
-    build:
-      context: .
-      dockerfile: frontend.Dockerfile
-    container_name: amp-frontend
-    ports:
-      - "3000:80"
-
   backend:
     build:
-      context: ./app/api
-      dockerfile: Dockerfile
-    container_name: amp-backend
+      context: .                  # ✅ 빌드 기준을 AMP 루트로
+      dockerfile: ./app/api/Dockerfile   # ✅ Dockerfile이 app/api 안에 있으니 이렇게 지정
     env_file:
-      - ./.env
+      - .env                      # AMP/.env
     ports:
       - "8000:8000"
 
