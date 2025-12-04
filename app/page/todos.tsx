@@ -158,11 +158,11 @@ export default function TodosScreen() {
 	const renderItem = ({ item }: { item: Todo }) => (
 		<Pressable
 			style={styles.item}
-			onPress={() => router.push({ pathname: '/todoDetail', params: { id: String(item.id) } })}
+			onPress={() => router.push({ pathname: '/page/todoDetail', params: { id: String(item.id) } })}
 		>
 			<View style={{ flex: 1 }}>
 				<ThemedText style={styles.itemTitle}>{item.title}</ThemedText>
-			{item.description ? <ThemedText type="subtitle">{item.description}</ThemedText> : null}
+				{item.description ? <ThemedText type="subtitle">{item.description}</ThemedText> : null}
 			</View>
 			<View style={styles.itemActions}>
 				<Pressable onPress={() => deleteTodo(item.id)} style={styles.deleteButton}>

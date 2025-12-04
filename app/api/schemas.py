@@ -28,12 +28,15 @@ class TodoCreate(TodoBase):
     # DB에 String으로 저장할 경우 Optional[str]
     # DB에 Time으로 저장할 경우 Optional[time]
     alarm_time: Optional[str] = None
+    alarm_repeat_type: Optional[str] = None  # 'daily', 'weekly', 또는 None
 
 class TodoUpdate(BaseModel):
     title: Optional[str] = None
     completed: Optional[bool] = None
     category_ids: Optional[List[int]] = None # 🥕 카테고리 ID 목록으로 수정
     date: Optional[date] = None # 🥕 날짜도 수정 가능하도록 추가
+    alarm_time: Optional[str] = None # ⏰ 알람 시간 필드 추가
+    alarm_repeat_type: Optional[str] = None  # 🔁 알람 반복 타입
 
 class Todo(TodoBase):
     id: int
@@ -41,6 +44,7 @@ class Todo(TodoBase):
     owner_id: int
     categories: List[Category] = [] # 🥕 연결된 카테고리 정보 포함
     alarm_time: Optional[time] = None
+    alarm_repeat_type: Optional[str] = None  # 🔁 알람 반복 타입
 
     class Config:
         from_attributes = True

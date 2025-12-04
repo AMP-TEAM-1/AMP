@@ -48,6 +48,8 @@ type Todo = {
   completed: boolean;
   categories: Category[];
   date?: string;
+  alarm_time?: string; // ⏰ 알람 시간 필드 추가
+  alarm_repeat_type?: string; // 🔁 알람 반복 타입
 };
 
 type Category = { id: number; text: string; color?: string; };
@@ -668,6 +670,23 @@ function HomeContent() {
                       </View>
                     )}
 
+                    {/* ⏰ 알람 시간 표시 */}
+                    {item.alarm_time && (
+                      <View style={{ flexDirection: 'row', marginTop: 6, marginLeft: 10, alignItems: 'center', gap: 4 }}>
+                        <Ionicons name="alarm-outline" size={16} color="#ff6b6b" />
+                        <ThemedText style={{ fontSize: 13, color: '#ff6b6b', fontWeight: '600' }}>
+                          {(() => {
+                            const [hours, minutes] = item.alarm_time.split(':').map(Number);
+                            const isPM = hours >= 12;
+                            const displayHour = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+                            const timeStr = `${isPM ? '오후' : '오전'} ${displayHour}:${minutes.toString().padStart(2, '0')}`;
+                            const repeatStr = item.alarm_repeat_type === 'daily' ? ' 🔁매일' : item.alarm_repeat_type === 'weekly' ? ' 🔁매주' : '';
+                            return timeStr + repeatStr;
+                          })()}
+                        </ThemedText>
+                      </View>
+                    )}
+
                     <View style={{ flexDirection: 'row', marginLeft: 'auto', gap: 8, alignItems: 'center' }}>
                       {!isEditing && (
                         <Pressable
@@ -760,9 +779,13 @@ function HomeContent() {
                   style={{ paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
                   onPress={() => {
                     setActionModalVisible(false);
-                    // 🥕 알람 페이지로 이동 시, 현재 할 일의 ID를 파라미터로 전달합니다.
+                    // 🥕 알람 페이지로 이동 시, 현재 할 일의 ID, 제목, 날짜를 파라미터로 전달합니다.
                     if (actionTodo) {
-                      navigation.navigate('Alarm', { todoId: actionTodo.id, todoTitle: actionTodo.title });
+                      navigation.navigate('Alarm', {
+                        todoId: actionTodo.id,
+                        todoTitle: actionTodo.title,
+                        todoDate: actionTodo.date || formatDate(selected)
+                      });
                     }
                   }}
                 >
