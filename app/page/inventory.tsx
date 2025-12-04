@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useContext, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TextStyle, View } from 'react-native';
 
 import AppHeader from '@/components/AppHeader';
 import ConfirmationModal from '@/components/ConfirmationModal';
@@ -12,21 +12,31 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ColorContext } from './ColorContext';
 
+// 아이템 타입에 따른 한글 이름을 매핑합니다.
+const ITEM_TYPE_KOREAN: { [key: string]: string } = {
+  hat: '모자',
+  accessory: '장신구',
+  background: '배경',
+};
+
 export default function InventoryScreen() {
   // useInventory 대신 userStore 사용
   const { 
     inventoryItems, 
     carrots, 
     equipItem, 
+    unequipItem,
     fetchUserData 
   } = useUserStore();
 
   const { colors } = useContext(ColorContext);
   const insets = useSafeAreaInsets();
 
-  const [selectedCategory, setSelectedCategory] = useState<ItemCategory | null>('모자');
+  const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('모자');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [modalMainText, setModalMainText] = useState('');
+  const [modalTextStyle, setModalTextStyle] = useState<TextStyle>({});
 
   // 화면이 포커스될 때마다 fetchUserData 호출
   useFocusEffect(
@@ -36,18 +46,46 @@ export default function InventoryScreen() {
   );
 
   const handleItemPress = (item: Item) => {
+    // 이미 장착된 아이템인지 확인
+    if (item.is_equipped) {
+      setModalMainText('해제하시겠습니까?');
+      setModalTextStyle({}); // 기본 폰트 크기
+      setSelectedItem(item);
+      setIsModalVisible(true);
+      return;
+    }
+
+    // 선택한 아이템과 같은 타입의 아이템 중 이미 장착된 것이 있는지 확인
+    const currentlyEquipped = inventoryItems.find(
+      (invItem) => invItem.type === item.type && invItem.is_equipped
+    );
+
+    if (currentlyEquipped) {
+      const itemTypeName = ITEM_TYPE_KOREAN[item.type] || '아이템';
+      setModalMainText(`이미 ${itemTypeName}을(를) 착용하고 있어요.\n새로운 ${itemTypeName}(으)로 교체할까요?`);
+      setModalTextStyle({ fontSize: 16 }); // 교체 시 폰트 크기 작게
+    } else {
+      setModalMainText('착용하시겠습니까?');
+      setModalTextStyle({}); // 기본 폰트 크기
+    }
     setSelectedItem(item);
     setIsModalVisible(true);
   };
 
-  const handleConfirmEquip = async () => {
+  const handleConfirm = async () => {
     if (!selectedItem) return;
-    await equipItem(selectedItem);
+
+    if (selectedItem.is_equipped) {
+      await unequipItem(selectedItem);
+    } else {
+      await equipItem(selectedItem);
+    }
     setIsModalVisible(false);
   };
 
   const handleCancelEquip = () => {
     setIsModalVisible(false);
+    setSelectedItem(null); // 모달이 닫힐 때 선택된 아이템 초기화
   };
 
   const handleTabPress = (category: ItemCategory) => {
@@ -77,8 +115,9 @@ export default function InventoryScreen() {
           visible={isModalVisible}
           item={selectedItem}
           onClose={handleCancelEquip}
-          onConfirm={handleConfirmEquip}
-          mainText="착용하시겠습니까?"
+          onConfirm={handleConfirm}
+          mainText={modalMainText}
+          mainTextStyle={modalTextStyle}
           confirmButtonText="예"
           cancelButtonText="아니오"
         />
@@ -96,7 +135,7 @@ export default function InventoryScreen() {
           mode="inventory"
           renderItemFooter={(item) => (
             <ThemedText style={styles.itemText}>
-              {'is_equipped' in item ? (item.is_equipped ? '장착 중' : '보유 중') : '구매 가능'}
+              {item.is_equipped ? '장착 중' : '보유 중'}
             </ThemedText>
           )}
         />
@@ -120,7 +159,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   itemText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: 'Cafe24Ssurround',
   },
 });

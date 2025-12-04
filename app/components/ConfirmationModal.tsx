@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { Item } from '@/data/items';
 import React from 'react';
-import { Image, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Modal, Pressable, StyleSheet, TextStyle, View } from 'react-native';
 
 /**
  * 사용자에게 특정 작업을 확인받기 위한 재사용 가능한 모달(팝업) 컴포넌트입니다.
@@ -16,6 +16,7 @@ interface ConfirmationModalProps {
   onModalHide?: () => void; // 선택적 prop으로 유지
   mainText: string;
   confirmButtonText: string;
+  mainTextStyle?: TextStyle;
   cancelButtonText?: string;
 }
 
@@ -27,6 +28,7 @@ export default function ConfirmationModal({
   onModalHide,
   mainText,
   confirmButtonText,
+  mainTextStyle,
   cancelButtonText = '취소',
 }: ConfirmationModalProps) {
 
@@ -59,7 +61,7 @@ export default function ConfirmationModal({
                 <ThemedText style={{ fontSize: 60 }}>{'❓'}</ThemedText>
               )}
             </View>
-            <ThemedText style={styles.modalText}>
+            <ThemedText style={[styles.modalText, mainTextStyle]}>
               {mainText}
             </ThemedText>
             <View style={styles.modalButtonContainer}>
