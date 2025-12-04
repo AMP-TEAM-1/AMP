@@ -91,17 +91,17 @@ export const itemStyleMap: { [key: number]: any } = {
   6: { width: '35%', height: '35%', top: '3%' }, // 왕관
 
   // 장신구 (type: 'accessory')
-  7: { width: '17%', height: '17%', top: '63%', left: '53%' }, // 하트
-  8: { width: '25%', height: '25%', top: '51%' }, // 나비넥타이
-  9: { width: '20%', height: '20%', top: '60%' }, // 넥타이
+  7: { width: '17%', height: '17%', top: '63%', left: '27%' }, // 하트
+  8: { width: '17%', height: '17%', top: '57%' }, // 나비넥타이
+  9: { width: '25%', height: '25%', top: '59%' }, // 넥타이
   10: { width: '35%', height: '35%', top: '50%', }, // 도트리본
   11: { width: '40%', height: '40%', top: '50%' }, // 스카프
-  12: { width: '20%', height: '20%', top: '55%', }, // 리본
+  12: { width: '20%', height: '20%', top: '56%', }, // 리본
 
   // 배경 (type: 'background')
-  13: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 튤립 배경
-  14: { zIndex: -1, opacity: 0.8, top: '-30%', width: '120%', height: '120%' }, // 선인장 배경
-  15: { zIndex: -1, opacity: 0.8, top: '-14%', left: '-15%' }, // 눈사람 배경
+  13: { zIndex: -1, opacity: 0.8, top: '-2%' }, // 튤립 배경
+  14: { zIndex: -1, opacity: 0.8, top: '-20%', width: '140%', height: '140%' }, // 선인장 배경
+  15: { zIndex: -1, opacity: 0.8, top: '-13%', left: '-32%' }, // 눈사람 배경
   16: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 생일 배경
   17: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 케이크 배경
   18: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 계단 배경

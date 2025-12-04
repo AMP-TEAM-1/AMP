@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   },
   carrotText: {
     fontSize: 18,
-    fontFamily: 'Jua',
+    fontFamily: 'Cafe24Ssurround',
     fontWeight: 'bold',
   },
   inventoryButton: {
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
   },
   inventoryButtonText: {
-    fontFamily: 'Jua',
+    fontFamily: 'Cafe24Ssurround',
     color: '#49454F',
   },
   rabbitContainer: {
