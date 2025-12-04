@@ -4,13 +4,12 @@ import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useContext, useEffect, useState } from 'react';
 import {
-  Image,
   Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   TextInput,
-  View,
+  View
 } from 'react-native';
 import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
@@ -49,7 +48,7 @@ export default function CategoryContent() {
       const headers = await getAuthHeaders();
       const response = await axios.post(`${API_URL}/categories/`, { text: '새 카테고리' }, { headers });
       const newCategory = { ...response.data, editing: true };
-      setBoxes(prev => [...prev.map(b => ({...b, editing: false})), newCategory]);
+      setBoxes(prev => [...prev.map(b => ({ ...b, editing: false })), newCategory]);
     } catch (error) {
       console.error('Error adding category:', error);
     }
@@ -95,7 +94,7 @@ export default function CategoryContent() {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
-      >
+    >
       <SafeAreaView style={styles.container}>
         {/* 상단 헤더 */}
         <View style={styles.header}>
@@ -103,15 +102,8 @@ export default function CategoryContent() {
             <Ionicons name="menu" size={30} color="#000" />
           </Pressable>
 
-          <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}> 
-            <Image
-              source={require('../../assets/images/item/rabbit_logo.png')} 
-              style={{
-                width: 40,
-                height: 40,
-                resizeMode: 'cover',
-              }}
-            />
+          <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
+            <ThemedText style={styles.myText}>마이</ThemedText>
           </Pressable>
         </View>
 
@@ -190,7 +182,7 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:10,
+    marginTop: 10,
   },
 
   myButton: {
@@ -205,7 +197,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:10,
+    marginTop: 10,
   },
 
   myText: {
