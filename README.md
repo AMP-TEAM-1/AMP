@@ -14,7 +14,7 @@ venv\Scripts\activate
 ### Backend (FastAPI)
 가상환경이 활성화된 상태에서 다음 명령어를 실행하여 백엔드 서버를 시작합니다.
 ```bash
-uvicorn app.api.main:app --reload
+uvicorn app.api.main:app --reload --port 8000
 ```
 
 ### Frontend (React Native - Expo)
