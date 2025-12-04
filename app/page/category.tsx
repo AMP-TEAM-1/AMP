@@ -4,6 +4,7 @@ import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useContext, useEffect, useState } from 'react';
 import {
+  Image,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -16,6 +17,7 @@ import { tokenStorage } from '../storage';
 import { ColorContext } from './ColorContext';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+//export const API_URL = "http://127.0.0.1:8000";
 
 export default function CategoryContent() {
   const { colors } = useContext(ColorContext);
@@ -101,8 +103,15 @@ export default function CategoryContent() {
             <Ionicons name="menu" size={30} color="#000" />
           </Pressable>
 
-          <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
-            <ThemedText style={styles.myText}>마이</ThemedText>
+          <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}> 
+            <Image
+              source={require('../../assets/images/item/rabbit_logo.png')} 
+              style={{
+                width: 40,
+                height: 40,
+                resizeMode: 'cover',
+              }}
+            />
           </Pressable>
         </View>
 
@@ -175,8 +184,8 @@ const styles = StyleSheet.create({
 
   menuButton: {
     position: 'absolute',
-    left: 24,
-    top: 25,
+    left: 10,
+    top: 15,
     width: 50,
     height: 50,
     justifyContent: 'center',
@@ -186,12 +195,14 @@ const styles = StyleSheet.create({
 
   myButton: {
     position: 'absolute',
-    right: 32,
-    top: 29,
+    right: 20,
+    top: 20,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#aaa',
+    borderWidth: 1,
+    borderColor: '#aaa',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop:10,
