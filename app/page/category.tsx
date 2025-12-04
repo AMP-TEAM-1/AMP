@@ -4,12 +4,13 @@ import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useContext, useEffect, useState } from 'react';
 import {
+  Image,
   Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   TextInput,
-  View
+  View,
 } from 'react-native';
 import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
@@ -103,7 +104,14 @@ export default function CategoryContent() {
           </Pressable>
 
           <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
-            <ThemedText style={styles.myText}>마이</ThemedText>
+            <Image
+              source={require('../../assets/images/item/rabbit_logo.png')}
+              style={{
+                width: 40,
+                height: 40,
+                resizeMode: 'cover',
+              }}
+            />
           </Pressable>
         </View>
 
