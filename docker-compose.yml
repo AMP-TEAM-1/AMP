@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> c4112b7250984da12dd605c1d2d9d828fd596dd8
 services:
   backend:
     build:
