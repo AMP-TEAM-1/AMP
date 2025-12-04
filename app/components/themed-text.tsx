@@ -27,6 +27,7 @@ export function ThemedText({
         type === 'subtitle' ? styles.subtitle : undefined,
         type === 'link' ? styles.link : undefined,
         style,
+        { includeFontPadding: false, textAlignVertical: 'center' },
       ]}
       {...rest}
     />

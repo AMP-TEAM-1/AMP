@@ -14,6 +14,7 @@ app = FastAPI()
 # allow_credentials=True 일 때는 보안 상의 이유로 allow_origins에 와일드카드("*")를 사용할 수 없습니다.
 # 따라서 요청을 허용할 출처(origin) 목록을 명시적으로 지정해야 합니다.
 origins = [
+    "http://10.0.2.2:8080",
     "http://localhost",
     "http://localhost:8081",  # Expo 웹 개발 서버
     "http://127.0.0.1:8000",

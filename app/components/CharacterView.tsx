@@ -33,7 +33,8 @@ export default function CharacterView({
     <View style={styles.characterSection}>
       {/* 당근 재화 표시 */}
       <View style={styles.carrotContainer}>
-        <ThemedText style={styles.carrotText}>🥕 {carrots}</ThemedText>
+        <ThemedText style={styles.carrotEmoji}>🥕</ThemedText>
+        <ThemedText style={styles.carrotText}>{carrots}</ThemedText>
       </View>
 
       {/* 인벤토리 이동 버튼 (바텀시트가 최소화되었을 때만 보임) */}
@@ -56,7 +57,7 @@ export default function CharacterView({
           // 2. 개별 스타일이 없으면, 아이템 타입에 맞는 기본 스타일을 사용합니다.
           const typeStyle = baseItemStyle[item.type] || {};
           const itemStyle = individualStyle || typeStyle;
-          
+
           return (
             <Image key={item.item_id} source={item.image} style={[styles.equippedItem, itemStyle]} resizeMode="contain" />
           );
@@ -83,11 +84,19 @@ const styles = StyleSheet.create({
     left: 20,
     paddingVertical: 11,
     backgroundColor: 'transparent',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  carrotEmoji: {
+    fontSize: 18,
+    lineHeight: 22,
   },
   carrotText: {
     fontSize: 18,
     fontFamily: 'Cafe24Ssurround',
     fontWeight: 'bold',
+    lineHeight: 22,
   },
   inventoryButton: {
     position: 'absolute',

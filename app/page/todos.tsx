@@ -4,6 +4,7 @@ import axios from 'axios';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { tokenStorage } from '../storage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -173,37 +174,39 @@ export default function TodosScreen() {
 	);
 
 	return (
-		<ThemedView style={styles.container}>
-			<ThemedText type="title">할일 목록</ThemedText>
+		<ThemedView style={[styles.container, { padding: 0 }]}>
+			<SafeAreaView style={{ flex: 1, padding: 16, alignItems: 'center', width: '100%' }}>
+				<ThemedText type="title">할일 목록</ThemedText>
 
-			<View style={styles.inputRow}>
+				<View style={styles.inputRow}>
 
-				<TextInput
-					style={styles.input}
-					placeholder="새 할일 제목"
-					value={newTitle}
-					onChangeText={setNewTitle}
-					placeholderTextColor="#888"
-				/>
-				<Pressable style={styles.addButton} onPress={createTodo} disabled={loading}>
-					{loading ? <ActivityIndicator color="#fff" /> : <ThemedText style={{ color: '#fff' }}>추가</ThemedText>}
-				</Pressable>
-			</View>
+					<TextInput
+						style={styles.input}
+						placeholder="새 할일 제목"
+						value={newTitle}
+						onChangeText={setNewTitle}
+						placeholderTextColor="#888"
+					/>
+					<Pressable style={styles.addButton} onPress={createTodo} disabled={loading}>
+						{loading ? <ActivityIndicator color="#fff" /> : <ThemedText style={{ color: '#fff' }}>추가</ThemedText>}
+					</Pressable>
+				</View>
 
-			{loading && !refreshing ? (
-				<ActivityIndicator style={{ marginTop: 24 }} />
-			) : (
-				<FlatList
-					data={todos}
-					keyExtractor={(item) => String(item.id)}
-					renderItem={renderItem}
-					style={{ width: '100%' }}
-					refreshing={refreshing}
-					onRefresh={() => { setRefreshing(true); fetchTodos(); }}
+				{loading && !refreshing ? (
+					<ActivityIndicator style={{ marginTop: 24 }} />
+				) : (
+					<FlatList
+						data={todos}
+						keyExtractor={(item) => String(item.id)}
+						renderItem={renderItem}
+						style={{ width: '100%' }}
+						refreshing={refreshing}
+						onRefresh={() => { setRefreshing(true); fetchTodos(); }}
 
-					ListEmptyComponent={<ThemedText>할일이 없습니다.</ThemedText>}
-				/>
-			)}
+						ListEmptyComponent={<ThemedText>할일이 없습니다.</ThemedText>}
+					/>
+				)}
+			</SafeAreaView>
 		</ThemedView>
 	);
 }

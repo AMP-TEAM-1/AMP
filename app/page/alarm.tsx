@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, FlatList, Platform, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { tokenStorage } from '../storage';
 import { cancelNotification, requestNotificationPermissions, scheduleNotification } from '../utils/notificationService';
 
@@ -87,11 +88,9 @@ export default function AlarmPage() {
     if (type === 'hour') {
       const hourValue = hours[index % baseHours.length];
       setSelectedHour(hourValue);
-      hourRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
     } else {
       const minuteValue = minutes[index % baseMinutes.length];
       setSelectedMinute(minuteValue);
-      minuteRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
     }
   };
 

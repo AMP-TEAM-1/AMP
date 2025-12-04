@@ -16,13 +16,14 @@ import {
   PanResponder,
   Platform,
   Pressable,
-  SafeAreaView,
+
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  View,
+  View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
 import { useUserStore } from '../store/userStore';
