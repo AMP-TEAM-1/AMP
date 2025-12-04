@@ -19,7 +19,6 @@ import { ColorContext } from './ColorContext';
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 //export const API_URL = "http://127.0.0.1:8000";
 
-
 export default function CategoryContent() {
   const { colors } = useContext(ColorContext);
   const navigation = useNavigation<any>();
