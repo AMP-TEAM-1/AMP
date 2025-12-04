@@ -185,8 +185,8 @@ const styles = StyleSheet.create({
 
   menuButton: {
     position: 'absolute',
-    left: 24,
-    top: 25,
+    left: 10,
+    top: 15,
     width: 50,
     height: 50,
     justifyContent: 'center',
@@ -196,11 +196,13 @@ const styles = StyleSheet.create({
 
   myButton: {
     position: 'absolute',
-    right: 32,
-    top: 29,
+    right: 20,
+    top: 20,
     width: 40,
     height: 40,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#aaa',
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',

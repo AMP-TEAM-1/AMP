@@ -84,6 +84,7 @@
 # 가상환경 생성
 python -m venv .venv
 
+<<<<<<< HEAD
 # 가상환경 활성화
 source .venv/bin/activate     # mac / linux
 .\.venv\Scripts\activate      # windows
@@ -95,6 +96,12 @@ pip install -r requirements.txt
 
 # 서버 실행
 uvicorn app.main:app --reload
+=======
+### Backend (FastAPI)
+가상환경이 활성화된 상태에서 다음 명령어를 실행하여 백엔드 서버를 시작합니다.
+```bash
+uvicorn app.api.main:app --reload --port 8000
+>>>>>>> 7ec76f0ae13dce6dd12e11b6b597a5366c7f940f
 ```
 
 ---
