@@ -1,4 +1,5 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
@@ -7,10 +8,12 @@ import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
   Dimensions,
   FlatList,
   Image,
   Modal,
+  PanResponder,
   Platform,
   Pressable,
   SafeAreaView,
@@ -31,6 +34,7 @@ import TodosScreen from './todos';
 
 // 🥕 백엔드 서버 주소.
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+//export const API_URL = "http://127.0.0.1:8000";
 
 const Drawer = createDrawerNavigator();
 
@@ -76,15 +80,19 @@ function HomeContent() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | number>('all');
   const [actionTodo, setActionTodo] = useState<Todo | null>(null);
   const [categorySelectVisible, setCategorySelectVisible] = useState(false);
+  const [calendarViewMode, setCalendarViewMode] = useState<'horizontal' | 'monthly'>('horizontal');
+
+  // 애니메이션
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const categoryColors = [
-  '#FFE0A3',
-  '#A3D8FF',
-  '#FFA3A3',
-  '#C8FFA3',
-  '#E3A3FF',
-  '#FFD1A3',
-  '#A3FFE0',
+    '#FFE0A3',
+    '#A3D8FF',
+    '#FFA3A3',
+    '#C8FFA3',
+    '#E3A3FF',
+    '#FFD1A3',
+    '#A3FFE0',
   ];
 
   const [coloredCategories, setColoredCategories] = useState<Category[]>([]);
@@ -108,6 +116,32 @@ function HomeContent() {
       setColoredCategories(result);
     }
   }, [categories]);
+
+  // 뷰 모드 저장 및 불러오기
+  useEffect(() => {
+    const loadViewMode = async () => {
+      try {
+        const saved = await AsyncStorage.getItem('calendarViewMode');
+        if (saved === 'horizontal' || saved === 'monthly') {
+          setCalendarViewMode(saved);
+        }
+      } catch (e) {
+        console.error('Failed to load view mode', e);
+      }
+    };
+    loadViewMode();
+  }, []);
+
+  useEffect(() => {
+    const saveViewMode = async () => {
+      try {
+        await AsyncStorage.setItem('calendarViewMode', calendarViewMode);
+      } catch (e) {
+        console.error('Failed to save view mode', e);
+      }
+    };
+    saveViewMode();
+  }, [calendarViewMode]);
 
 
   // 인증 헤더
@@ -194,6 +228,37 @@ function HomeContent() {
     scrollToIndex(CENTER_INDEX);
   };
 
+  // 월 이동 함수
+  const handlePrevMonth = () => {
+    const newDate = new Date(selected);
+    newDate.setMonth(selected.getMonth() - 1);
+    setSelected(newDate);
+  };
+
+  const handleNextMonth = () => {
+    const newDate = new Date(selected);
+    newDate.setMonth(selected.getMonth() + 1);
+    setSelected(newDate);
+  };
+
+  // 뷰 모드 전환 (애니메이션 포함)
+  const switchViewMode = (newMode: 'horizontal' | 'monthly') => {
+    // Fade out
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start(() => {
+      setCalendarViewMode(newMode);
+      // Fade in
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
   // 할일 추가
   const handleAddTodo = async () => {
     try {
@@ -214,6 +279,8 @@ function HomeContent() {
       console.error('[handleAddTodo] error:', err);
       if (Platform.OS === 'web') window.alert('할일 추가에 실패했습니다.');
       else Alert.alert('오류', '할일 추가에 실패했습니다.');
+      console.log("API_URL = ", API_URL);
+
     }
   };
 
@@ -261,6 +328,105 @@ function HomeContent() {
     }
   }, [editingTodoId]);
 
+  // 월간 캘린더 날짜 생성 함수
+  const generateMonthDays = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    const firstDayOfWeek = firstDay.getDay();
+
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+
+    const days: Date[] = [];
+
+    // 이전 달 날짜 채우기
+    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+      const prevDate = new Date(year, month, -i);
+      days.push(prevDate);
+    }
+
+    // 이번 달 날짜
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+
+    // 다음 달 날짜로 42일 채우기
+    const remainingDays = 42 - days.length;
+    for (let i = 1; i <= remainingDays; i++) {
+      days.push(new Date(year, month + 1, i));
+    }
+
+    return days;
+  };
+
+  // 월간 캘린더 컴포넌트
+  const MonthlyCalendar = () => {
+    const monthDays = generateMonthDays(selected);
+    const today = new Date();
+
+    // 스와이프 제스처
+    const panResponder = useRef(
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (evt, gestureState) => {
+          return Math.abs(gestureState.dx) > 20;
+        },
+        onPanResponderRelease: (evt, gestureState) => {
+          if (gestureState.dx > 50) {
+            handlePrevMonth();
+          } else if (gestureState.dx < -50) {
+            handleNextMonth();
+          }
+        },
+      })
+    ).current;
+
+    return (
+      <View {...panResponder.panHandlers} style={styles.monthlyCalendarContainer}>
+        {/* 요일 헤더 */}
+        <View style={styles.monthlyWeekdayRow}>
+          {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
+            <View key={idx} style={styles.monthlyWeekdayCell}>
+              <ThemedText style={styles.monthlyWeekdayText}>{day}</ThemedText>
+            </View>
+          ))}
+        </View>
+
+        {/* 날짜 그리드 */}
+        <View style={styles.monthlyDaysGrid}>
+          {monthDays.map((date, idx) => {
+            const isSelected = date.toDateString() === selected.toDateString();
+            const isToday = date.toDateString() === today.toDateString();
+            const isSameMonth = date.getMonth() === selected.getMonth();
+
+            return (
+              <Pressable
+                key={idx}
+                onPress={() => setSelected(date)}
+                style={[
+                  styles.monthlyDayCell,
+                  isSelected && styles.monthlyDaySelected,
+                  isToday && styles.monthlyDayToday,
+                  !isSameMonth && styles.monthlyDayOtherMonth,
+                ]}
+              >
+                <ThemedText
+                  style={[
+                    styles.monthlyDayText,
+                    { color: isSelected ? '#1f7aeb' : '#000' },
+                  ]}
+                >
+                  {date.getDate()}
+                </ThemedText>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+    );
+  };
+
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
@@ -280,7 +446,7 @@ function HomeContent() {
               <Ionicons name="menu" size={30} color="#000" />
             </Pressable>
             <ThemedText style={styles.dateText}>
-              {today.getMonth() + 1}. {today.getDate()}. ({['일','월','화','수','목','금','토'][today.getDay()]})
+              {today.getMonth() + 1}. {today.getDate()}. ({['일', '월', '화', '수', '목', '금', '토'][today.getDay()]})
             </ThemedText>
             <Pressable
               onPress={() => navigation.navigate('MyPage')}
@@ -294,7 +460,7 @@ function HomeContent() {
                 justifyContent: 'center',
                 alignItems: 'center',
                 overflow: 'hidden',
-                marginTop:10,
+                marginTop: 10,
               }}
             >
               <Image
@@ -305,7 +471,7 @@ function HomeContent() {
                   resizeMode: 'cover',
                 }}
               />
-            </Pressable>  
+            </Pressable>
           </View>
 
           {/* 무한 달력 */}
@@ -317,43 +483,68 @@ function HomeContent() {
               <View style={{ flex: 1, alignItems: 'center' }}>
                 <ThemedText style={styles.monthText}>{formatMonthYear(selected)}</ThemedText>
               </View>
-              <View style={{ width: 60 }} />
+              {calendarViewMode === 'monthly' && (
+                <View style={styles.monthNavigationButtons}>
+                  <Pressable onPress={handlePrevMonth} style={styles.monthNavButton}>
+                    <Ionicons name="chevron-back" size={24} color="#000" />
+                  </Pressable>
+                  <Pressable onPress={handleNextMonth} style={styles.monthNavButton}>
+                    <Ionicons name="chevron-forward" size={24} color="#000" />
+                  </Pressable>
+                </View>
+              )}
+              <Pressable
+                onPress={() => setCalendarViewMode(prev => prev === 'horizontal' ? 'monthly' : 'horizontal')}
+                style={styles.viewToggleButton}
+              >
+                <Ionicons
+                  name={calendarViewMode === 'horizontal' ? 'calendar-outline' : 'swap-horizontal'}
+                  size={24}
+                  color="#000"
+                />
+              </Pressable>
             </View>
 
-            <FlatList<number>
-              ref={flatListRef}
-              data={Array.from({ length: TOTAL_DAYS }).map((_, i) => i)}
-              horizontal // 💡 keyExtractor는 문자열을 반환해야 합니다.
-              keyExtractor={(item) => item.toString()}
-              initialScrollIndex={CENTER_INDEX}
-              getItemLayout={(_, index) => ({
-                length: itemWidth + spacing,
-                offset: (itemWidth + spacing) * index,
-                index,
-              })}
-              renderItem={({ item: index }) => {
-                const item = getDateFromIndex(index);
-                const isSelected = item.toDateString() === selected.toDateString();
-                return (
-                  <Pressable
-                    onPress={() => handleSelectDate(index)}
-                    style={[
-                      styles.dateButton,
-                      { width: itemWidth },
-                      isSelected && styles.dateButtonSelected,
-                    ]}
-                  >
-                    <ThemedText style={[styles.weekdayText, isSelected && styles.weekdaySelected]}>
-                      {['일','월','화','수','목','금','토'][item.getDay()]}
-                    </ThemedText>
-                    <ThemedText style={[styles.dateNumber, isSelected && styles.dateNumberSelected]}>
-                      {item.getDate()}
-                    </ThemedText>
-                  </Pressable>
-                );
-              }}
-              showsHorizontalScrollIndicator={false}
-            />
+            {/* 달력 뷰 - 조건부 렌더링 */}
+            {calendarViewMode === 'horizontal' ? (
+              <FlatList<number>
+                ref={flatListRef}
+                data={Array.from({ length: TOTAL_DAYS }).map((_, i) => i)}
+                horizontal
+                keyExtractor={(item) => item.toString()}
+                initialScrollIndex={CENTER_INDEX}
+                getItemLayout={(_, index) => ({
+                  length: itemWidth + spacing,
+                  offset: (itemWidth + spacing) * index,
+                  index,
+                })}
+                renderItem={({ item: index }) => {
+                  const item = getDateFromIndex(index);
+                  const isSelected = item.toDateString() === selected.toDateString();
+                  return (
+                    <Pressable
+                      onPress={() => handleSelectDate(index)}
+                      style={[
+                        styles.dateButton,
+                        { width: itemWidth },
+                        isSelected && styles.dateButtonSelected,
+                      ]}
+                    >
+                      <ThemedText style={[styles.weekdayText, isSelected && styles.weekdaySelected]}>
+                        {['일', '월', '화', '수', '목', '금', '토'][item.getDay()]}
+                      </ThemedText>
+                      <ThemedText style={[styles.dateNumber, isSelected && styles.dateNumberSelected]}>
+                        {item.getDate()}
+                      </ThemedText>
+                    </Pressable>
+                  );
+                }}
+                showsHorizontalScrollIndicator={false}
+              />
+            ) : (
+              <MonthlyCalendar />
+            )}
+
             <View style={{ alignItems: 'center', marginTop: 3 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <ThemedText style={{ fontSize: 18, color: '#333', fontWeight: '700' }}>
@@ -384,20 +575,20 @@ function HomeContent() {
                         styles.categoryBox,
                         isAll
                           ? {
-                              width: 80,
-                              backgroundColor: isSelected ? '#1f7aeb' : '#fff',
-                              borderColor: '#000',
-                              borderWidth: 1,
-                              shadowColor: '#000',
-                              shadowOffset: { width: 0, height: 3 },
-                              shadowOpacity: 0.4,
-                              shadowRadius: 3,
-                              elevation: 5,
-                            }
+                            width: 80,
+                            backgroundColor: isSelected ? '#1f7aeb' : '#fff',
+                            borderColor: '#000',
+                            borderWidth: 1,
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 3 },
+                            shadowOpacity: 0.4,
+                            shadowRadius: 3,
+                            elevation: 5,
+                          }
                           : {
-                              width: Math.max(80, item.text.length * 18 + 40),
-                              backgroundColor: isSelected ? '#1f7aeb' : item.color, 
-                            },
+                            width: Math.max(80, item.text.length * 18 + 40),
+                            backgroundColor: isSelected ? '#1f7aeb' : item.color,
+                          },
                       ]}
                     >
                       <Text style={[styles.categoryText, { color: isSelected ? '#fff' : '#000' }]}>
@@ -435,12 +626,12 @@ function HomeContent() {
                     styles.item,
                     item.categories.length > 0
                       ? {
-                          borderLeftWidth: 8,
-                          borderLeftColor: coloredCategories.find(c => c.id === item.categories[0].id)?.color || '#ccc',
-                        }
+                        borderLeftWidth: 8,
+                        borderLeftColor: coloredCategories.find(c => c.id === item.categories[0].id)?.color || '#ccc',
+                      }
                       : {
-                          borderLeftWidth: 0,  // 카테고리 없으면 띠 제거
-                        },
+                        borderLeftWidth: 0,  // 카테고리 없으면 띠 제거
+                      },
                   ]}>
                     {isEditing ? (
                       <TextInput
@@ -587,7 +778,7 @@ function HomeContent() {
                   onPress={async () => {
                     if (!actionTodo) return;
                     try {
-                      const headers = await getAuthHeaders(); 
+                      const headers = await getAuthHeaders();
                       await axios.delete(`${API_URL}/todos/${actionTodo.id}/`, { headers });
                       setCurrentTodos(prev => prev.filter(t => t.id !== actionTodo.id));
                     } catch (err) {
@@ -813,7 +1004,7 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
               >
                 <ThemedText style={{ color: '#fff', fontSize: 18, fontWeight: '600', }}>저장</ThemedText>
               </Pressable>
-              
+
             </View>
           </View>
 
@@ -940,7 +1131,7 @@ function OptionContent() {
                     </LinearGradient>
                   </Pressable>
                 ))}
-              </View>  
+              </View>
             </View>
           </View>
         </View>
@@ -1030,10 +1221,10 @@ export default function AppDrawer() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 24 },
   header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 0 },
-  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, marginTop:10, fontFamily: 'Cafe24Ssurround' },
+  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, marginTop: 10, fontFamily: 'Cafe24Ssurround' },
   drawerHeader: { padding: 16, marginBottom: 8 },
   userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 30 },
-  menuButton: { marginRight: 8, marginTop:10, },
+  menuButton: { marginRight: 8, marginTop: 10, },
   calendarContainer: {
     backgroundColor: 'white',
     borderRadius: 12,
@@ -1123,4 +1314,80 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   categoryText: { fontSize: 20, fontWeight: '700', color: '#000', textAlign: 'center', fontFamily: 'Cafe24Ssurround' },
+  viewToggleButton: {
+    width: 60,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  monthlyCalendarContainer: {
+    padding: 8,
+  },
+  monthlyWeekdayRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  monthlyWeekdayCell: {
+    width: '14.28%',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  monthlyWeekdayText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    fontFamily: 'Cafe24Ssurround',
+  },
+  monthlyDaysGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  monthlyDayCell: {
+    width: '14.28%',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginVertical: 2,
+  },
+  monthlyDayText: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Cafe24Ssurround',
+  },
+  monthlyDaySelected: {
+    backgroundColor: '#1f7aeb22',
+    borderColor: '#1f7aeb',
+    borderWidth: 2,
+  },
+  monthlyDayToday: {
+    borderColor: '#FF8C42',
+    borderWidth: 1.5,
+  },
+  monthlyDayOtherMonth: {
+    opacity: 0.3,
+  },
+  monthNavigationButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    marginRight: 8,
+  },
+  monthNavButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
 });
