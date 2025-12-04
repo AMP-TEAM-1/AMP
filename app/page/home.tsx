@@ -34,6 +34,7 @@ import TodosScreen from './todos';
 
 // 🥕 백엔드 서버 주소.
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+//export const API_URL = "http://127.0.0.1:8000";
 
 const Drawer = createDrawerNavigator();
 
@@ -278,6 +279,8 @@ function HomeContent() {
       console.error('[handleAddTodo] error:', err);
       if (Platform.OS === 'web') window.alert('할일 추가에 실패했습니다.');
       else Alert.alert('오류', '할일 추가에 실패했습니다.');
+      console.log("API_URL = ", API_URL);
+
     }
   };
 
