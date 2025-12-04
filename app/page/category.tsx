@@ -4,6 +4,7 @@ import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useContext, useEffect, useState } from 'react';
 import {
+  Image,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -16,6 +17,7 @@ import { tokenStorage } from '../storage';
 import { ColorContext } from './ColorContext';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+//export const API_URL = "http://127.0.0.1:8000";
 
 export default function CategoryContent() {
   const { colors } = useContext(ColorContext);
@@ -47,7 +49,7 @@ export default function CategoryContent() {
       const headers = await getAuthHeaders();
       const response = await axios.post(`${API_URL}/categories/`, { text: '새 카테고리' }, { headers });
       const newCategory = { ...response.data, editing: true };
-      setBoxes(prev => [...prev.map(b => ({...b, editing: false})), newCategory]);
+      setBoxes(prev => [...prev.map(b => ({ ...b, editing: false })), newCategory]);
     } catch (error) {
       console.error('Error adding category:', error);
     }
@@ -93,7 +95,7 @@ export default function CategoryContent() {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
-      >
+    >
       <SafeAreaView style={styles.container}>
         {/* 상단 헤더 */}
         <View style={styles.header}>
@@ -102,7 +104,14 @@ export default function CategoryContent() {
           </Pressable>
 
           <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
-            <ThemedText style={styles.myText}>마이</ThemedText>
+            <Image
+              source={require('../../assets/images/item/rabbit_logo.png')}
+              style={{
+                width: 40,
+                height: 40,
+                resizeMode: 'cover',
+              }}
+            />
           </Pressable>
         </View>
 
@@ -175,26 +184,28 @@ const styles = StyleSheet.create({
 
   menuButton: {
     position: 'absolute',
-    left: 24,
-    top: 25,
+    left: 10,
+    top: 15,
     width: 50,
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:10,
+    marginTop: 10,
   },
 
   myButton: {
     position: 'absolute',
-    right: 32,
-    top: 29,
+    right: 20,
+    top: 20,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#aaa',
+    borderWidth: 1,
+    borderColor: '#aaa',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:10,
+    marginTop: 10,
   },
 
   myText: {
