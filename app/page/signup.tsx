@@ -10,14 +10,13 @@ import {
   Alert,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   useWindowDimensions,
-  View,
+  View
 } from 'react-native';
 
 // 백엔드 서버 주소
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function SignupScreen() {
   const { width, height } = useWindowDimensions();
@@ -171,14 +170,14 @@ export default function SignupScreen() {
 
           {/* 🥕 하단 로그인 유도 문구 */}
           <View style={[styles.loginContainer, { marginTop: height * 0.02 }]}>
-            <Text style={[styles.normalText, { fontSize: width * 0.035 }]}>
+            <ThemedText style={[styles.normalText, { fontSize: width * 0.035 }]}>
               이미 계정이 있으신가요?{' '}
-            </Text>
+            </ThemedText>
             <Link href="/page/login" asChild>
               <Pressable>
-                <Text style={[styles.loginText, { fontSize: width * 0.035 }]}>
+                <ThemedText style={[styles.loginText, { fontSize: width * 0.035 }]}>
                   로그인
-                </Text>
+                </ThemedText>
               </Pressable>
             </Link>
           </View>
@@ -225,12 +224,12 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'left',
     color: '#3A3A3A',
-    fontWeight: '700',
+    fontWeight: '700', // ThemedText에서 fontFamily가 적용됩니다.
   },
   title2: {
     textAlign: 'left',
     color: '#FF8C42',
-    fontWeight: '700',
+    fontWeight: '700', // ThemedText에서 fontFamily가 적용됩니다.
   },
   input: {
     backgroundColor: '#F5F5F5',
@@ -238,6 +237,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     paddingHorizontal: 20,
+    fontFamily: 'Cafe24Ssurround', // TextInput에는 직접 적용 필요
   },
   signupButton: {
     backgroundColor: '#FFB347',
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   signupButtonText: {
     color: '#000',
     fontWeight: '700',
-    textAlign: 'center',
+    textAlign: 'center', // ThemedText에서 fontFamily가 적용됩니다.
   },
   loginContainer: {
     flexDirection: 'row',
@@ -258,10 +258,10 @@ const styles = StyleSheet.create({
   },
   normalText: {
     color: '#000',
-    fontWeight: 'bold',
+    fontWeight: 'bold', // ThemedText에서 fontFamily가 적용됩니다.
   },
   loginText: {
     color: '#FF8C42',
-    fontWeight: 'bold',
+    fontWeight: 'bold', // ThemedText에서 fontFamily가 적용됩니다.
   },
 });

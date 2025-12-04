@@ -61,7 +61,6 @@ const styles = StyleSheet.create({
   toastText: {
     color: 'white',
     fontSize: 14,
-    fontFamily: 'Jua',
     textAlign: 'center',
   },
 });

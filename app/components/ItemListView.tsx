@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, ViewStyle } from 'react-native';
 
 /**
  * 아이템 목록을 표시하는 재사용 가능한 UI 컴포넌트입니다.
@@ -20,10 +20,13 @@ interface ItemListViewProps {
   selectedItemId: number | null;
   onTabPress: (category: ItemCategory) => void;
   onItemPress: (item: Item) => void;
+  mode?: 'shop' | 'inventory';
   renderItemFooter: (item: Item) => React.ReactNode;
+  containerStyle?: ViewStyle; // 컨테이너에 적용할 추가 스타일
 }
 
 export default function ItemListView({
+  mode = 'shop',
   title,
   items,
   loading,
@@ -32,13 +35,14 @@ export default function ItemListView({
   onTabPress,
   onItemPress,
   renderItemFooter,
+  containerStyle,
 }: ItemListViewProps) {
   const filteredItems = selectedCategory
     ? items.filter((item) => item.type === CATEGORY_MAP[selectedCategory])
     : [];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>
         <CategoryTabs selectedCategory={selectedCategory} onTabPress={onTabPress} />
 
@@ -46,6 +50,7 @@ export default function ItemListView({
           <ActivityIndicator style={{ flex: 1 }} size="large" />
         ) : (
           <ItemGrid
+            mode={mode}
             items={filteredItems}
             onItemPress={onItemPress}
             selectedItemId={selectedItemId}

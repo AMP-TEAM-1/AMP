@@ -4,19 +4,18 @@ import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useContext, useEffect, useState } from 'react';
 import {
-  Image,
   Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
-  View
+  View,
 } from 'react-native';
+import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
 import { ColorContext } from './ColorContext';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function CategoryContent() {
   const { colors } = useContext(ColorContext);
@@ -42,7 +41,7 @@ export default function CategoryContent() {
     }
   };
 
-  // ✅ 박스 추가 시 자동 편집 모드로 생성
+  // ✅ 박스 추가 시 자동 편집 모드로 생성.
   const handleAddBox = async () => {
     try {
       const headers = await getAuthHeaders();
@@ -90,7 +89,7 @@ export default function CategoryContent() {
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.3, 0.7, 1]}
+      locations={[0, 0.35, 0.65, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -102,37 +101,17 @@ export default function CategoryContent() {
             <Ionicons name="menu" size={30} color="#000" />
           </Pressable>
 
-          <Pressable
-            onPress={() => navigation.navigate('MyPage')}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              borderWidth: 1,
-              borderColor: '#aaa',
-              backgroundColor: '#fff',
-              justifyContent: 'center',
-              alignItems: 'center',
-              overflow: 'hidden',
-            }}
-          >
-            <Image
-              source={require('../../assets/images/item/rabbit_logo.png')} // ✅ 여기에 저장한 파일 경로
-              style={{
-                width: 40,
-                height: 40,
-                resizeMode: 'cover',
-                }}
-            />
-          </Pressable> 
+          <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
+            <ThemedText style={styles.myText}>마이</ThemedText>
+          </Pressable>
         </View>
 
         {/* 제목 */}
-        <Text style={styles.titleText}>카테고리</Text>
+        <ThemedText style={styles.titleText}>카테고리</ThemedText>
 
         {/* + 버튼 */}
         <Pressable style={styles.addButton} onPress={handleAddBox}>
-          <Ionicons name="add" size={35} color="#000" />
+          <Ionicons name="add" size={40} color="#000" />
         </Pressable>
 
         {/* 회색 박스 목록 */}
@@ -160,7 +139,7 @@ export default function CategoryContent() {
                       autoFocus={item.editing}
                     />
                   ) : (
-                    <Text style={styles.input}>{item.text || '입력'}</Text>
+                    <ThemedText style={styles.input}>{item.text || '입력'}</ThemedText>
                   )}
                 </View>
               </Pressable>
@@ -184,13 +163,25 @@ export default function CategoryContent() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
 
-  header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20, paddingHorizontal: 20 },
+  header: {
+    height: 80,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 8,
+    paddingHorizontal: 10,
+
+  },
 
   menuButton: {
+    position: 'absolute',
+    left: 24,
+    top: 25,
     width: 50,
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop:10,
   },
 
   myButton: {
@@ -203,11 +194,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#aaa',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop:10,
   },
 
   myText: {
     color: '#000',
-    fontWeight: '600',
+    fontWeight: '600', // ThemedText에서 fontFamily가 적용됩니다.
   },
 
   titleText: {
@@ -216,7 +208,7 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     marginVertical: 10,
-  },
+  }, // ThemedText에서 fontFamily가 적용됩니다.
 
   addButton: {
     position: 'absolute',
@@ -225,8 +217,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    borderWidth: 3,
-    borderColor: '#000',
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
@@ -262,6 +252,7 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     paddingVertical: 6,
+    fontFamily: 'Cafe24Ssurround', // TextInput과 Text에 공통으로 폰트 적용
   },
 
   deleteButton: {

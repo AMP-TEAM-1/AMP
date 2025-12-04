@@ -30,7 +30,7 @@ export const CATEGORIES: ItemCategory[] = ['모자', '장신구', '배경'];
 
 export const CATEGORY_MAP: Record<ItemCategory, string> = {
   '모자': 'hat',
-  '장신구': 'accessories',
+  '장신구': 'accessory',
   '배경': 'background',
 };
 
@@ -79,20 +79,37 @@ export const imageMap: { [key: string]: any } = {
   'b6': require('../../assets/images/item/stairs-bg.png'),
 };
 
-// --- UI 테스트용 임시 데이터 ---
-export const mockShopItems: Item[] = [
-  { item_id: 1, name: '밀짚모자', price: 50, type: 'hat', image: imageMap['h1'] },
-  { item_id: 2, name: '카우보이 모자', price: 70, type: 'hat', image: imageMap['h2'] },
-  { item_id: 6, name: '왕관', price: 200, type: 'hat', image: imageMap['h6'] },
-  { item_id: 7, name: '하트 장식', price: 30, type: 'accessory', image: imageMap['a1'] },
-  { item_id: 8, name: '나비 넥타이', price: 40, type: 'accessory', image: imageMap['a2'] },
-  { item_id: 13, name: '튤립 배경', price: 100, type: 'background', image: imageMap['b1'] },
-];
+// --- 아이템별 스타일 정의 ---
+// 각 아이템의 고유 ID를 키로 사용하여 위치, 크기 등을 개별적으로 조정합니다.
+export const itemStyleMap: { [key: number]: any } = {
+  // 모자 (type: 'hat')
+  1: { width: '40%', height: '40%', top: '5%' }, // 밀짚모자
+  2: { width: '45%', height: '45%', top: '2%' }, // 카우보이모자
+  3: { width: '35%', height: '35%', top: '2%' }, // 요리사모자
+  4: { width: '50%', height: '50%', top: '-7%' }, // 산타모자
+  5: { width: '31%', height: '31%', top: '0%' }, // 생일모자
+  6: { width: '35%', height: '35%', top: '3%' }, // 왕관
 
-export const mockInventoryItems: Item[] = [
-  { item_id: 1, name: '밀짚모자', type: 'hat', is_equipped: true, image: imageMap['h1'] },
-  { item_id: 3, name: '요리사 모자', type: 'hat', is_equipped: false, image: imageMap['h3'] },
-  { item_id: 8, name: '나비 넥타이', type: 'accessory', is_equipped: true, image: imageMap['a2'] },
-  { item_id: 10, name: '땡땡이 리본', type: 'accessory', is_equipped: false, image: imageMap['a4'] },
-  { item_id: 18, name: '계단 배경', type: 'background', is_equipped: false, image: imageMap['b6'] },
-];
+  // 장신구 (type: 'accessory')
+  7: { width: '17%', height: '17%', top: '63%', left: '27%' }, // 하트
+  8: { width: '17%', height: '17%', top: '57%' }, // 나비넥타이
+  9: { width: '25%', height: '25%', top: '59%' }, // 넥타이
+  10: { width: '35%', height: '35%', top: '50%', }, // 도트리본
+  11: { width: '40%', height: '40%', top: '50%' }, // 스카프
+  12: { width: '20%', height: '20%', top: '56%', }, // 리본
+
+  // 배경 (type: 'background')
+  13: { zIndex: -1, opacity: 0.8, top: '-2%' }, // 튤립 배경
+  14: { zIndex: -1, opacity: 0.8, top: '-20%', width: '140%', height: '140%' }, // 선인장 배경
+  15: { zIndex: -1, opacity: 0.8, top: '-13%', left: '-32%' }, // 눈사람 배경
+  16: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 생일 배경
+  17: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 케이크 배경
+  18: { zIndex: -1, opacity: 0.8, top: '-13%', width: '120%', height: '120%' }, // 계단 배경
+};
+
+// --- 아이템 타입별 기본 스타일 ---
+export const baseItemStyle: { [key: string]: any } = {
+  hat: { width: '40%', height: '40%', top: '5%' },
+  accessory: { width: '25%', height: '25%', top: '52%' },
+  background: { zIndex: -1, opacity: 0.8, top: '-10%' },
+};

@@ -1,74 +1,256 @@
-# AMP (A-AMP) 프로젝트
+# 🥕 Carrot
 
-carrot 프로젝트 파일 구조 및 주요 기능 설명
+할 일 관리에 **게이미피케이션**을 결합한 모바일 앱(React Native + FastAPI)입니다.
 
-## 실행 방법
+날짜별 Todo 관리, 카테고리 기반 필터, 보상 재화(당근), 상점·인벤토리·캐릭터 커스터마이징 기능을 제공하여 사용자의 지속적인 활동을 유도합니다.
 
-### 가상환경 실행 (가상환경 설치한 사람 한정)
-프로젝트 루트 디렉토리에서 다음 명령어를 실행하여 Python 가상환경을 활성화합니다.
+---
+
+## 📚 목차
+
+- 프로젝트 소개
+- 팀--담당
+- 사용 기술 스택
+- 실행 환경 및 방법
+- 주요 기능
+- 서비스 구성--페이지-설명
+- 데이터 구조--핵심-api
+- 워크플로우 예시: 할 일 완료 → 보상 지급
+
+---
+
+## 🎯 프로젝트 소개
+
+- **Carrot**은 **생산성(Todo 관리)** + **게임적 보상 시스템(재화·아이템·커스터마이징)** 을 결합한 모바일 애플리케이션입니다.
+
+- 사용자는 날짜별 Todo를 기록·관리하며, 할 일을 완료할 때마다 **‘당근(Carrot)’** 보상을 획득해 상점에서 아이템을 구매하고 캐릭터(토끼)를 꾸밀 수 있습니다.
+
+### 🔑 핵심 가치
+
+- **즉시성** — 날짜 기반 서버 조회 + 클라이언트 필터링으로 빠른 UX
+- **동기부여** — 보상 재화와 커스터마이징을 통한 몰입도 향상
+- **확장성** — FastAPI + React Native 기반으로 기능/플랫폼 확장 용이
+
+---
+
+## 👥 팀
+
+| 역할 | 기술 | 이름  |
+| --- | --- | --- |
+| 프론트엔드 | React Native (Expo), TypeScript | 박진수 |
+|  |  | 배지윤 |
+| 백엔드, 인프라 | FastAPI, Database | 고범창 |
+|  |  | 나윤서 |
+
+
+---
+
+## 🛠 사용 기술 스택
+
+### **Frontend**
+
+- React Native (Expo)
+- TypeScript
+- Zustand (전역 상태 관리)
+- Axios (HTTP 통신)
+
+### **Backend**
+
+- FastAPI
+- Uvicorn
+- SQLAlchemy (ORM)
+- Pydantic (Validation)
+- JWT Authentication
+
+### **Database / Infra**
+
+- Supabase
+
+---
+
+## ⚙️ 실행 환경 및 방법
+
+### 🔧 요구사항
+
+- Node.js (v18 LTS 권장)
+- npm 또는 yarn
+- Python 3.10+
+
+---
+
+### 1) 백엔드 실행 (FastAPI)
+
 ```bash
-venv\Scripts\activate
+# 가상환경 생성
+python -m venv .venv
+
+# 가상환경 활성화
+source .venv/bin/activate     # mac / linux
+.\.venv\Scripts\activate      # windows
+
+# 패키지 설치
+pip install -r requirements.txt
+
+# 환경변수(.env) 설정
+
+# 서버 실행
+uvicorn app.main:app --reload
 ```
-비활성화는 `deactivate` 명령어를 사용합니다.
 
-### Backend (FastAPI)
-가상환경이 활성화된 상태에서 다음 명령어를 실행하여 백엔드 서버를 시작합니다.
-```bash
-uvicorn app.api.main:app --reload
-```
+---
 
-### Frontend (React Native - Expo)
-새로운 터미널에서 다음 명령어를 실행하여 프론트엔드 앱을 시작합니다.
+### 2) 프론트엔드 실행 (React Native / Expo)
+
 ```bash
+# 의존성 설치
+npm instal
+# 개발 서버 실행
 npm start
+# 또는
+expo start
 ```
 
-## 프로젝트 구조 및 파일 역할
+> JWT 토큰은 AsyncStorage에 저장되며, Axios 인스턴스가 자동으로 Authorization 헤더를 포함합니다.
+> 
 
-### 📁 `app/`
-애플리케이션의 핵심 소스 코드가 위치합니다. React Native (프론트엔드)와 FastAPI (백엔드) 코드가 함께 포함되어 있습니다.
+---
 
-#### 📁 `api/` - Backend (FastAPI)
-백엔드 API 서버 관련 파일들입니다.
+## 📲 주요 기능
 
-- **`main.py`**: FastAPI 애플리케이션의 주 진입점(entry point)입니다. API 라우터를 포함하고 서버를 실행하는 역할을 합니다.
-- **`database.py`**: 데이터베이스 연결 및 세션 관리를 담당합니다.
-- **`models.py`**: SQLAlchemy를 사용하여 데이터베이스 테이블 구조(ORM 모델)를 정의합니다.
-- **`schemas.py`**: Pydantic을 사용하여 API 요청/응답의 데이터 유효성 검사 및 형태를 정의합니다.
-- **`crud.py`**: 데이터베이스에 대한 CRUD (Create, Read, Update, Delete) 작업을 수행하는 함수들을 모아놓은 파일입니다.
-- **`auth.py`**: 사용자 인증(로그인, 회원가입)과 관련된 API 엔드포인트를 정의합니다.
-- **`security.py`**: 비밀번호 해싱, JWT 토큰 생성 및 검증 등 보안 관련 로직을 처리합니다.
-- **`todos.py`**: '할 일' 기능 관련 API 엔드포인트를 정의합니다.
-- **`inventory.py`**: '인벤토리' 기능 관련 API 엔드포인트를 정의합니다.
-- **`mypage_shop.py`**: '마이페이지' 및 '상점' 기능 관련 API 엔드포인트를 정의합니다.
+### ✔ Todo 관리
 
-#### 📁 `page/`, `(tabs)/` - Frontend (React Native)
-애플리케이션의 화면(페이지)을 구성하는 React Native 컴포넌트들입니다.
+- 날짜별 Todo 생성/수정/삭제
+- 완료 체크 시 보상 지급
+- 완료 취소 시 보상 회수
+- 카테고리(태그) 연동
+- 무한 캘린더 스크롤
 
-- **`page/`**: `login.tsx`, `mypage.tsx`, `inventory.tsx` 등 주요 페이지 컴포넌트가 위치합니다.
-- **`(tabs)/`**: 하단 탭 네비게이션을 통해 접근하는 페이지들(`explore.tsx`, `index.tsx`)이 위치합니다.
+### ✔ 카테고리 시스템
 
-#### 📁 `components/` - Frontend (React Native)
-여러 페이지에서 재사용되는 공통 UI 컴포넌트들입니다.
+- 색상 태그
+- 클라이언트 즉시 필터링
 
-- `AppHeader.tsx`, `ItemGrid.tsx`, `ConfirmationModal.tsx` 등이 포함됩니다.
+### ✔ 게이미피케이션
 
-#### 📁 `hooks/` - Frontend (React Native)
-React Custom Hook을 모아놓은 디렉토리입니다. 상태 관리 로직, API 호출 등 반복되는 로직을 재사용하기 위해 사용됩니다.
+- **당근(Carrot) 재화** 획득 & 소비
+- 상점(Shop) — 아이템 구매
+- 인벤토리 — 보유 아이템 관리
+- 캐릭터(토끼) 커스터마이징
 
-- `useShop.ts`, `useInventory.ts` 등이 포함됩니다.
+### ✔ 사용자 관리
 
-#### 📁 `store/` - Frontend (React Native)
-Zustand와 같은 상태 관리 라이브러리를 사용하여 전역 상태를 관리합니다.
+- 회원가입 / 로그인 (JWT)
+- 테마 변경
+- 당근 히스토리 조회
 
-- `userStore.ts`: 사용자 정보(예: 로그인 상태)를 전역으로 관리합니다.
+---
 
-#### 📁 `assets/`
-이미지, 폰트 등 정적 에셋 파일이 위치합니다.
+## 🗂 서비스 구성 / 페이지 설명
 
-### 📁 기타 주요 파일
-- **`.gitignore`**: Git 버전 관리에서 제외할 파일 및 폴더를 지정합니다.
-- **`package.json`**: 프로젝트 정보 및 `npm` 의존성(라이브러리) 목록을 관리합니다.
-- **`requirements.txt`**: Python 의존성(라이브러리) 목록을 관리합니다.
-- **`babel.config.js`**: Babel 컴파일러 설정을 담당합니다.
-- **`tsconfig.json`**: TypeScript 컴파일러 설정을 담당합니다.
+### **1. Auth (로그인/회원가입)**
+
+- JWT 기반 로그인 및 토큰 저장
+
+### **2. Home / Dashboard**
+
+- 무한 캘린더
+- 선택 날짜 Todo 목록
+- 캐릭터 UI + 현재 당근 표시
+- 카테고리 필터링
+
+### **3. Todo 상세**
+
+- `/todos/:date`
+- Todo CRUD, 완료 처리
+
+### **4. Calendar View**
+
+- 월별 이동
+
+### **5. Shop**
+
+- 아이템 목록 조회 / 구매
+
+### **6. Inventory**
+
+- 보유 아이템 조회 및 장착/해제
+
+### **7. Profile (MyPage)**
+
+- 테마 변경
+- 당근 히스토리
+
+---
+
+## 🧾 데이터 구조 & 핵심 API
+
+### 📌 주요 모델
+
+```
+User
+- id
+- username
+- email
+- carrot_balance
+- profile
+
+Todo
+- id
+- owner_id
+- title
+- description
+- date
+- completed
+- categories (Many-to-many)
+
+Category
+- id
+- name
+- color
+
+Item
+- id
+- name
+- price
+- type
+- sprite_path
+
+Inventory
+- id
+- user_id
+- item_id
+- equipped (bool)
+```
+
+---
+
+### 📌 핵심 엔드포인트 요약
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | /auth/register | 회원가입 |
+| POST | /auth/login | 로그인(JWT) |
+| GET | /todos/?target_date=YYYY-MM-DD | 날짜별 Todo 조회 |
+| PUT | /todos/{id} | Todo 수정 |
+| POST | /todos/{id}/complete | 완료 처리 + 보상 지급 |
+| GET | /shop/items | 아이템 목록 |
+| POST | /shop/purchase | 아이템 구매 |
+| GET | /inventory | 인벤토리 조회 |
+| POST | /inventory/equip | 장착 처리 |
+
+---
+
+## 🔄 워크플로우 예시
+
+### **할 일 완료 → 보상 지급 흐름**
+
+1. 사용자가 Todo 완료 체크
+2. 프론트: Optimistic UI로 즉시 완료 표시
+3. 서버에 요청
+    - `PUT /todos/{id}` : 완료 상태 업데이트
+    - `POST /todos/{id}/complete` : 보상 트랜잭션
+4. 서버 내부 처리
+    - Todo.completed 업데이트
+    - User.carrot_balance 증가
+5. 서버 응답 → 프론트 전역 상태(userStore) 업데이트
+6. 사용자는 상점에서 아이템 구매 가능

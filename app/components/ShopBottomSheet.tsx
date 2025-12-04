@@ -3,6 +3,7 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CategoryTabs from './CategoryTabs';
 import ItemGrid from './ItemGrid';
 
@@ -48,8 +49,12 @@ export default function ShopBottomSheet({
   onItemPress,
   renderItemFooter,
 }: ShopBottomSheetProps) {
+  const { bottom } = useSafeAreaInsets();
+
   return (
-    <Animated.View style={[styles.bottomSheet, animatedStyle]}>
+    <Animated.View 
+      style={[styles.bottomSheet, animatedStyle, { bottom }]}
+    >
       {/* 상단 핸들 제스처 영역 */}
       <GestureDetector gesture={panGesture}>
         <View style={styles.handleContainer}>
@@ -84,26 +89,20 @@ export default function ShopBottomSheet({
 const styles = StyleSheet.create({
   bottomSheet: {
     position: 'absolute',
-    bottom: 0,
     left: 0,
     right: 0,
-    height: '55%',
-    backgroundColor: 'transparent', // 배경을 투명하게 변경
+    height: '45%', // 높이를 45%로 통일
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // 배경을 반투명한 흰색으로 변경
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    shadowColor: '#000',
     borderTopWidth: 1, // 상단 경계선 추가
     borderTopColor: 'rgba(255, 255, 255, 0.3)', // 반투명 경계선 색상
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 10,
   },
   handleContainer: {
     alignItems: 'center',
     paddingVertical: 12,
     // @ts-ignore: 'grab' is a valid cursor value for web
-    cursor: 'grab',
+    //cursor: 'grab',
   },
   handle: {
     width: 40,
@@ -113,6 +112,5 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 12,
-    fontFamily: 'Jua',
   },
 });

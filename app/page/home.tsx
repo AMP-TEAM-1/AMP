@@ -20,15 +20,17 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
+import { useUserStore } from '../store/userStore';
 import AlarmPage from './alarm';
 import CategoryContent from './category';
 import { ColorContext } from './ColorContext';
 import MyPageScreen from './mypage';
 import TodosScreen from './todos';
 
-// 🥕 백엔드 서버 주소
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+// 🥕 백엔드 서버 주소.
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const Drawer = createDrawerNavigator();
 
@@ -40,13 +42,16 @@ type Todo = {
   id: number;
   title: string;
   completed: boolean;
-  categories: { id: number; text: string }[];
+  categories: Category[];
   date?: string;
 };
 
-type Category = { id: number; text: string };
+type Category = { id: number; text: string; color?: string; };
 
 function HomeContent() {
+  // 🥕 userStore에서 fetchUserData 함수를 가져옵니다.
+  const { fetchUserData } = useUserStore();
+
   const { colors } = React.useContext(ColorContext);
   const navigation = useNavigation<any>();
   const flatListRef = useRef<FlatList<number>>(null);
@@ -71,6 +76,39 @@ function HomeContent() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | number>('all');
   const [actionTodo, setActionTodo] = useState<Todo | null>(null);
   const [categorySelectVisible, setCategorySelectVisible] = useState(false);
+
+  const categoryColors = [
+  '#FFE0A3',
+  '#A3D8FF',
+  '#FFA3A3',
+  '#C8FFA3',
+  '#E3A3FF',
+  '#FFD1A3',
+  '#A3FFE0',
+  ];
+
+  const [coloredCategories, setColoredCategories] = useState<Category[]>([]);
+
+  const colorMap = Object.fromEntries(
+    coloredCategories.map(cat => [cat.id, cat.color])
+  );
+
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      // 색상 배열 복사 후 섞기
+      const shuffled = [...categoryColors].sort(() => Math.random() - 0.5);
+
+      // categories 각각에 색상 부여
+      const result = categories.map((cat, index) => ({
+        ...cat,
+        color: shuffled[index % shuffled.length], // 색상 부족하면 순환
+      }));
+
+      setColoredCategories(result);
+    }
+  }, [categories]);
+
 
   // 인증 헤더
   const getAuthHeaders = async () => {
@@ -104,7 +142,19 @@ function HomeContent() {
         headers,
         params: { target_date: formatDate(date) },
       });
-      setCurrentTodos(res.data || []);
+
+      const todos: Todo[] = res.data;
+
+      // ⭐ 여기서 color 입혀주기
+      const mapped = todos.map(todo => ({
+        ...todo,
+        categories: todo.categories.map(cat => {
+          const colored = coloredCategories.find(c => c.id === cat.id);
+          return colored ? { ...cat, color: colored.color } : cat;
+        })
+      }));
+
+      setCurrentTodos(mapped || []);
     } catch (err) {
       console.error('[fetchTodosByDate] error:', err);
       setCurrentTodos([]);
@@ -169,16 +219,12 @@ function HomeContent() {
 
   // 완료 토글
   const handleCheck = async (id: number, currentCompleted: boolean) => {
-    // 🥕 이미 완료된 할 일은 다시 체크 해제할 수 없도록 막습니다.
-    if (currentCompleted) {
-      Alert.alert('완료', '이미 완료된 할 일입니다.');
-      return;
-    }
-
     setCurrentTodos(prev => prev.map(t => (t.id === id ? { ...t, completed: !currentCompleted } : t)));
     try {
       const headers = await getAuthHeaders();
-      await axios.put(`${API_URL}/todos/${id}`, { completed: !currentCompleted }, { headers });
+      await axios.put(`${API_URL}/todos/${id}/`, { completed: !currentCompleted }, { headers });
+      // 🥕 할일 완료/해제 성공 시, 유저 데이터를 다시 불러와 당근 개수를 업데이트합니다.
+      await fetchUserData();
     } catch (err) {
       console.error('[handleCheck] error:', err);
       // 롤백
@@ -192,7 +238,7 @@ function HomeContent() {
   const saveTodo = async (id: number, newTitle: string) => {
     try {
       const headers = await getAuthHeaders();
-      await axios.put(`${API_URL}/todos/${id}`, { title: newTitle }, { headers });
+      await axios.put(`${API_URL}/todos/${id}/`, { title: newTitle }, { headers });
       setCurrentTodos(prev => prev.map(t => (t.id === id ? { ...t, title: newTitle } : t)));
     } catch (err) {
       console.error('[saveTodo] error:', err);
@@ -233,9 +279,9 @@ function HomeContent() {
             >
               <Ionicons name="menu" size={30} color="#000" />
             </Pressable>
-            <Text style={styles.dateText}>
+            <ThemedText style={styles.dateText}>
               {today.getMonth() + 1}. {today.getDate()}. ({['일','월','화','수','목','금','토'][today.getDay()]})
-            </Text>
+            </ThemedText>
             <Pressable
               onPress={() => navigation.navigate('MyPage')}
               style={{
@@ -248,6 +294,7 @@ function HomeContent() {
                 justifyContent: 'center',
                 alignItems: 'center',
                 overflow: 'hidden',
+                marginTop:10,
               }}
             >
               <Image
@@ -265,10 +312,10 @@ function HomeContent() {
           <View style={styles.calendarContainer}>
             <View style={styles.calendarHeader}>
               <Pressable onPress={handleGoToday} style={styles.goTodayButton}>
-                <Text style={styles.goTodayText}>오늘</Text>
+                <ThemedText style={styles.goTodayText}>오늘</ThemedText>
               </Pressable>
               <View style={{ flex: 1, alignItems: 'center' }}>
-                <Text style={styles.monthText}>{formatMonthYear(selected)}</Text>
+                <ThemedText style={styles.monthText}>{formatMonthYear(selected)}</ThemedText>
               </View>
               <View style={{ width: 60 }} />
             </View>
@@ -296,12 +343,12 @@ function HomeContent() {
                       isSelected && styles.dateButtonSelected,
                     ]}
                   >
-                    <Text style={[styles.weekdayText, isSelected && styles.weekdaySelected]}>
+                    <ThemedText style={[styles.weekdayText, isSelected && styles.weekdaySelected]}>
                       {['일','월','화','수','목','금','토'][item.getDay()]}
-                    </Text>
-                    <Text style={[styles.dateNumber, isSelected && styles.dateNumberSelected]}>
+                    </ThemedText>
+                    <ThemedText style={[styles.dateNumber, isSelected && styles.dateNumberSelected]}>
                       {item.getDate()}
-                    </Text>
+                    </ThemedText>
                   </Pressable>
                 );
               }}
@@ -309,9 +356,9 @@ function HomeContent() {
             />
             <View style={{ alignItems: 'center', marginTop: 3 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ fontSize: 18, color: '#333', fontWeight: '700' }}>
+                <ThemedText style={{ fontSize: 18, color: '#333', fontWeight: '700' }}>
                   {currentTodos.filter(todo => !todo.completed).length}
-                </Text>
+                </ThemedText>
                 <Ionicons name="checkmark-outline" size={22} color="#000" />
               </View>
             </View>
@@ -320,7 +367,7 @@ function HomeContent() {
           {/* 카테고리 바 */}
           <View style={{ height: 45 }}>
             <FlatList
-              data={[{ id: -1, text: 'ALL' } as Category, ...categories]}
+              data={[{ id: -1, text: 'ALL', color: '#fff' } as Category, ...coloredCategories]}
               horizontal
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => String(item.id)}
@@ -349,7 +396,7 @@ function HomeContent() {
                             }
                           : {
                               width: Math.max(80, item.text.length * 18 + 40),
-                              backgroundColor: isSelected ? '#1f7aeb' : '#FFE0A3',
+                              backgroundColor: isSelected ? '#1f7aeb' : item.color, 
                             },
                       ]}
                     >
@@ -384,7 +431,17 @@ function HomeContent() {
                 const isEditing = editingTodoId === item.id;
 
                 return (
-                  <View style={styles.item}>
+                  <View style={[
+                    styles.item,
+                    item.categories.length > 0
+                      ? {
+                          borderLeftWidth: 8,
+                          borderLeftColor: coloredCategories.find(c => c.id === item.categories[0].id)?.color || '#ccc',
+                        }
+                      : {
+                          borderLeftWidth: 0,  // 카테고리 없으면 띠 제거
+                        },
+                  ]}>
                     {isEditing ? (
                       <TextInput
                         style={[styles.itemTitle, { flex: 1, borderBottomWidth: 1, borderColor: '#aaa' }]}
@@ -400,21 +457,21 @@ function HomeContent() {
                         }}
                       />
                     ) : (
-                      <Text
+                      <ThemedText
                         style={[
                           styles.itemTitle,
                           item.completed && { textDecorationLine: 'line-through', color: '#888' },
                         ]}
                       >
                         {item.title}
-                      </Text>
+                      </ThemedText>
                     )}
 
                     {item.categories && item.categories.length > 0 && (
                       <View style={{ flexDirection: 'row', marginTop: 2, marginLeft: 10, gap: 6, flexWrap: 'wrap' }}>
                         {item.categories.map(({ id, text }) => (
                           <View key={id} style={{ paddingHorizontal: 6, paddingVertical: 2, backgroundColor: '#FFE0A3', borderRadius: 6 }}>
-                            <Text style={{ fontSize: 13, color: '#1f7aeb' }}>{text}</Text>
+                            <ThemedText style={{ fontSize: 13, color: '#1f7aeb' }}>{text}</ThemedText>
                           </View>
                         ))}
                       </View>
@@ -444,9 +501,9 @@ function HomeContent() {
                           alignItems: 'center',
                           backgroundColor: item.completed ? '#1f7aeb' : 'transparent',
                         }}
-                        onPress={() => handleCheck(item.id, item.completed)} disabled={item.completed}
+                        onPress={() => handleCheck(item.id, item.completed)}
                       >
-                        {item.completed && <Text style={{ color: 'white', fontWeight: 'bold' }}>✓</Text>}
+                        {item.completed && <ThemedText style={{ color: 'white', fontWeight: 'bold' }}>✓</ThemedText>}
                       </Pressable>
                     </View>
                   </View>
@@ -488,7 +545,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="pencil-outline" size={20} color="blue" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'blue' }}>수정하기</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'blue' }}>수정하기</ThemedText>
                 </Pressable>
 
                 <View style={{ height: 1, backgroundColor: '#ccc', width: '100%', marginVertical: 4 }} />
@@ -502,7 +559,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="book-outline" size={20} color="green" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'green' }}>카테고리 설정</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'green' }}>카테고리 설정</ThemedText>
                 </Pressable>
 
                 <View style={{ height: 1, backgroundColor: '#ccc', width: '100%', marginVertical: 4 }} />
@@ -512,11 +569,14 @@ function HomeContent() {
                   style={{ paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
                   onPress={() => {
                     setActionModalVisible(false);
-                    navigation.navigate('Alarm');
+                    // 🥕 알람 페이지로 이동 시, 현재 할 일의 ID를 파라미터로 전달합니다.
+                    if (actionTodo) {
+                      navigation.navigate('Alarm', { todoId: actionTodo.id, todoTitle: actionTodo.title });
+                    }
                   }}
                 >
                   <Ionicons name="notifications-outline" size={20} color="black" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'black' }}>알림 설정</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'black' }}>알림 설정</ThemedText>
                 </Pressable>
 
                 <View style={{ height: 1, backgroundColor: '#ccc', width: '100%', marginVertical: 4 }} />
@@ -527,8 +587,8 @@ function HomeContent() {
                   onPress={async () => {
                     if (!actionTodo) return;
                     try {
-                      const headers = await getAuthHeaders();
-                      await axios.delete(`${API_URL}/todos/${actionTodo.id}`, { headers });
+                      const headers = await getAuthHeaders(); 
+                      await axios.delete(`${API_URL}/todos/${actionTodo.id}/`, { headers });
                       setCurrentTodos(prev => prev.filter(t => t.id !== actionTodo.id));
                     } catch (err) {
                       console.error('[deleteTodo] error:', err);
@@ -540,7 +600,7 @@ function HomeContent() {
                   }}
                 >
                   <Ionicons name="trash-outline" size={20} color="red" style={{ marginRight: 10 }} />
-                  <Text style={{ fontSize: 17, color: 'red' }}>삭제하기</Text>
+                  <ThemedText style={{ fontSize: 17, color: 'red' }}>삭제하기</ThemedText>
                 </Pressable>
               </View>
 
@@ -557,7 +617,7 @@ function HomeContent() {
                   style={{ paddingVertical: 14, alignItems: 'center', justifyContent: 'center' }}
                   onPress={() => setActionModalVisible(false)}
                 >
-                  <Text style={{ fontSize: 17, color: '#000' }}>취소</Text>
+                  <ThemedText style={{ fontSize: 17, color: '#000' }}>취소</ThemedText>
                 </Pressable>
               </View>
             </View>
@@ -584,7 +644,7 @@ function HomeContent() {
                 maxHeight: 400,
               }}
             >
-              <Text style={{ fontSize: 18, fontWeight: '700', textAlign: 'center', marginBottom: 12 }}>카테고리 관리</Text>
+              <ThemedText style={{ fontSize: 18, fontWeight: '700', textAlign: 'center', marginBottom: 12 }}>카테고리 관리</ThemedText>
 
               <ScrollView style={{ marginTop: 12 }}>
                 {categories.map(cat => (
@@ -593,6 +653,7 @@ function HomeContent() {
                     style={{ paddingVertical: 12, paddingHorizontal: 20, borderBottomWidth: 1, borderColor: '#eee' }}
                     onPress={async () => {
                       if (!actionTodo) return;
+
                       const currentIds = actionTodo.categories.map(c => c.id);
                       const nextIds = currentIds.includes(cat.id)
                         ? currentIds.filter(id => id !== cat.id)
@@ -600,8 +661,12 @@ function HomeContent() {
 
                       try {
                         const headers = await getAuthHeaders();
-                        await axios.put(`${API_URL}/todos/${actionTodo.id}`, { category_ids: nextIds }, { headers });
+                        await axios.put(`${API_URL}/todos/${actionTodo.id}/`, { category_ids: nextIds }, { headers });
                         await fetchTodosByDate(selected);
+
+                        const updatedCategories = nextIds.map(id => categories.find(c => c.id === id)!);
+                        setActionTodo({ ...actionTodo, categories: updatedCategories });
+
                       } catch (err) {
                         console.error('[update categories] error:', err);
                         if (Platform.OS === 'web') window.alert('카테고리 업데이트 실패');
@@ -609,9 +674,9 @@ function HomeContent() {
                       }
                     }}
                   >
-                    <Text style={{ fontSize: 16 }}>
+                    <ThemedText style={{ fontSize: 16 }}>
                       {cat.text} {actionTodo?.categories.some(c => c.id === cat.id) ? '✅' : ''}
-                    </Text>
+                    </ThemedText>
                   </Pressable>
                 ))}
 
@@ -622,8 +687,10 @@ function HomeContent() {
                     if (!actionTodo) return;
                     try {
                       const headers = await getAuthHeaders();
-                      await axios.put(`${API_URL}/todos/${actionTodo.id}`, { category_ids: [] }, { headers });
+                      await axios.put(`${API_URL}/todos/${actionTodo.id}/`, { category_ids: [] }, { headers });
                       await fetchTodosByDate(selected);
+
+                      setActionTodo({ ...actionTodo, categories: [] });
                     } catch (err) {
                       console.error('[clear categories] error:', err);
                       if (Platform.OS === 'web') window.alert('카테고리 초기화 실패');
@@ -631,7 +698,7 @@ function HomeContent() {
                     }
                   }}
                 >
-                  <Text style={{ fontSize: 16 }}>카테고리 초기화</Text>
+                  <ThemedText style={{ fontSize: 16 }}>카테고리 초기화</ThemedText>
                 </Pressable>
               </ScrollView>
             </View>
@@ -697,24 +764,24 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
             <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
               <Ionicons name="menu" size={30} color="#000" />
             </Pressable>
-            <Text style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</Text>
+            <ThemedText style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</ThemedText>
             <View style={{ width: 28 }} />
           </View>
 
-          <Text style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
+          <ThemedText style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
             계정 정보
-          </Text>
+          </ThemedText>
 
           <View style={{ height: 2, backgroundColor: '#000', marginVertical: 8 }} />
 
           <View style={{ paddingHorizontal: 16, gap: 16 }}>
-            <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이메일</Text>
+            <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이메일</ThemedText>
             <View style={styles.infoBox}>
               <Text style={{ fontSize: 16, color: '#000' }}>{email}</Text>
             </View>
 
             <View>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이름</Text>
+              <ThemedText style={{ fontSize: 16, fontWeight: '800', color: '#555', marginTop: 20 }}>이름</ThemedText>
               <TextInput
                 style={{
                   height: 50,
@@ -744,7 +811,7 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
                   setUserName(localName); // Drawer에 반영
                 }}
               >
-                <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600', }}>저장</Text>
+                <ThemedText style={{ color: '#fff', fontSize: 18, fontWeight: '600', }}>저장</ThemedText>
               </Pressable>
               
             </View>
@@ -760,7 +827,7 @@ function InformationContent({ userName, setUserName }: { userName: string; setUs
                 alignItems: 'center',
               }}
             >
-              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>로그아웃</Text>
+              <ThemedText style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>로그아웃</ThemedText>
             </Pressable>
           </View>
         </View>
@@ -776,13 +843,13 @@ function OptionContent() {
   const gradients = [
     ['#ffafb2ff', '#ffe0d7ff', '#ffe0d7ff', '#ffafb2ff'], // 분홍
     ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'], // 기본(주황)
-    ['#fcff51ff', '#f8ffaaff', '#f8ffaaff', '#fcff51ff'], // 노랑
+    ['#fdff74ff', '#faffbeff', '#faffbeff', '#fdff74ff'], // 노랑
     ['#51ff44ff', '#c6ffa3ff', '#c6ffa3ff', '#51ff44ff'], // 초록
     ['#5ffff4ff', '#d2fffcff', '#d2fffcff', '#5ffff4ff'], // 하늘
     ['#b7b8ffff', '#dbf2fcff', '#dbf2fcff', '#b7b8ffff'], // 파랑
     ['#FBC2EB', '#fae6f9ff', '#fae6f9ff', '#FBC2EB'], // 보라
     ['#b5b4b4ff', '#f6f6f6', '#f6f6f6', '#b5b4b4ff'], // 회색
-    ['#fff'], // 흰색
+    ['#fff', '#fff', '#fff', '#fff'], // 흰색
   ];
 
   return (
@@ -800,14 +867,14 @@ function OptionContent() {
             <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
               <Ionicons name="menu" size={30} color="#000" />
             </Pressable>
-            <Text style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</Text>
+            <ThemedText style={{ fontSize: 23, fontWeight: '500', color: '#000' }}>설정</ThemedText>
             <View style={{ width: 28 }} />
           </View>
 
           {/* 타이틀 */}
-          <Text style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
+          <ThemedText style={{ fontSize: 25, fontWeight: '600', color: '#000', marginLeft: 15, marginTop: 10 }}>
             배경 색상 선택
-          </Text>
+          </ThemedText>
           <View style={{ height: 2, backgroundColor: '#000', marginVertical: 8 }} />
 
           {/* 색상 옵션 (3x2 그리드) */}
@@ -858,7 +925,7 @@ function OptionContent() {
                         alignItems: 'center',
                       }}
                     >
-                      <Text
+                      <ThemedText
                         style={{
                           fontSize: 16,
                           fontWeight: '600',
@@ -869,7 +936,7 @@ function OptionContent() {
                         }}
                       >
                         색상 {idx + 1}
-                      </Text>
+                      </ThemedText>
                     </LinearGradient>
                   </Pressable>
                 ))}
@@ -888,48 +955,48 @@ function CustomDrawerContent({ userName, ...props }: any) {
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
       <View style={styles.drawerHeader}>
-        <Text style={styles.userText}>{userName}</Text>
+        <ThemedText style={styles.userText}>{userName}</ThemedText>
       </View>
 
       <DrawerItem
         label="오늘의 할 일"
-        labelStyle={{ color: 'black' }}
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Home')}
         icon={({ size }) => <Ionicons name="time-outline" size={size} color='blue' />}
       />
 
       <DrawerItem
         label="카테고리"
-        labelStyle={{ color: 'black' }}
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Category')}
         icon={({ size }) => <Ionicons name="menu-outline" size={size} color='blue' />}
       />
 
       <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
 
-      <Text style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>커스터마이징</Text>
+      <ThemedText style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>커스터마이징</ThemedText>
 
       <DrawerItem
         label="마이페이지"
-        labelStyle={{ color: 'black' }}
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('MyPage')}
         icon={({ size }) => <MaterialIcons name="emoji-emotions" size={size} color='blue' />}
       />
 
       <View style={{ height: 1, backgroundColor: '#aaa', marginVertical: 8, marginBottom: 15 }} />
 
-      <Text style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>설정</Text>
+      <ThemedText style={{ marginLeft: 16, marginBottom: 5, color: '#000', fontWeight: '600' }}>설정</ThemedText>
 
       <DrawerItem
         label="계정 정보"
-        labelStyle={{ color: 'black' }}
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Info')}
         icon={({ size }) => <Ionicons name="person-outline" size={size} color='blue' />}
       />
 
       <DrawerItem
         label="테마"
-        labelStyle={{ color: 'black' }}
+        labelStyle={{ color: 'black', fontFamily: 'Cafe24Ssurround' }}
         onPress={() => props.navigation.navigate('Option')}
         icon={({ size }) => <Ionicons name="settings-outline" size={size} color='blue' />}
       />
@@ -963,10 +1030,10 @@ export default function AppDrawer() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 24 },
   header: { height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 0 },
-  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, },
+  dateText: { fontSize: 24, fontWeight: '700', color: '#000', marginLeft: 15, marginTop:10, fontFamily: 'Cafe24Ssurround' },
   drawerHeader: { padding: 16, marginBottom: 8 },
-  userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 15 },
-  menuButton: { marginRight: 8 },
+  userText: { fontSize: 20, fontWeight: 'bold', color: '#000', marginTop: 30 },
+  menuButton: { marginRight: 8, marginTop:10, },
   calendarContainer: {
     backgroundColor: 'white',
     borderRadius: 12,
@@ -980,9 +1047,9 @@ const styles = StyleSheet.create({
     borderColor: '#aaa',
   },
   calendarHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 8, marginBottom: 8 },
-  monthText: { fontSize: 19, fontWeight: '700' },
+  monthText: { fontSize: 19, fontWeight: '700', fontFamily: 'Cafe24Ssurround' },
   goTodayButton: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, marginTop: 7 },
-  goTodayText: { fontSize: 14, fontWeight: '600' },
+  goTodayText: { fontSize: 14, fontWeight: '600', fontFamily: 'Cafe24Ssurround' },
   dateButton: {
     width: 52,
     height: 52,
@@ -994,9 +1061,9 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   dateButtonSelected: { backgroundColor: '#1f7aeb22', borderColor: '#1f7aeb' },
-  dateNumber: { fontSize: 16, fontWeight: '700', color: '#111' },
+  dateNumber: { fontSize: 16, fontWeight: '700', color: '#111', fontFamily: 'Cafe24Ssurround' },
   dateNumberSelected: { color: '#1f7aeb' },
-  weekdayText: { fontSize: 14, fontWeight: '600', color: '#000' },
+  weekdayText: { fontSize: 14, fontWeight: '600', color: '#000', fontFamily: 'Cafe24Ssurround' },
   weekdaySelected: { color: '#1f7aeb', fontWeight: '600' },
   input: { height: 56, marginTop: 12, paddingHorizontal: 16, fontSize: 16, borderRadius: 8, borderWidth: 1, borderColor: '#ddd', backgroundColor: '#fff' },
   addButton: { height: 30, width: 30, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', borderRadius: 30, borderWidth: 3, borderColor: '#000' },
@@ -1015,7 +1082,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  itemTitle: { fontSize: 19, fontWeight: '600' },
+  itemTitle: { fontSize: 19, fontWeight: '600', fontFamily: 'Cafe24Ssurround' },
   editButton: { backgroundColor: '#fff', width: 25, height: 25, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   deleteButton: { backgroundColor: '#ff4d4f', paddingVertical: 4, paddingHorizontal: 12, borderRadius: 6 },
   buttonText: { color: '#fff', fontWeight: '600' },
@@ -1055,5 +1122,5 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
   },
-  categoryText: { fontSize: 20, fontWeight: '700', color: '#000', textAlign: 'center' },
+  categoryText: { fontSize: 20, fontWeight: '700', color: '#000', textAlign: 'center', fontFamily: 'Cafe24Ssurround' },
 });
