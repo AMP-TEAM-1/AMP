@@ -104,7 +104,7 @@ export const itemStyleMap: { [key: number]: any } = {
   15: { zIndex: -1, opacity: 0.8, top: '-13%', left: '-32%' }, // 눈사람 배경
   16: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 생일 배경
   17: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 케이크 배경
-  18: { zIndex: -1, opacity: 0.8, top: '-10%' }, // 계단 배경
+  18: { zIndex: -1, opacity: 0.8, top: '-13%', width: '120%', height: '120%' }, // 계단 배경
 };
 
 // --- 아이템 타입별 기본 스타일 ---

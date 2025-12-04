@@ -12,6 +12,8 @@ interface UserState {
   purchaseItem: (item: Item) => Promise<true | string>;
   // 3. 아이템 장착 함수 (useInventory -> 여기로 이동)
   equipItem: (item: Item) => Promise<boolean>;
+  // 4. 아이템 해제 함수
+  unequipItem: (item: Item) => Promise<boolean>;
 }
 
 // 헬퍼 함수: 이미지 URL을 imageMap 키로 변환
@@ -109,6 +111,24 @@ export const useUserStore = create<UserState>((set, get) => ({
     } catch (error) {
        console.error("장착 실패", error);
        return false;
+    }
+  },
+
+  // 4. 아이템 해제 로직
+  unequipItem: async (item: Item) => {
+    try {
+      const headers = await getAuthHeaders();
+      await axios.put(
+        `${API_URL}/api/inventory/${item.item_id}/equip`, // 장착/해제에 동일한 엔드포인트 사용
+        { item_id: item.item_id, is_equipped: false }, // body에 item_id와 해제 상태를 명시
+        { headers }
+      );
+      // 해제 성공 시, 인벤토리 상태를 새로고침하여 is_equipped 상태 반영
+      await get().fetchUserData();
+      return true;
+    } catch (error) {
+      console.error("해제 실패", error);
+      return false;
     }
   },
 }));
