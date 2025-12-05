@@ -10,15 +10,17 @@ import { useShopBottomSheet } from '@/hooks/useShopBottomSheet';
 import { useUserStore } from '@/store/userStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useContext, useState } from 'react';
-import { StatusBar, StyleSheet, View } from 'react-native';
+import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Palette } from '../constants/theme';
+import { Colors } from '../constants/theme';
 import { ColorContext } from './ColorContext';
 
 export default function MyPageScreen() {
   const { panGesture, animatedSheetStyle, animatedRabbitStyle, selectedCategory, isSheetMinimized, isHandleTouched, handleTabPress } = useShopBottomSheet({ initialState: 'minimized' });
   const { colors } = useContext(ColorContext);
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? 'light'];
   const { shopItems: originalShopItems, loading } = useShop();
   const { carrots, inventoryItems, purchaseItem } = useUserStore();
 
@@ -57,7 +59,7 @@ export default function MyPageScreen() {
 
         <AppHeader
           title="마이페이지"
-          titleStyle={{ fontFamily: 'Cafe24Ssurround', color: Palette.text }}
+          titleStyle={{ fontFamily: 'Cafe24Ssurround', color: theme.text }}
           headerStyle={{ backgroundColor: 'transparent', marginBottom: 10 }}
         />
 
@@ -82,10 +84,10 @@ export default function MyPageScreen() {
             onItemPress={openPurchaseModal}
             renderItemFooter={(item) =>
               item.is_owned ? (
-                <ThemedText style={[styles.itemText, { color: Palette.subText }]}>보유 중</ThemedText>
+                <ThemedText style={[styles.itemText, { color: theme.icon }]}>보유 중</ThemedText>
               ) : (
                 isShopItem(item) && (
-                  <ThemedText style={[styles.itemText, { color: Palette.primary }]}>🥕 {item.price}</ThemedText>
+                  <ThemedText style={[styles.itemText, { color: theme.primary }]}>🥕 {item.price}</ThemedText>
                 )
               )
             }

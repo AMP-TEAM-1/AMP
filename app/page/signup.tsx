@@ -61,15 +61,15 @@ export default function SignupScreen() {
         style={styles.gradientContainer}
       >
 
-       <Pressable
-        onPress={() => router.push('/')}
-        style={({ pressed }) => [
-          styles.homeButton,
-          pressed && { opacity: 0.6 },
-        ]}
-      >
-        <Ionicons name="home-outline" size={width * 0.08} color="#FF8C42" />
-      </Pressable>
+        <Pressable
+          onPress={() => router.push('/')}
+          style={({ pressed }) => [
+            styles.homeButton,
+            pressed && { opacity: 0.6 },
+          ]}
+        >
+          <Ionicons name="home-outline" size={width * 0.08} color="#FF8C42" />
+        </Pressable>
 
         <ThemedView
           style={[
@@ -224,12 +224,10 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'left',
     color: '#3A3A3A',
-    fontWeight: '700', // ThemedText에서 fontFamily가 적용됩니다.
   },
   title2: {
     textAlign: 'left',
     color: '#FF8C42',
-    fontWeight: '700', // ThemedText에서 fontFamily가 적용됩니다.
   },
   input: {
     backgroundColor: '#F5F5F5',
@@ -237,7 +235,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     paddingHorizontal: 20,
-    fontFamily: 'Cafe24Ssurround', // TextInput에는 직접 적용 필요
+    fontFamily: 'Cafe24Ssurround',
   },
   signupButton: {
     backgroundColor: '#FFB347',
@@ -249,8 +247,7 @@ const styles = StyleSheet.create({
   },
   signupButtonText: {
     color: '#000',
-    fontWeight: '700',
-    textAlign: 'center', // ThemedText에서 fontFamily가 적용됩니다.
+    textAlign: 'center',
   },
   loginContainer: {
     flexDirection: 'row',
@@ -258,10 +255,8 @@ const styles = StyleSheet.create({
   },
   normalText: {
     color: '#000',
-    fontWeight: 'bold', // ThemedText에서 fontFamily가 적용됩니다.
   },
   loginText: {
     color: '#FF8C42',
-    fontWeight: 'bold', // ThemedText에서 fontFamily가 적용됩니다.
   },
 });

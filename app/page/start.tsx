@@ -77,7 +77,7 @@ export default function InitScreen() {
             onPress={() => router.push('/page/login')}
           >
             <ThemedText
-              style={{ color: '#000', fontSize: width * 0.04, fontWeight: 'bold' }}
+              style={{ color: '#000', fontSize: width * 0.04 }}
             >
               로그인
             </ThemedText>
@@ -99,7 +99,6 @@ export default function InitScreen() {
               style={{
                 color: '#000',
                 fontSize: width * 0.04,
-                fontWeight: '700',
                 textAlign: 'center',
               }}
             >
@@ -122,21 +121,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   slogan: {
-    fontWeight: '700',
     color: '#3A3A3A',
     textAlign: 'center',
   },
   slogan2: {
-    fontWeight: '700',
     color: '#FF8C42',
     textAlign: 'center',
   },
   whiteBox: {
-    backgroundColor: '#FFFFFF', // ✅ 버튼 배경 흰색
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 4, // ✅ 약간의 그림자 효과 (Android)
-    shadowColor: '#000', // ✅ 그림자 (iOS)
+    elevation: 4,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,

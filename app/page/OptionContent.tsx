@@ -12,17 +12,13 @@ export default function OptionContent() {
     const { colors, setColors } = React.useContext(ColorContext);
     const navigation = useNavigation<any>();
 
-    // 제공할 그라데이션 프리셋들
     const gradients = [
-        ['#ffafb2ff', '#ffe0d7ff', '#ffe0d7ff', '#ffafb2ff'], // 분홍
-        ['#FFD8A9', '#FFF5E1', '#FFF5E1', '#FFD8A9'], // 오렌지
-        ['#fdff74ff', '#faffbeff', '#faffbeff', '#fdff74ff'], // 노랑
-        ['#51ff44ff', '#c6ffa3ff', '#c6ffa3ff', '#51ff44ff'], // 초록
-        ['#5ffff4ff', '#d2fffcff', '#d2fffcff', '#5ffff4ff'], // 하늘
-        ['#b7b8ffff', '#dbf2fcff', '#dbf2fcff', '#b7b8ffff'], // 파랑
-        ['#FBC2EB', '#fae6f9ff', '#fae6f9ff', '#FBC2EB'], // 보라
-        ['#b5b4b4ff', '#f6f6f6', '#f6f6f6', '#b5b4b4ff'], // 회색
-        ['#fff', '#fff', '#fff', '#fff'], // 흰색
+        ['#FFF8F0', '#FFF0E0'],
+        ['#FFF0F5', '#FFD1DC'],
+        ['#FFFAF0', '#FFF8DC'],
+        ['#F1F8E9', '#DCEDC8'],
+        ['#F0F8FF', '#E0F7FA'],
+        ['#F8F9FA', '#E9ECEF'],
     ];
 
     return (

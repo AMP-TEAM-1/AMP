@@ -3,17 +3,18 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
-import { Alert, Animated, Image, Pressable, StatusBar, StyleSheet, View } from 'react-native';
+import { Animated, Image, Pressable, StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import MonthlyCalendar from '../components/Calendar/MonthlyCalendar';
 import WeeklyCalendar from '../components/Calendar/WeeklyCalendar';
 import CategoryBar from '../components/Common/CategoryBar';
+import CategorySelectionModal from '../components/Common/CategorySelectionModal';
 import TodoActionModal from '../components/Todo/TodoActionModal';
 import TodoList from '../components/Todo/TodoList';
 import { ThemedText } from '../components/themed-text';
 
-import { Palette } from '../constants/theme';
+import { Colors } from '../constants/theme';
 import { useCalendar } from '../hooks/useCalendar';
 import { useTodos } from '../hooks/useTodos';
 import { useUserStore } from '../store/userStore';
@@ -33,6 +34,8 @@ function HomeContent() {
   const navigation = useNavigation<any>();
   const { fetchUserData } = useUserStore();
   const { colors } = React.useContext(ColorContext);
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? 'light'];
 
   const {
     selectedDate,
@@ -52,11 +55,13 @@ function HomeContent() {
     toggleTodo,
     updateTodoTitle,
     deleteTodo,
+    updateTodoCategory,
   } = useTodos(selectedDate);
 
   const [selectedCategory, setSelectedCategory] = useState<'all' | number>('all');
   const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
   const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [selectedTodoAction, setSelectedTodoAction] = useState<any>(null);
 
   useEffect(() => {
@@ -82,7 +87,7 @@ function HomeContent() {
           {/* [1] 상단 헤더 영역 - 날짜 포맷 변경 */}
           <View style={styles.header}>
             <Pressable onPress={() => navigation.toggleDrawer()} style={styles.iconButton}>
-              <Ionicons name="menu" size={28} color={Palette.text} />
+              <Ionicons name="menu" size={28} color={theme.text} />
             </Pressable>
 
             {/* 년도 월 일 형식으로 변경 */}
@@ -110,10 +115,10 @@ function HomeContent() {
                 {calendarViewMode === 'monthly' && (
                   <View style={styles.arrowContainer}>
                     <Pressable onPress={handlePrevMonth} style={styles.arrowButton}>
-                      <Ionicons name="chevron-back" size={20} color={Palette.subText} />
+                      <Ionicons name="chevron-back" size={20} color={theme.icon} />
                     </Pressable>
                     <Pressable onPress={handleNextMonth} style={styles.arrowButton}>
-                      <Ionicons name="chevron-forward" size={20} color={Palette.subText} />
+                      <Ionicons name="chevron-forward" size={20} color={theme.icon} />
                     </Pressable>
                   </View>
                 )}
@@ -122,7 +127,7 @@ function HomeContent() {
               <Pressable onPress={toggleViewMode} style={styles.viewModeButton}>
                 <Ionicons
                   name={calendarViewMode === 'horizontal' ? 'calendar-outline' : 'swap-horizontal'}
-                  size={20} color={Palette.subText}
+                  size={20} color={theme.icon}
                 />
               </Pressable>
             </View>
@@ -142,7 +147,7 @@ function HomeContent() {
 
             <View style={styles.calendarFooter}>
               <ThemedText style={styles.taskCount}>
-                남은 할 일 <ThemedText style={{ color: Palette.accent, fontWeight: 'bold' }}>
+                남은 할 일 <ThemedText style={{ color: theme.primary, fontWeight: 'bold' }}>
                   {todos.filter(t => !t.completed).length}
                 </ThemedText>개
               </ThemedText>
@@ -193,8 +198,8 @@ function HomeContent() {
               setActionModalVisible(false);
             }}
             onCategorySetting={() => {
-              Alert.alert('알림', '카테고리 설정은 추후 구현 예정입니다.');
               setActionModalVisible(false);
+              setCategoryModalVisible(true);
             }}
             onAlarmSetting={() => {
               setActionModalVisible(false);
@@ -206,6 +211,19 @@ function HomeContent() {
             onDelete={() => {
               if (selectedTodoAction) deleteTodo(selectedTodoAction.id);
               setActionModalVisible(false);
+            }}
+          />
+
+          {/* 카테고리 선택 모달 */}
+          <CategorySelectionModal
+            visible={categoryModalVisible}
+            onClose={() => setCategoryModalVisible(false)}
+            categories={coloredCategories}
+            selectedCategoryIds={selectedTodoAction?.categories?.map((c: any) => c.id) || []}
+            onConfirm={async (categoryIds: number[]) => {
+              if (selectedTodoAction) {
+                await updateTodoCategory(selectedTodoAction.id, categoryIds);
+              }
             }}
           />
 
@@ -253,7 +271,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20, // 폰트 사이즈 조정
     fontFamily: 'Cafe24Ssurround',
-    color: Palette.text,
+    color: '#212529',
   },
   profileButton: {
     width: 44,
@@ -261,7 +279,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: '#fff',
     borderWidth: 2,
-    borderColor: Palette.background,
+    borderColor: '#F8F9FA',
     overflow: 'hidden',
     elevation: 2,
   },
@@ -299,11 +317,11 @@ const styles = StyleSheet.create({
   todayText: {
     fontSize: 14,
     fontFamily: 'Cafe24Ssurround',
-    color: Palette.text,
+    color: '#212529',
   },
   viewModeButton: { padding: 4 },
   calendarFooter: { marginTop: 16, alignItems: 'center' },
-  taskCount: { fontSize: 14, color: Palette.subText, fontFamily: 'Cafe24Ssurround' },
+  taskCount: { fontSize: 14, color: '#6C757D', fontFamily: 'Cafe24Ssurround' },
 
   listContainer: { flex: 1 },
   listHeader: {

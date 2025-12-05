@@ -10,10 +10,9 @@ import {
   Alert,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   useWindowDimensions,
-  View,
+  View
 } from 'react-native';
 import { tokenStorage } from '../storage';
 
@@ -209,14 +208,14 @@ export default function LoginScreen() {
 
         {/* 회원가입 유도 문구 */}
         <View style={styles.signupContainer}>
-          <Text style={styles.normalText}>
+          <ThemedText style={styles.normalText}>
             계정이 없으신가요?{' '}
-          </Text>
+          </ThemedText>
           <Link href="/page/signup" asChild>
             <Pressable>
-              <Text style={styles.signupText}>
+              <ThemedText style={styles.signupText}>
                 회원가입
-              </Text>
+              </ThemedText>
             </Pressable>
           </Link>
         </View>
@@ -263,9 +262,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   input: {
-    backgroundColor: '#F8F9FA',
+    borderRadius: 30,
     borderWidth: 1,
     borderColor: '#DEE2E6',
+    fontFamily: 'Cafe24Ssurround',
   },
   loginButton: {
     width: '100%',
