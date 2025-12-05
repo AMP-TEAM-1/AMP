@@ -6,22 +6,24 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   Image,
   Pressable,
-  SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   TextInput,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '../components/themed-text';
 import { tokenStorage } from '../storage';
 import { ColorContext } from './ColorContext';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
-//export const API_URL = "http://127.0.0.1:8000";
+
 
 export default function CategoryContent() {
   const { colors } = useContext(ColorContext);
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const [boxes, setBoxes] = useState<{ id: number; text: string; editing: boolean }[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -91,186 +93,223 @@ export default function CategoryContent() {
   return (
     <LinearGradient
       colors={colors as [string, string, ...string[]]}
-      locations={[0, 0.35, 0.65, 1]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
-      <SafeAreaView style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
         {/* 상단 헤더 */}
         <View style={styles.header}>
           <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
-            <Ionicons name="menu" size={30} color="#000" />
+            <Ionicons name="menu" size={28} color="#000" />
           </Pressable>
+
+          <ThemedText style={styles.titleText}>카테고리</ThemedText>
 
           <Pressable onPress={() => navigation.navigate('MyPage')} style={styles.myButton}>
             <Image
               source={require('../../assets/images/item/rabbit_logo.png')}
-              style={{
-                width: 40,
-                height: 40,
-                resizeMode: 'cover',
-              }}
+              style={styles.profileImage}
             />
           </Pressable>
         </View>
 
-        {/* 제목 */}
-        <ThemedText style={styles.titleText}>카테고리</ThemedText>
+        {/* 카테고리 리스트 */}
+        <View style={styles.content}>
+          <View style={styles.listHeader}>
+            <ThemedText style={styles.listTitle}>내 카테고리</ThemedText>
+            <Pressable style={styles.addButton} onPress={handleAddBox}>
+              <Ionicons name="add" size={24} color="#fff" />
+            </Pressable>
+          </View>
 
-        {/* + 버튼 */}
-        <Pressable style={styles.addButton} onPress={handleAddBox}>
-          <Ionicons name="add" size={40} color="#000" />
-        </Pressable>
-
-        {/* 회색 박스 목록 */}
-        <ScrollView contentContainerStyle={styles.boxContainer} keyboardShouldPersistTaps="handled">
-          {boxes.map(item => (
-            <View key={item.id} style={styles.boxRow}>
-              {/* 박스 선택 시 기본 노란 하이라이트 제거 */}
-              <Pressable
-                onPress={() => handleBoxPress(item.id)}
-                android_ripple={{ color: 'transparent' }} // ✅ 노란 하이라이트 제거
-                style={({ pressed }) => [
-                  { opacity: pressed ? 0.8 : 1 }, // 눌렀을 때 살짝 투명하게만
-                ]}
-              >
-                <View style={[styles.dynamicBox, { width: Math.max(100, item.text.length * 18 + 40) }]}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {boxes.map(item => (
+              <View key={item.id} style={styles.categoryCard}>
+                <Pressable
+                  onPress={() => handleBoxPress(item.id)}
+                  style={styles.categoryContent}
+                >
                   {item.editing ? (
                     <TextInput
                       style={styles.input}
-                      placeholder="입력"
+                      placeholder="카테고리 이름"
                       placeholderTextColor="#999"
                       value={item.text}
                       onChangeText={text => handleTextChange(item.id, text)}
                       onBlur={() => handleSaveEdit(item.id, item.text)}
-                      maxLength={13}
+                      maxLength={20}
                       autoFocus={item.editing}
                     />
                   ) : (
-                    <ThemedText style={styles.input}>{item.text || '입력'}</ThemedText>
+                    <ThemedText style={styles.categoryText}>{item.text || '카테고리'}</ThemedText>
                   )}
-                </View>
-              </Pressable>
-
-              {item.editing && (
-                <Pressable
-                  onPressIn={() => handleDeleteBox(item.id)}
-                  style={styles.deleteButton}
-                >
-                  <Ionicons name="close" size={24} color="#000" />
                 </Pressable>
-              )}
-            </View>
-          ))}
-        </ScrollView>
-      </SafeAreaView>
+
+                {item.editing && (
+                  <Pressable
+                    onPress={() => handleDeleteBox(item.id)}
+                    style={styles.deleteButton}
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                  </Pressable>
+                )}
+              </View>
+            ))}
+
+            {boxes.length === 0 && (
+              <View style={styles.emptyState}>
+                <ThemedText style={styles.emptyText}>카테고리가 없습니다</ThemedText>
+                <ThemedText style={styles.emptySubText}>+ 버튼을 눌러 추가해보세요</ThemedText>
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </View>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+  },
 
   header: {
-    height: 80,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 8,
-    paddingHorizontal: 10,
-
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
 
   menuButton: {
-    position: 'absolute',
-    left: 10,
-    top: 15,
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-
-  myButton: {
-    position: 'absolute',
-    right: 20,
-    top: 20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#aaa',
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-
-  myText: {
-    color: '#000',
-    fontWeight: '600', // ThemedText에서 fontFamily가 적용됩니다.
+    padding: 8,
   },
 
   titleText: {
-    fontSize: 25,
+    fontSize: 22,
     fontWeight: '700',
-    color: '#000',
-    textAlign: 'center',
-    marginVertical: 10,
-  }, // ThemedText에서 fontFamily가 적용됩니다.
+    color: '#212529',
+    fontFamily: 'Cafe24Ssurround',
+  },
 
-  addButton: {
-    position: 'absolute',
-    right: 30,
-    top: 150,
+  myButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#E0E0E0',
     backgroundColor: '#fff',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 8,
+  },
+
+  listTitle: {
+    fontSize: 20,
+    fontFamily: 'Cafe24Ssurround',
+    color: '#212529',
+    fontWeight: '600',
+  },
+
+  addButton: {
+    backgroundColor: '#FF9F43',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 10,
-    elevation: 5,
+    shadowColor: '#FF9F43',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
 
-  boxContainer: {
-    paddingTop: 80,
-    alignItems: 'flex-start',
-    paddingHorizontal: 50,
+  scrollContent: {
+    paddingBottom: 20,
   },
 
-  boxRow: {
+  categoryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
 
-  dynamicBox: {
-    minHeight: 53,
-    backgroundColor: '#f6f6f6',
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, elevation: 2, borderWidth: 1, borderColor: '#ccc'
+  categoryContent: {
+    flex: 1,
   },
 
   input: {
-    fontSize: 21,
-    fontWeight: '700',
-    color: '#000',
-    textAlign: 'center',
-    paddingVertical: 6,
-    fontFamily: 'Cafe24Ssurround', // TextInput과 Text에 공통으로 폰트 적용
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#212529',
+    fontFamily: 'Cafe24Ssurround',
+    padding: 0,
+  },
+
+  categoryText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#212529',
+    fontFamily: 'Cafe24Ssurround',
   },
 
   deleteButton: {
-    marginLeft: 10,
-    justifyContent: 'center',
+    marginLeft: 12,
+    padding: 8,
+  },
+
+  emptyState: {
     alignItems: 'center',
-    width: 40,
-    height: 40,
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+
+  emptyText: {
+    fontSize: 16,
+    color: '#6C757D',
+    fontFamily: 'Cafe24Ssurround',
+    marginBottom: 8,
+  },
+
+  emptySubText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    fontFamily: 'Cafe24Ssurround',
   },
 });

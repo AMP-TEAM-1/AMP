@@ -78,7 +78,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
-    fontWeight: '700',
     fontFamily: 'Cafe24Ssurround',
   },
 });

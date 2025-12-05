@@ -23,6 +23,7 @@ export type InventoryItem = {
 export type Item = (ShopItem | InventoryItem) & {
   image: any; // require()의 반환 타입
   is_owned?: boolean; // 아이템 보유 여부
+  is_equipped?: boolean; // 아이템 장착 여부 (InventoryItem에만 실제로 존재하지만, ShopItem에서도 undefined로 허용)
 };
 
 // --- 상수 정의 ---
@@ -49,7 +50,7 @@ export const imageMap: { [key: string]: any } = {
   'h4': require('../../assets/images/item/santa-hat.png'),
   'h5': require('../../assets/images/item/birthdayHat.png'),
   'h6': require('../../assets/images/item/crown.png'),
-  
+
   // 장신구
   // 'a1': require('@/assets/images/item/heart-accessory.png'),
   // 'a2': require('@/assets/images/item/bowtie.png'),
@@ -63,7 +64,7 @@ export const imageMap: { [key: string]: any } = {
   'a4': require('../../assets/images/item/dot-ribbon.png'),
   'a5': require('../../assets/images/item/scarf.png'),
   'a6': require('../../assets/images/item/ribbon.png'),
-  
+
   // 배경
   // 'b1': require('@/assets/images/item/tulip-bg.png'),
   // 'b2': require('@/assets/images/item/cactus-bg.png'),

@@ -228,7 +228,7 @@ export default function AlarmPage() {
       }
 
       const repeatMsg = repeatType === 'daily' ? ' (매일 반복)' : repeatType === 'weekly' ? ' (매주 반복)' : '';
-      console.log(`알람 저장 완료: ${isAM ? '오전' : '오후'} ${selectedHour}:${selectedMinute.toString().padStart(2, '0')}${repeatMsg}`);
+
 
       if (Platform.OS === 'web') window.alert(`알람이 설정되었습니다.${repeatMsg}`);
       else Alert.alert('성공', `알람이 설정되었습니다.${repeatMsg}`);

@@ -20,7 +20,7 @@ Notifications.setNotificationHandler({
 export async function requestNotificationPermissions(): Promise<boolean> {
     // Web doesn't support notifications
     if (Platform.OS === 'web') {
-        console.log('Notifications not supported on web');
+
         return false;
     }
 
@@ -34,7 +34,7 @@ export async function requestNotificationPermissions(): Promise<boolean> {
         }
 
         if (finalStatus !== 'granted') {
-            console.log('Failed to get notification permissions');
+
             return false;
         }
 
@@ -73,7 +73,7 @@ export async function scheduleNotification(
 ): Promise<string | null> {
     // Web doesn't support notifications
     if (Platform.OS === 'web') {
-        console.log('Notifications not supported on web');
+
         return null;
     }
 
@@ -89,7 +89,7 @@ export async function scheduleNotification(
 
         // Don't schedule if the time has already passed and it's not repeating
         if (triggerDate < new Date() && !repeatType) {
-            console.log('Alarm time has already passed, not scheduling');
+
             return null;
         }
 
@@ -142,7 +142,7 @@ export async function scheduleNotification(
             const secondsUntilTrigger = Math.floor((triggerDate.getTime() - Date.now()) / 1000);
 
             if (secondsUntilTrigger <= 0) {
-                console.log('Alarm time has already passed');
+
                 return null;
             }
 
@@ -164,7 +164,7 @@ export async function scheduleNotification(
             });
         }
 
-        console.log(`Notification scheduled for todo ${todoId} at ${triggerDate}${repeatType ? ` (${repeatType})` : ''}`);
+
         return notificationId;
     } catch (error) {
         console.error('Error scheduling notification:', error);
@@ -190,7 +190,7 @@ export async function cancelNotification(todoId: number): Promise<void> {
 
         if (todoNotification) {
             await Notifications.cancelScheduledNotificationAsync(todoNotification.identifier);
-            console.log(`Cancelled notification for todo ${todoId}`);
+
         }
     } catch (error) {
         console.error('Error cancelling notification:', error);
@@ -225,7 +225,7 @@ export async function cancelAllNotifications(): Promise<void> {
 
     try {
         await Notifications.cancelAllScheduledNotificationsAsync();
-        console.log('All notifications cancelled');
+
     } catch (error) {
         console.error('Error cancelling all notifications:', error);
     }

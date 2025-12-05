@@ -10,10 +10,9 @@ import {
   Alert,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   useWindowDimensions,
-  View,
+  View
 } from 'react-native';
 import { tokenStorage } from '../storage';
 
@@ -34,9 +33,8 @@ export default function LoginScreen() {
       return;
     }
     setIsLoading(true);
-    
-    // 🕵️‍♂️ [로그] 어떤 이메일과 비밀번호로 로그인을 시도하는지 확인합니다.
-    console.log(`[로그인 시도] 이메일: ${email}`);
+
+
 
     const params = new URLSearchParams();
     params.append('username', email);
@@ -49,8 +47,7 @@ export default function LoginScreen() {
 
       const { access_token } = response.data;
 
-      // 🕵️‍♂️ [로그] 서버로부터 받은 액세스 토큰을 확인합니다.
-      console.log('[로그인 성공] 받은 토큰:', access_token);
+
 
       await tokenStorage.setItem(access_token);
 
@@ -65,24 +62,20 @@ export default function LoginScreen() {
       console.error('--- 로그인 에러 상세 정보 ---');
       if (axios.isAxiosError(error)) {
         if (!error.response) {
-          console.error('[에러 종류] 네트워크 오류 또는 서버 미실행');
           console.error('[에러 메시지]', error.message);
           Alert.alert('네트워크 오류', '서버에 연결할 수 없습니다.');
         } else if (error.response.status === 401) {
-          console.error('[에러 종류] 인증 실패 (401)');
-          console.error('[서버 응답]', error.response.data);
+
           Alert.alert('로그인 실패', '이메일 또는 비밀번호가 일치하지 않습니다.');
         } else {
-          console.error(`[에러 종류] 서버 응답 오류 (${error.response.status})`);
-          console.error('[서버 응답]', error.response.data);
+
           Alert.alert('서버 오류', `상태 코드: ${error.response.status}`);
         }
       } else {
-        console.error('[에러 종류] 기타 자바스크립트 오류');
         console.error('[에러 메시지]', error.message);
         Alert.alert('알 수 없는 오류', error.message);
       }
-      console.error('---------------------------');
+
     } finally {
       setIsLoading(false);
     }
@@ -209,14 +202,14 @@ export default function LoginScreen() {
 
         {/* 회원가입 유도 문구 */}
         <View style={styles.signupContainer}>
-          <Text style={styles.normalText}>
+          <ThemedText style={styles.normalText}>
             계정이 없으신가요?{' '}
-          </Text>
+          </ThemedText>
           <Link href="/page/signup" asChild>
             <Pressable>
-              <Text style={styles.signupText}>
+              <ThemedText style={styles.signupText}>
                 회원가입
-              </Text>
+              </ThemedText>
             </Pressable>
           </Link>
         </View>
@@ -252,26 +245,27 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   whiteBox: {
-    backgroundColor: '#FFFFFFEE', // ✅ 살짝 투명한 흰색
+    backgroundColor: '#FFFFFF',
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 6,
-    opacity: 0.8
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
   },
   input: {
-    backgroundColor: '#F8F8F8',
+    borderRadius: 30,
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: '#DEE2E6',
+    fontFamily: 'Cafe24Ssurround',
   },
   loginButton: {
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#FF9F43',
   },
   signupContainer: {
     flexDirection: 'row',

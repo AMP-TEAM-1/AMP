@@ -1,266 +1,307 @@
+import CategoryBar from '@/components/Common/CategoryBar';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import axios from 'axios';
-import { router } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { tokenStorage } from '../storage';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
-type Todo = {
-	id: number;
-	title: string;
-	description?: string;
-	completed?: boolean;
-};
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useContext, useEffect, useState } from 'react';
+import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTodos } from '../hooks/useTodos';
+import { Todo } from '../types';
+import { ColorContext } from './ColorContext';
 
 export default function TodosScreen() {
-	const [todos, setTodos] = useState<Todo[]>([]);
-	const [loading, setLoading] = useState(false);
+	const { colors } = useContext(ColorContext);
+	const insets = useSafeAreaInsets();
 	const [newTitle, setNewTitle] = useState('');
-	const [refreshing, setRefreshing] = useState(false);
+	const [selectedCategory, setSelectedCategory] = useState<'all' | number>('all');
 
-	const getAuthHeaders = async () => {
-		const token = await tokenStorage.getItem();
-		console.log('[Auth Debug] Token from storage:', token ? 'exists' : 'missing');
-		return token ? { Authorization: `Bearer ${token}` } : {};
-	};
-
-	const fetchTodos = useCallback(async () => {
-		setLoading(true);
-		try {
-			const headers = await getAuthHeaders();
-			console.log('[Debug] Fetching todos with headers:', headers);
-			const res = await axios.get(`${API_URL}/todos/`, { headers });
-			setTodos(res.data || []);
-		} catch (err: any) {
-			console.error('[fetchTodos] Detailed error:', {
-				message: err.message,
-				status: err.response?.status,
-				data: err.response?.data,
-				headers: err.response?.headers,
-				config: {
-					url: err.config?.url,
-					headers: err.config?.headers,
-					method: err.config?.method,
-				}
-			});
-
-			let errorMessage = '할일 목록을 불러오는 중 오류가 발생했습니다.';
-			if (err.response?.status === 401) {
-				errorMessage = '인증이 만료되었습니다. 다시 로그인해주세요.';
-				router.replace('/');  // 로그인 페이지로 리디렉션
-			} else if (err.response?.status === 403) {
-				errorMessage = '접근 권한이 없습니다.';
-			} else if (!err.response) {
-				errorMessage = '서버에 연결할 수 없습니다. API 주소와 네트워크를 확인해주세요.';
-			}
-
-			if (Platform.OS === 'web') {
-				window.alert(errorMessage + ' (자세한 내용은 브라우저 콘솔을 확인하세요)');
-			}
-		} finally {
-			setLoading(false);
-			setRefreshing(false);
-		}
-	}, []);
+	// 오늘 날짜로 useTodos hook 사용
+	const today = new Date();
+	const {
+		todos,
+		categories,
+		coloredCategories,
+		fetchTodos,
+		fetchCategories,
+		addTodo,
+		toggleTodo,
+		deleteTodo,
+	} = useTodos(today);
 
 	useEffect(() => {
-		fetchTodos();
-	}, [fetchTodos]);
+		fetchCategories();
+	}, []);
 
-	const createTodo = async () => {
+	const handleAddTodo = async () => {
 		if (!newTitle.trim()) return;
-		setLoading(true);
-		try {
-			const headers = await getAuthHeaders();
-			console.log('[Debug] Creating todo with headers:', headers);
-			const res = await axios.post(
-				`${API_URL}/todos/`,
-				{ title: newTitle },
-				{ headers: { 'Content-Type': 'application/json', ...headers } }
-			);
-			console.log('[Debug] Todo created successfully:', res.data);
-			setTodos((s) => [res.data, ...s]);
-			setNewTitle('');
-		} catch (err: any) {
-			console.error('[createTodo] Detailed error:', {
-				message: err.message,
-				status: err.response?.status,
-				data: err.response?.data,
-				headers: err.response?.headers,
-				config: {
-					url: err.config?.url,
-					headers: err.config?.headers,
-					method: err.config?.method,
-					data: err.config?.data
-				}
-			});
-
-			let errorMessage = '할일 생성에 실패했습니다.';
-			if (err.response?.status === 401) {
-				errorMessage = '인증이 만료되었습니다. 다시 로그인해주세요.';
-				router.replace('/');  // 로그인 페이지로 리디렉션
-			} else if (err.response?.status === 403) {
-				errorMessage = '할일을 생성할 권한이 없습니다.';
-			} else if (!err.response) {
-				errorMessage = '서버에 연결할 수 없습니다. API 주소와 네트워크를 확인해주세요.';
-			}
-
-			if (Platform.OS === 'web') {
-				window.alert(errorMessage + ' (자세한 내용은 브라우저 콘솔을 확인하세요)');
-			}
-		} finally {
-			setLoading(false);
-		}
+		await addTodo(newTitle, selectedCategory);
+		setNewTitle('');
 	};
 
-	const deleteTodo = async (id: number) => {
-		setLoading(true);
-		try {
-			const headers = await getAuthHeaders();
-			console.log('[Debug] Deleting todo with headers:', headers);
-			await axios.delete(`${API_URL}/todos/${id}`, { headers });
-			console.log('[Debug] Todo deleted successfully:', id);
-			setTodos((s) => s.filter((t) => t.id !== id));
-		} catch (err: any) {
-			console.error('[deleteTodo] Detailed error:', {
-				message: err.message,
-				status: err.response?.status,
-				data: err.response?.data,
-				headers: err.response?.headers,
-				config: {
-					url: err.config?.url,
-					headers: err.config?.headers,
-					method: err.config?.method
-				}
-			});
-
-			let errorMessage = '할일 삭제에 실패했습니다.';
-			if (err.response?.status === 401) {
-				errorMessage = '인증이 만료되었습니다. 다시 로그인해주세요.';
-				router.replace('/');
-			} else if (err.response?.status === 403) {
-				errorMessage = '할일을 삭제할 권한이 없습니다.';
-			} else if (!err.response) {
-				errorMessage = '서버에 연결할 수 없습니다. API 주소와 네트워크를 확인해주세요.';
-			}
-
-			if (Platform.OS === 'web') {
-				window.alert(errorMessage + ' (자세한 내용은 브라우저 콘솔을 확인하세요)');
-			}
-		} finally {
-			setLoading(false);
-		}
+	const handleDeleteTodo = async (id: number) => {
+		await deleteTodo(id);
 	};
+
+	// 카테고리 필터링
+	const filteredTodos = selectedCategory === 'all'
+		? todos
+		: todos.filter(todo => todo.categories.some(cat => cat.id === selectedCategory));
 
 	const renderItem = ({ item }: { item: Todo }) => (
-		<Pressable
-			style={styles.item}
-			onPress={() => router.push({ pathname: '/page/todoDetail', params: { id: String(item.id) } })}
-		>
-			<View style={{ flex: 1 }}>
-				<ThemedText style={styles.itemTitle}>{item.title}</ThemedText>
-				{item.description ? <ThemedText type="subtitle">{item.description}</ThemedText> : null}
-			</View>
-			<View style={styles.itemActions}>
-				<Pressable onPress={() => deleteTodo(item.id)} style={styles.deleteButton}>
-					<ThemedText style={{ color: '#fff' }}>삭제</ThemedText>
-				</Pressable>
-			</View>
-		</Pressable>
+		<View style={styles.todoCard}>
+			<Pressable
+				onPress={() => toggleTodo(item.id, item.completed)}
+				style={styles.todoContent}
+			>
+				<View style={styles.checkboxContainer}>
+					<Ionicons
+						name={item.completed ? 'checkbox' : 'square-outline'}
+						size={24}
+						color={item.completed ? '#4CAF50' : '#9CA3AF'}
+					/>
+				</View>
+				<View style={styles.todoTextContainer}>
+					<ThemedText
+						style={[
+							styles.todoTitle,
+							item.completed && styles.completedText
+						]}
+					>
+						{item.title}
+					</ThemedText>
+					{item.categories && item.categories.length > 0 && (
+						<View style={styles.categoryBadgesContainer}>
+							{item.categories.map((cat) => (
+								<View
+									key={cat.id}
+									style={[
+										styles.categoryBadge,
+										{ backgroundColor: cat.color || '#E0E0E0' }
+									]}
+								>
+									<ThemedText style={styles.categoryBadgeText}>
+										{cat.text}
+									</ThemedText>
+								</View>
+							))}
+						</View>
+					)}
+				</View>
+			</Pressable>
+			<Pressable
+				onPress={() => handleDeleteTodo(item.id)}
+				style={styles.deleteButton}
+			>
+				<Ionicons name="trash-outline" size={20} color="#FF3B30" />
+			</Pressable>
+		</View>
 	);
 
 	return (
-		<ThemedView style={[styles.container, { padding: 0 }]}>
-			<SafeAreaView style={{ flex: 1, padding: 16, alignItems: 'center', width: '100%' }}>
-				<ThemedText type="title">할일 목록</ThemedText>
+		<LinearGradient
+			colors={colors as [string, string, ...string[]]}
+			style={{ flex: 1 }}
+		>
+			<View style={[styles.container, { paddingTop: insets.top }]}>
+				<View style={styles.header}>
+					<ThemedText style={styles.title}>할일 목록</ThemedText>
+				</View>
 
-				<View style={styles.inputRow}>
+				{/* 카테고리 필터 바 */}
+				{coloredCategories.length > 0 && (
+					<CategoryBar
+						categories={coloredCategories}
+						selectedCategory={selectedCategory}
+						onSelectCategory={setSelectedCategory}
+					/>
+				)}
 
+				{/* 할 일 추가 입력 */}
+				<View style={styles.inputContainer}>
 					<TextInput
 						style={styles.input}
 						placeholder="새 할일 제목"
 						value={newTitle}
 						onChangeText={setNewTitle}
-						placeholderTextColor="#888"
+						placeholderTextColor="#999"
+						onSubmitEditing={handleAddTodo}
+						returnKeyType="done"
 					/>
-					<Pressable style={styles.addButton} onPress={createTodo} disabled={loading}>
-						{loading ? <ActivityIndicator color="#fff" /> : <ThemedText style={{ color: '#fff' }}>추가</ThemedText>}
+					<Pressable
+						style={[styles.addButton, !newTitle.trim() && styles.addButtonDisabled]}
+						onPress={handleAddTodo}
+						disabled={!newTitle.trim()}
+					>
+						<Ionicons name="add" size={24} color="#fff" />
 					</Pressable>
 				</View>
 
-				{loading && !refreshing ? (
-					<ActivityIndicator style={{ marginTop: 24 }} />
-				) : (
-					<FlatList
-						data={todos}
-						keyExtractor={(item) => String(item.id)}
-						renderItem={renderItem}
-						style={{ width: '100%' }}
-						refreshing={refreshing}
-						onRefresh={() => { setRefreshing(true); fetchTodos(); }}
-
-						ListEmptyComponent={<ThemedText>할일이 없습니다.</ThemedText>}
-					/>
+				{/* 선택된 카테고리 표시 */}
+				{selectedCategory !== 'all' && (
+					<View style={styles.selectedCategoryInfo}>
+						<ThemedText style={styles.selectedCategoryText}>
+							{coloredCategories.find(c => c.id === selectedCategory)?.text} 카테고리에 추가됩니다
+						</ThemedText>
+					</View>
 				)}
-			</SafeAreaView>
-		</ThemedView>
+
+				{/* 할 일 목록 */}
+				<FlatList
+					data={filteredTodos}
+					keyExtractor={(item) => String(item.id)}
+					renderItem={renderItem}
+					contentContainerStyle={styles.listContent}
+					ListEmptyComponent={
+						<View style={styles.emptyState}>
+							<ThemedText style={styles.emptyText}>할일이 없습니다</ThemedText>
+							<ThemedText style={styles.emptySubText}>
+								{selectedCategory === 'all'
+									? '새 할일을 추가해보세요'
+									: '이 카테고리에 할일이 없습니다'}
+							</ThemedText>
+						</View>
+					}
+				/>
+			</View>
+		</LinearGradient>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		padding: 16,
-		alignItems: 'center',
-		backgroundColor: '#f5f5f5',
+		paddingHorizontal: 20,
 	},
-	inputRow: {
-		width: '100%',
+	header: {
+		paddingVertical: 16,
+		alignItems: 'center',
+	},
+	title: {
+		fontSize: 22,
+		fontFamily: 'Cafe24Ssurround',
+	},
+	inputContainer: {
 		flexDirection: 'row',
-		gap: 8,
+		gap: 12,
+		marginTop: 16,
 		marginBottom: 12,
 	},
 	input: {
 		flex: 1,
-		height: 44,
-		backgroundColor: '#fff',
-		paddingHorizontal: 12,
-		borderRadius: 8,
-		borderWidth: 1,
-		borderColor: '#ddd',
+		backgroundColor: '#FFFFFF',
+		borderRadius: 16,
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+		fontSize: 16,
+		fontFamily: 'Cafe24Ssurround',
+		shadowColor: '#000',
+		shadowOpacity: 0.05,
+		shadowRadius: 8,
+		shadowOffset: { width: 0, height: 2 },
+		elevation: 2,
 	},
 	addButton: {
-		height: 44,
-		paddingHorizontal: 12,
-		backgroundColor: '#007AFF',
+		backgroundColor: '#FF9F43',
+		width: 48,
+		height: 48,
+		borderRadius: 24,
 		justifyContent: 'center',
 		alignItems: 'center',
-		borderRadius: 8,
+		shadowColor: '#FF9F43',
+		shadowOpacity: 0.3,
+		shadowRadius: 8,
+		shadowOffset: { width: 0, height: 4 },
+		elevation: 4,
 	},
-	item: {
-		width: '100%',
-		padding: 12,
-		backgroundColor: '#fff',
-		borderRadius: 8,
-		marginBottom: 8,
+	addButtonDisabled: {
+		backgroundColor: '#CCCCCC',
+		shadowOpacity: 0.1,
+	},
+	selectedCategoryInfo: {
+		paddingVertical: 8,
+		paddingHorizontal: 16,
+		backgroundColor: 'rgba(255, 159, 67, 0.1)',
+		borderRadius: 12,
+		marginBottom: 12,
+	},
+	selectedCategoryText: {
+		fontSize: 13,
+		color: '#FF9F43',
+		fontFamily: 'Cafe24Ssurround',
+		textAlign: 'center',
+	},
+	listContent: {
+		paddingBottom: 20,
+	},
+	todoCard: {
+		backgroundColor: '#FFFFFF',
+		borderRadius: 16,
+		marginBottom: 12,
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 16,
+		paddingVertical: 14,
+		shadowColor: '#000',
+		shadowOpacity: 0.06,
+		shadowRadius: 8,
+		shadowOffset: { width: 0, height: 2 },
+		elevation: 2,
+	},
+	todoContent: {
+		flex: 1,
 		flexDirection: 'row',
 		alignItems: 'center',
 	},
-	itemTitle: {
-		fontSize: 16,
-		fontWeight: '600',
+	checkboxContainer: {
+		marginRight: 12,
 	},
-	itemActions: {
-		marginLeft: 12,
+	todoTextContainer: {
+		flex: 1,
+	},
+	todoTitle: {
+		fontSize: 16,
+		color: '#212529',
+		fontFamily: 'Cafe24Ssurround',
+		marginBottom: 4,
+	},
+	completedText: {
+		textDecorationLine: 'line-through',
+		color: '#9CA3AF',
+	},
+	categoryBadgesContainer: {
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		gap: 6,
+		marginTop: 4,
+	},
+	categoryBadge: {
+		paddingHorizontal: 10,
+		paddingVertical: 4,
+		borderRadius: 12,
+	},
+	categoryBadgeText: {
+		fontSize: 11,
+		color: '#333',
+		fontFamily: 'Cafe24Ssurround',
 	},
 	deleteButton: {
-		backgroundColor: '#ff3b30',
-		paddingHorizontal: 10,
-		paddingVertical: 6,
-		borderRadius: 6,
+		marginLeft: 12,
+		padding: 8,
+	},
+	emptyState: {
+		alignItems: 'center',
+		justifyContent: 'center',
+		paddingVertical: 60,
+	},
+	emptyText: {
+		fontSize: 16,
+		color: '#6C757D',
+		fontFamily: 'Cafe24Ssurround',
+		marginBottom: 8,
+	},
+	emptySubText: {
+		fontSize: 14,
+		color: '#9CA3AF',
+		fontFamily: 'Cafe24Ssurround',
 	},
 });
