@@ -94,6 +94,7 @@ uvicorn app.api.main:app --reload --port 8000
 ### Frontend (React Native - Expo)
 새로운 터미널에서 다음 명령어를 실행하여 프론트엔드 앱을 시작합니다.
 ```bash
+npx expo run:android            
 npm start
 ```
 
