@@ -51,10 +51,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 10,
-    backgroundColor: 'transparent', // 기본 배경색을 투명으로 변경
+    backgroundColor: 'transparent',
+    borderBottomWidth: 1,
+    borderBottomColor: '#DEE2E610', // 매우 연한 경계선
   },
   menuButton: {
-    padding: 4, // 아이콘 주변에 터치 영역을 확보하고 여백을 줍니다.
+    padding: 4,
   },
-  headerTitle: { fontSize: 20, color: '#000', fontFamily: 'Cafe24Ssurround' },
+  headerTitle: {
+    fontSize: 20,
+    color: '#212529',
+    fontFamily: 'Cafe24Ssurround',
+    fontWeight: '600',
+  },
 });

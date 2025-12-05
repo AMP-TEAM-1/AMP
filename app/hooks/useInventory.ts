@@ -1,19 +1,33 @@
-// useInventory.ts
+import { Item } from '@/data/items';
 import { useUserStore } from '@/store/userStore';
-import { useFocusEffect } from 'expo-router'; // useFocusEffect 사용
-import { useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 
 export function useInventory() {
   const { inventoryItems, carrots, equipItem, fetchUserData } = useUserStore();
-  
+
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
   const loading = false;
 
-  // useFocusEffect로 화면에 진입할 때마다 최신 데이터 로드
   useFocusEffect(
     useCallback(() => {
       fetchUserData();
     }, [fetchUserData])
   );
 
-  return { inventoryItems, carrots, loading, fetchInventory: fetchUserData, equipItem };
+  const handleEquip = async (item: Item) => {
+    return await equipItem(item);
+  };
+
+  return {
+    inventoryItems,
+    carrots,
+    loading,
+    fetchInventory: fetchUserData,
+    equipItem,
+    selectedCategory,
+    setSelectedCategory,
+    handleEquip
+  };
 }

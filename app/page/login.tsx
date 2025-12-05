@@ -34,7 +34,7 @@ export default function LoginScreen() {
       return;
     }
     setIsLoading(true);
-    
+
     // 🕵️‍♂️ [로그] 어떤 이메일과 비밀번호로 로그인을 시도하는지 확인합니다.
     console.log(`[로그인 시도] 이메일: ${email}`);
 
@@ -252,26 +252,26 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   whiteBox: {
-    backgroundColor: '#FFFFFFEE', // ✅ 살짝 투명한 흰색
+    backgroundColor: '#FFFFFF',
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 6,
-    opacity: 0.8
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
   },
   input: {
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#F8F9FA',
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: '#DEE2E6',
   },
   loginButton: {
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#FF9F43',
   },
   signupContainer: {
     flexDirection: 'row',

@@ -36,25 +36,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#DEE2E6',
   },
   tab: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 20,
+    backgroundColor: '#E9ECEF', // 비활성 탭 배경
   },
   activeTab: {
-    backgroundColor: '#E8730D8A',
+    backgroundColor: '#FF9F43', // 솔리드 오렌지
+    shadowColor: '#FF9F43',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   tabText: {
-    fontSize: 16,
-    color: '#333',
-    // fontFamily: 'Cafe24Ssurround', // 전역으로 적용되므로 제거
+    fontSize: 15,
+    color: '#495057',
+    fontWeight: '500',
   },
   activeTabText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
 });

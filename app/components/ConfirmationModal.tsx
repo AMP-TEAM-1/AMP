@@ -36,7 +36,7 @@ export default function ConfirmationModal({
   const handleCancel = () => {
     // 1. 부모 컴포넌트의 닫기 상태 변경 함수 호출
     onClose();
-    
+
     // 2. 모달이 닫힌 후 정리 작업이 있다면 실행 (예: 선택된 아이템 초기화)
     if (onModalHide) {
       onModalHide();
@@ -49,7 +49,7 @@ export default function ConfirmationModal({
       transparent={true}
       visible={visible}
       onRequestClose={handleCancel} // ✅ 안드로이드 뒤로가기 버튼 대응
-      // ❌ 에러가 발생하던 onModalHide 속성 삭제됨
+    // ❌ 에러가 발생하던 onModalHide 속성 삭제됨
     >
       {item && (
         <View style={styles.modalContainer}>
@@ -68,7 +68,7 @@ export default function ConfirmationModal({
               <Pressable style={[styles.modalButton, styles.confirmButton]} onPress={onConfirm}>
                 <ThemedText style={styles.modalButtonText}>{confirmButtonText}</ThemedText>
               </Pressable>
-              
+
               {/* ✅ 취소 버튼에 handleCancel 연결 */}
               <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={handleCancel}>
                 <ThemedText style={[styles.modalButtonText, { color: '#4A4459' }]}>{cancelButtonText}</ThemedText>
@@ -86,20 +86,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)', // 더 진한 오버레이
   },
   modalContent: {
     width: '80%',
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderRadius: 24, // 더 둥근 모서리
     paddingVertical: 35,
     paddingHorizontal: 20,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   modalItemImageContainer: {
     width: 100,
@@ -115,29 +115,37 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 30,
     textAlign: 'center',
-    fontSize: 22,
+    fontSize: 20,
+    fontFamily: 'Cafe24Ssurround',
+    color: '#212529',
   },
   modalButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
+    gap: 10,
   },
   modalButton: {
     flex: 1,
-    borderRadius: 25,
-    padding: 10,
-    elevation: 2,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
     alignItems: 'center',
-    marginHorizontal: 5,
   },
   confirmButton: {
-    backgroundColor: '#E8730D8A',
+    backgroundColor: '#FF9F43',
+    shadowColor: '#FF9F43',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   cancelButton: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#E9ECEF',
   },
   modalButtonText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: '600',
   },
 });

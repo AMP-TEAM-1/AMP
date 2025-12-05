@@ -2,12 +2,17 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '../components/themed-text';
 
 export default function CustomDrawerContent({ userName, ...props }: any) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
-      {/* 드로어 헤더: 유저 정보 표시 */}
+    <DrawerContentScrollView
+      {...props}
+      contentContainerStyle={{ paddingTop: insets.top }}
+    >
       <View style={styles.drawerHeader}>
         <View style={styles.profileContainer}>
           <Image
@@ -19,7 +24,6 @@ export default function CustomDrawerContent({ userName, ...props }: any) {
         <ThemedText style={styles.welcomeText}>오늘도 힘내세요! 🍀</ThemedText>
       </View>
 
-      {/* 메뉴 리스트 */}
       <View style={styles.menuContainer}>
         <DrawerItem
           label="오늘의 할 일"
@@ -27,7 +31,6 @@ export default function CustomDrawerContent({ userName, ...props }: any) {
           onPress={() => props.navigation.navigate('Home')}
           icon={({ size }) => <Ionicons name="time-outline" size={size} color='#1f7aeb' />}
         />
-
         <DrawerItem
           label="카테고리"
           labelStyle={styles.label}
