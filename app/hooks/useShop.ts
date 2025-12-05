@@ -8,9 +8,9 @@ import { useCallback, useEffect, useState } from 'react';
 const getImageKey = (imageUrl: string): string => {
   // DB의 image_url: "../assets/images/item/strawHat.png"
   // imageMap 키: "h1", "h2", "a1" 등
-  
+
   const filename = imageUrl.split('/').pop()?.replace('.png', '') || '';
-  
+
   // 파일명 → imageMap 키 매핑
   const keyMap: { [key: string]: string } = {
     'strawHat': 'h1',
@@ -21,7 +21,7 @@ const getImageKey = (imageUrl: string): string => {
     'bowtie': 'a2',
     'tulip-bg': 'b1',
   };
-  
+
   return keyMap[filename] || imageUrl; // 매핑 실패 시 원본 URL 반환
 };
 
@@ -38,26 +38,25 @@ export function useShop() {
     try {
       const headers = await getAuthHeaders();
       const shopRes = await axios.get(`${API_URL}/shop/items`, { headers });
-      
+
       // 🔍 디버깅: API 응답 확인
-      console.log('📦 API 응답:', shopRes.data);
-      console.log('📦 첫 번째 아이템:', shopRes.data[0]);
-      
+
+
       const transformedItems = shopRes.data.map((item: any) => {
         // 🔥 이미지 매핑 개선
         const imageKey = getImageKey(item.image_url);
         const image = imageMap[imageKey];
-        
+
         // 🔍 디버깅: 매핑 결과 확인
         if (!image) {
           console.warn(`❌ 이미지 매핑 실패: ${item.image_url} → ${imageKey}`);
         }
-        
+
         // 🔍 디버깅: type 필드 확인
         if (!item.type && !item.item_type) {
           console.warn(`❌ type 필드 누락:`, item);
         }
-        
+
         return {
           ...item,
           // type이 없으면 item_type으로 폴백
@@ -65,8 +64,8 @@ export function useShop() {
           image: image || imageMap['h1'], // 이미지 매핑 실패 시 기본 이미지
         };
       });
-      
-      console.log('✅ 변환된 아이템:', transformedItems);
+
+
       setShopItems(transformedItems);
 
     } catch (error) {

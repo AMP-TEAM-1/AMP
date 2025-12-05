@@ -6,7 +6,7 @@ import Animated from 'react-native-reanimated';
 
 import { ThemedText } from './themed-text';
 
-//const rabbitImage = require('@/assets/images/item/rabbit.png');
+
 const rabbitImage = require('../../assets/images/item/rabbit.png');
 
 interface CharacterViewProps {

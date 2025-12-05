@@ -34,8 +34,7 @@ export default function LoginScreen() {
     }
     setIsLoading(true);
 
-    // 🕵️‍♂️ [로그] 어떤 이메일과 비밀번호로 로그인을 시도하는지 확인합니다.
-    console.log(`[로그인 시도] 이메일: ${email}`);
+
 
     const params = new URLSearchParams();
     params.append('username', email);
@@ -48,8 +47,7 @@ export default function LoginScreen() {
 
       const { access_token } = response.data;
 
-      // 🕵️‍♂️ [로그] 서버로부터 받은 액세스 토큰을 확인합니다.
-      console.log('[로그인 성공] 받은 토큰:', access_token);
+
 
       await tokenStorage.setItem(access_token);
 
@@ -64,24 +62,20 @@ export default function LoginScreen() {
       console.error('--- 로그인 에러 상세 정보 ---');
       if (axios.isAxiosError(error)) {
         if (!error.response) {
-          console.error('[에러 종류] 네트워크 오류 또는 서버 미실행');
           console.error('[에러 메시지]', error.message);
           Alert.alert('네트워크 오류', '서버에 연결할 수 없습니다.');
         } else if (error.response.status === 401) {
-          console.error('[에러 종류] 인증 실패 (401)');
-          console.error('[서버 응답]', error.response.data);
+
           Alert.alert('로그인 실패', '이메일 또는 비밀번호가 일치하지 않습니다.');
         } else {
-          console.error(`[에러 종류] 서버 응답 오류 (${error.response.status})`);
-          console.error('[서버 응답]', error.response.data);
+
           Alert.alert('서버 오류', `상태 코드: ${error.response.status}`);
         }
       } else {
-        console.error('[에러 종류] 기타 자바스크립트 오류');
         console.error('[에러 메시지]', error.message);
         Alert.alert('알 수 없는 오류', error.message);
       }
-      console.error('---------------------------');
+
     } finally {
       setIsLoading(false);
     }
