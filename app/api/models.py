@@ -48,11 +48,6 @@ class Todo(Base):
         back_populates="todos"
     )
 
-    # ⏰ 알람 시간 필드 추가
-    alarm_time = Column(Time, nullable=True) # Python time 객체로 저장
-    # 혹은 Column(String)으로 "06:20" 문자열 저장도 가능
-    alarm_repeat_type = Column(String, nullable=True) # 🔁 알람 반복 타입 (None, 'daily', 'weekly')
-
 # 🥕 카테고리 모델 추가
 class Category(Base):
     __tablename__ = "categories"

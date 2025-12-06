@@ -23,7 +23,6 @@ import { ColorContext } from './ColorContext';
 import CustomDrawerContent from './CustomDrawerContent';
 import InformationContent from './InformationContent';
 import OptionContent from './OptionContent';
-import AlarmPage from './alarm';
 import CategoryContent from './category';
 import MyPageScreen from './mypage';
 import TodosScreen from './todos';
@@ -201,13 +200,6 @@ function HomeContent() {
               setActionModalVisible(false);
               setCategoryModalVisible(true);
             }}
-            onAlarmSetting={() => {
-              setActionModalVisible(false);
-              navigation.navigate('Alarm', {
-                todoId: selectedTodoAction?.id,
-                todoTitle: selectedTodoAction?.title
-              });
-            }}
             onDelete={() => {
               if (selectedTodoAction) deleteTodo(selectedTodoAction.id);
               setActionModalVisible(false);
@@ -245,7 +237,6 @@ export default function AppDrawer() {
       <Drawer.Screen name="MyPage" component={MyPageScreen} />
       <Drawer.Screen name="Category" component={CategoryContent} />
       <Drawer.Screen name="Todos" component={TodosScreen} />
-      <Drawer.Screen name="Alarm" component={AlarmPage} />
       <Drawer.Screen name="Info">
         {(props) => <InformationContent {...props} userName={userName} setUserName={setUserName} />}
       </Drawer.Screen>

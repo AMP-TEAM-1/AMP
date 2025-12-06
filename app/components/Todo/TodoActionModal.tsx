@@ -8,7 +8,6 @@ interface TodoActionModalProps {
     onClose: () => void;
     onEdit: () => void;
     onCategorySetting: () => void;
-    onAlarmSetting: () => void;
     onDelete: () => void;
 }
 
@@ -17,7 +16,6 @@ export default function TodoActionModal({
     onClose,
     onEdit,
     onCategorySetting,
-    onAlarmSetting,
     onDelete,
 }: TodoActionModalProps) {
 
@@ -44,8 +42,6 @@ export default function TodoActionModal({
                     <MenuRow icon="pencil-outline" color="#1f7aeb" text="수정하기" onPress={onEdit} />
                     <View style={styles.divider} />
                     <MenuRow icon="book-outline" color="#4CAF50" text="카테고리 설정" onPress={onCategorySetting} />
-                    <View style={styles.divider} />
-                    <MenuRow icon="notifications-outline" color="#333" text="알림 설정" onPress={onAlarmSetting} />
                     <View style={styles.divider} />
                     <MenuRow icon="trash-outline" color="#FF5252" text="삭제하기" onPress={onDelete} isDestructive />
                 </View>

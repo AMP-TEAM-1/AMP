@@ -10,6 +10,4 @@ export type Todo = {
     completed: boolean;
     categories: Category[];
     date?: string;
-    alarm_time?: string;
-    alarm_repeat_type?: string;
 };

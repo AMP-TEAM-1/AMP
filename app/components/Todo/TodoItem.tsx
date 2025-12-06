@@ -56,12 +56,6 @@ export default function TodoItem({
                                 <ThemedText style={styles.categoryText}>{cat.text}</ThemedText>
                             </View>
                         ))}
-                        {todo.alarm_time && (
-                            <View style={styles.alarmTag}>
-                                <Ionicons name="alarm-outline" size={12} color="#ff6b6b" />
-                                <ThemedText style={styles.alarmText}>{todo.alarm_time}</ThemedText>
-                            </View>
-                        )}
                     </View>
                 </View>
 
@@ -147,15 +141,6 @@ const styles = StyleSheet.create({
         fontSize: 10,
         color: '#FFB74D',
         fontWeight: 'bold',
-    },
-    alarmTag: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 2,
-    },
-    alarmText: {
-        fontSize: 10,
-        color: '#ff6b6b',
     },
     actionContainer: {
         flexDirection: 'row',
