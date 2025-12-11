@@ -1,4 +1,3 @@
-# 사용자 인증 및 권한 부여 (예: 로그인, 회원가입)
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -34,7 +33,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     return user
 
 # --- 인증 관련 API 엔드포인트 ---
-
 @router.post("/signup/", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
 def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)

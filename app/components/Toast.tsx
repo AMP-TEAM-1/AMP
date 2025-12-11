@@ -7,10 +7,6 @@ interface ToastProps {
   duration?: number;
 }
 
-/**
- * 화면 하단에 잠시 나타났다가 사라지는 토스트 메시지를 표시하는 재사용 가능한 UI 컴포넌트입니다.
- * 사용자에게 작업 결과나 간단한 알림(예: 구매 실패)을 전달하는 데 사용됩니다.
- */
 export default function Toast({ message, duration = 3000 }: ToastProps) {
   const [visible, setVisible] = useState(false);
   const toastAnim = useState(new Animated.Value(0))[0];
@@ -56,7 +52,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1000, // 다른 UI 요소 위에 보이도록 zIndex 추가
+    zIndex: 1000, 
   },
   toastText: {
     color: 'white',

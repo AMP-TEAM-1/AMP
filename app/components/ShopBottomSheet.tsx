@@ -26,8 +26,7 @@ interface ShopBottomSheetProps {
 
 
 /*
- * 마이페이지 하단에 표시되는 아이템 상점 Bottom Sheet 컴포넌트입니다.
- * 사용자는 이 시트를 위아래로 드래그하거나, 카테고리 탭을 눌러 아이템을 탐색하고 구매할 수 있습니다.
+ * 마이페이지 하단에 표시되는 아이템 상점 Bottom Sheet 컴포넌트.
  * @param panGesture - 시트를 드래그하기 위한 제스처 핸들러
  * @param animatedStyle - 시트의 애니메이션(위치 이동)을 위한 스타일
  * @param loading - 아이템 목록 로딩 상태
@@ -91,18 +90,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    height: '45%', // 높이를 45%로 통일
-    backgroundColor: 'rgba(255, 255, 255, 0.5)', // 배경을 반투명한 흰색으로 변경
+    height: '45%', 
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', 
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    borderTopWidth: 1, // 상단 경계선 추가
-    borderTopColor: 'rgba(255, 255, 255, 0.3)', // 반투명 경계선 색상
+    borderTopWidth: 1, 
+    borderTopColor: 'rgba(255, 255, 255, 0.3)', 
   },
   handleContainer: {
     alignItems: 'center',
     paddingVertical: 12,
-    // @ts-ignore: 'grab' is a valid cursor value for web
-    //cursor: 'grab',
   },
   handle: {
     width: 40,

@@ -53,7 +53,7 @@ export default function SignupScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      {/* 🎨 당근톤 그라데이션 배경 */}
+      {/* 당근톤 그라데이션 배경 */}
       <LinearGradient
         colors={['#FFD8A9', '#FFF5E1', '#FFD8A9']}
         start={{ x: 0, y: 0 }}
@@ -97,7 +97,7 @@ export default function SignupScreen() {
             가입하기
           </ThemedText>
 
-          {/* 🥕 흰색 입력 영역 컨테이너 */}
+          {/* 흰색 입력 영역 컨테이너 */}
           <View
             style={[
               styles.whiteBox,
@@ -141,7 +141,7 @@ export default function SignupScreen() {
               placeholderTextColor="#888"
             />
 
-            {/* 🥕 회원가입 버튼 */}
+            {/* 회원가입 버튼 */}
             <Pressable
               style={({ pressed }) => [
                 styles.signupButton,
@@ -168,7 +168,7 @@ export default function SignupScreen() {
             </Pressable>
           </View>
 
-          {/* 🥕 하단 로그인 유도 문구 */}
+          {/* 하단 로그인 유도 문구 */}
           <View style={[styles.loginContainer, { marginTop: height * 0.02 }]}>
             <ThemedText style={[styles.normalText, { fontSize: width * 0.035 }]}>
               이미 계정이 있으신가요?{' '}
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   },
   homeButton: {
     position: 'absolute',
-    top: 50, // ✅ 상태바 아래로 살짝 내림
+    top: 50, 
     left: 20,
     zIndex: 10,
     backgroundColor: '#FFF',
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
-    elevation: 4, // Android 그림자
+    elevation: 4,
     opacity: 0.8
   },
   title: {

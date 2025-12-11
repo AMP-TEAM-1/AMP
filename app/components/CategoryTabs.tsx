@@ -3,11 +3,6 @@ import { CATEGORIES, ItemCategory } from '@/data/items';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-/**
- * '모자', '장신구', '배경' 등 아이템 카테고리를 선택할 수 있는 탭 UI 컴포넌트입니다.
- * 선택된 탭에 따라 다른 아이템 목록을 필터링하는 데 사용됩니다.
- */
-
 interface CategoryTabsProps {
   selectedCategory: ItemCategory | null;
   onTabPress: (category: ItemCategory) => void;
@@ -45,10 +40,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
-    backgroundColor: '#E9ECEF', // 비활성 탭 배경
+    backgroundColor: '#E9ECEF', 
   },
   activeTab: {
-    backgroundColor: '#FF9F43', // 솔리드 오렌지
+    backgroundColor: '#FF9F43', 
     shadowColor: '#FF9F43',
     shadowOpacity: 0.3,
     shadowRadius: 8,

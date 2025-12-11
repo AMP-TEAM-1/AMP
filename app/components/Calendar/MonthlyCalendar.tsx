@@ -36,7 +36,7 @@ export default function MonthlyCalendar({
         for (let i = 1; i <= daysInMonth; i++) {
             days.push(new Date(year, month, i));
         }
-        // 다음 달 (42칸 채우기)
+        // 다음 달
         const remaining = 42 - days.length;
         for (let i = 1; i <= remaining; i++) {
             days.push(new Date(year, month + 1, i));

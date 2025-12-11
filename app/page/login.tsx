@@ -20,7 +20,6 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 export default function LoginScreen() {
   const { width, height } = useWindowDimensions();
-  // 🥕 전역 스토어에서 사용자 데이터를 불러오는 함수를 가져옵니다.
   const { fetchUserData } = useUserStore();
 
   const [email, setEmail] = useState('');
@@ -51,14 +50,12 @@ export default function LoginScreen() {
 
       await tokenStorage.setItem(access_token);
 
-      // 🥕 로그인 성공 후, 전역 스토어의 사용자 데이터를 즉시 갱신합니다.
+      // 로그인 성공 후, 전역 스토어의 사용자 데이터를 즉시 갱신
       await fetchUserData();
 
       Alert.alert('성공', '로그인에 성공했습니다.');
-      // 🥕 로그인 성공 후 drawer navigator의 기본 화면으로 이동하도록 경로를 수정합니다.
       router.replace('/page/drawer');
     } catch (error: any) {
-      // 🕵️‍♂️ [로그] 에러 발생 시, 어떤 종류의 에러인지 상세하게 출력합니다.
       console.error('--- 로그인 에러 상세 정보 ---');
       if (axios.isAxiosError(error)) {
         if (!error.response) {
@@ -85,7 +82,6 @@ export default function LoginScreen() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* ✅ 그라데이션 배경 */}
       <LinearGradient
         colors={['#FFD8A9', '#FFF5E1', '#FFD8A9']}
         start={{ x: 0, y: 0 }}
@@ -118,7 +114,6 @@ export default function LoginScreen() {
           계정
         </ThemedText>
 
-        {/* ✅ 흰색 박스 (입력창 + 버튼 포함) */}
         <View
           style={[
             styles.whiteBox,

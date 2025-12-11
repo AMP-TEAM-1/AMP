@@ -3,14 +3,12 @@ import { Item } from '@/data/items';
 import React from 'react';
 import { FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
 
-// ✅ [수정 1] Item 타입 확장: is_equipped와 is_owned가 있을 수 있다고 정의합니다.
 export type GridItem = Item & {
   is_equipped?: boolean;
   is_owned?: boolean;
 };
 
 interface ItemGridProps {
-  // ✅ [수정 2] items의 타입을 Item[] 대신 확장된 GridItem[]으로 변경
   items: GridItem[];
   onItemPress: (item: GridItem) => void;
   renderItemFooter: (item: GridItem) => React.ReactNode;
@@ -26,7 +24,6 @@ export default function ItemGrid({
   mode = 'shop'
 }: ItemGridProps) {
 
-  // ✅ [수정 3] renderItem의 인자 타입도 GridItem으로 변경
   const renderItem = ({ item }: { item: GridItem }) => {
     const isSelected = selectedItemId === item.item_id;
 
@@ -39,7 +36,6 @@ export default function ItemGrid({
         style={[
           styles.itemContainer,
           shouldApplyOpacity && styles.itemSelected,
-          // 🔹 이제 item.is_equipped에 접근해도 에러가 나지 않습니다.
           (mode === 'inventory' && item.is_equipped) && styles.equippedItemBorder
         ]}
         onPress={() => {
@@ -56,8 +52,6 @@ export default function ItemGrid({
           ) : (
             <ThemedText style={{ fontSize: 40 }}>{'❓'}</ThemedText>
           )}
-
-          {/* 🔹 여기서도 에러가 사라집니다. */}
           {mode === 'inventory' && item.is_equipped && (
             <View style={styles.equippedBadge}>
               <ThemedText style={styles.equippedText}>E</ThemedText>
@@ -98,7 +92,7 @@ const styles = StyleSheet.create({
     marginHorizontal: '1.5%',
     marginVertical: 8,
     padding: 10,
-    backgroundColor: '#FFFFFF', // 순수 흰색 배경
+    backgroundColor: '#FFFFFF', 
     borderRadius: 12,
     shadowColor: '#000',
     shadowOpacity: 0.08,

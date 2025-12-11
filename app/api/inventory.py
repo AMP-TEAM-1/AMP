@@ -1,5 +1,3 @@
-# 인벤토리 아이템과 관련된 API 엔드포인트를 처리
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -18,9 +16,6 @@ def read_user_inventory(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    """
-    현재 로그인된 사용자의 인벤토리 목록을 조회합니다.
-    """
     inventory_items = crud.get_user_inventory(db, user_id=current_user.id)
     return inventory_items
 
@@ -31,12 +26,7 @@ def update_inventory_item_status(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    """
-    사용자 인벤토리 아이템의 장착 상태를 업데이트합니다.
-    동일한 타입의 다른 아이템이 장착되어 있다면 해제 처리합니다.
-    """
 
-    # URL 경로의 item_id와 Body의 item_id가 다르면 400 에러 발생
     if item_id != inventory_update.item_id:
         raise HTTPException(
             status_code=400, 

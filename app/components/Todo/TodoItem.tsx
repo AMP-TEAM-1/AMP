@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         marginVertical: 6,
         marginHorizontal: 2,
-        height: 70, // 카드 높이 고정 
+        height: 70, 
         overflow: 'hidden',
         elevation: 3,
         shadowColor: '#AEAEAE',

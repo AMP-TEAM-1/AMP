@@ -20,14 +20,12 @@ export const useTodos = (selectedDate: Date) => {
         return token ? { Authorization: `Bearer ${token}` } : {};
     };
 
-    // 1. 카테고리 목록 조회 및 색상 할당
+    // 카테고리 목록 조회 및 색상 할당
     const fetchCategories = useCallback(async () => {
         try {
             const headers = await getHeaders();
             const res = await axios.get(`${API_URL}/categories/`, { headers });
             const cats: Category[] = res.data || [];
-
-            // 색상 랜덤/순환 할당 로직
             const categoryColors = ['#FFE0A3', '#A3D8FF', '#FFA3A3', '#C8FFA3', '#E3A3FF', '#FFD1A3', '#A3FFE0'];
             const shuffled = [...categoryColors].sort(() => Math.random() - 0.5);
             const colored = cats.map((cat, index) => ({
@@ -42,7 +40,7 @@ export const useTodos = (selectedDate: Date) => {
         }
     }, []);
 
-    // 2. 날짜별 할일 조회
+    // 날짜별 할일 조회
     const fetchTodos = useCallback(async () => {
         try {
             const headers = await getHeaders();
@@ -50,8 +48,6 @@ export const useTodos = (selectedDate: Date) => {
                 headers,
                 params: { target_date: formatDate(selectedDate) },
             });
-
-            // 할일에 카테고리 색상 입히기
             const rawTodos: Todo[] = res.data;
             const mappedTodos = rawTodos.map(todo => ({
                 ...todo,
@@ -68,7 +64,6 @@ export const useTodos = (selectedDate: Date) => {
         }
     }, [selectedDate, coloredCategories]);
 
-    // 초기 로딩
     useEffect(() => {
         fetchCategories();
     }, [fetchCategories]);
@@ -88,20 +83,18 @@ export const useTodos = (selectedDate: Date) => {
                 payload.category_ids = [categoryId];
             }
             await axios.post(`${API_URL}/todos/`, payload, { headers });
-            await fetchTodos(); // 목록 갱신
+            await fetchTodos();
         } catch (err) {
             Alert.alert('오류', '할일 추가 실패');
         }
     };
 
     const toggleTodo = async (id: number, currentCompleted: boolean) => {
-        // 낙관적 업데이트 
         setTodos(prev => prev.map(t => t.id === id ? { ...t, completed: !currentCompleted } : t));
         try {
             const headers = await getHeaders();
             await axios.put(`${API_URL}/todos/${id}/`, { completed: !currentCompleted }, { headers });
         } catch (err) {
-            // 실패시 롤백 및 알림
             setTodos(prev => prev.map(t => t.id === id ? { ...t, completed: currentCompleted } : t));
             console.error(err);
         }

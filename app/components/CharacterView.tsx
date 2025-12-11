@@ -17,14 +17,9 @@ interface CharacterViewProps {
   animatedRabbitStyle: StyleProp<ViewStyle>;
 }
 
-/**
- * 마이페이지의 상단 영역을 담당하는 컴포넌트입니다.
- * 사용자의 캐릭터(토끼), 보유 재화(캐롯), 인벤토리 이동 버튼을 표시합니다.
- * Bottom Sheet의 상태에 따라 캐릭터의 위치와 크기가 애니메이션으로 변경됩니다.
- */
 export default function CharacterView({
   carrots,
-  equippedItems = [], // 기본값을 빈 배열로 설정
+  equippedItems = [], 
   isSheetMinimized,
   isHandleTouched,
   animatedRabbitStyle,
@@ -37,7 +32,7 @@ export default function CharacterView({
         <ThemedText style={styles.carrotText}>{carrots}</ThemedText>
       </View>
 
-      {/* 인벤토리 이동 버튼 (바텀시트가 최소화되었을 때만 보임) */}
+      {/* 인벤토리 이동 버튼 */}
       {isSheetMinimized && !isHandleTouched && (
         <Pressable
           style={styles.inventoryButton}
@@ -50,11 +45,8 @@ export default function CharacterView({
       {/* 애니메이션이 적용된 캐릭터 이미지 */}
       <Animated.View style={[styles.rabbitContainer, animatedRabbitStyle]}>
         <Image source={rabbitImage} style={styles.rabbitImage} resizeMode="contain" />
-        {/* 장착된 아이템들을 캐릭터 위에 겹쳐서 렌더링합니다. */}
         {equippedItems.map((item) => {
-          // 1. itemStyleMap에서 현재 아이템 ID에 해당하는 개별 스타일을 찾습니다.
           const individualStyle = itemStyleMap[item.item_id];
-          // 2. 개별 스타일이 없으면, 아이템 타입에 맞는 기본 스타일을 사용합니다.
           const typeStyle = baseItemStyle[item.type] || {};
           const itemStyle = individualStyle || typeStyle;
 
@@ -80,7 +72,7 @@ const styles = StyleSheet.create({
   },
   carrotContainer: {
     position: 'absolute',
-    top: 70, // 헤더 바로 아래 위치
+    top: 70, 
     left: 24,
     paddingVertical: 8,
     paddingHorizontal: 14,
@@ -108,7 +100,7 @@ const styles = StyleSheet.create({
   },
   inventoryButton: {
     position: 'absolute',
-    top: 70, // 당근 개수와 같은 높이로 정렬
+    top: 70, 
     right: 24,
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 18,

@@ -1,5 +1,3 @@
-# 비밀번호 해싱, 토큰 생성 등 보안 관련 함수
-
 import os
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext

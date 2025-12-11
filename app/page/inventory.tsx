@@ -95,14 +95,14 @@ export default function InventoryScreen() {
       style={{ flex: 1 }}
     >
       <View style={{ flex: 1, paddingTop: insets.top }}>
-        {/* 1. 상단 헤더 */}
+        {/* 상단 헤더 */}
         <AppHeader
           title="인벤토리"
           leftIcon="arrow-back"
           headerStyle={{ backgroundColor: 'transparent' }}
         />
 
-        {/* 2. 당근 재화 표시 (Absolute 제거 -> Flex로 오른쪽 배치) */}
+        {/* 당근 재화 표시 */}
         <View style={styles.currencyBar}>
           <View style={styles.carrotBadge}>
             <ThemedText style={styles.carrotText}>🥕 {carrots}</ThemedText>
@@ -120,7 +120,7 @@ export default function InventoryScreen() {
           cancelButtonText="아니오"
         />
 
-        {/* 3. 리스트 뷰 */}
+        {/* 리스트 뷰 */}
         <View style={{ flex: 1 }}>
           <ItemListView
             title="인벤토리"

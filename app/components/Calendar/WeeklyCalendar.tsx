@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
         height: 52,
         borderRadius: 15,
         borderWidth: 1,
-        borderColor: 'transparent', // 기본 테두리 투명
+        borderColor: 'transparent', 
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 4,

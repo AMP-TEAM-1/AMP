@@ -1,5 +1,3 @@
-#  SQLAlchemy 데이터베이스 모델 정의
-
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Time, DATETIME, Table
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -12,11 +10,8 @@ class User(Base):
     password = Column(String)
 
     todos = relationship("Todo", back_populates="owner")
-
-    # 🥕 당근 갯수 필드 추가
     carrot_balance = Column(Integer, default=0, nullable=False) 
-    
-    # 👒 현재 장착된 물품 ID 추가 (빠른 조회를 위함)
+
     equipped_hat_id = Column(Integer, ForeignKey("items.id"), nullable=True)
     equipped_acc_id = Column(Integer, ForeignKey("items.id"), nullable=True)
     equipped_background_id = Column(Integer, ForeignKey("items.id"), nullable=True)
@@ -24,7 +19,7 @@ class User(Base):
     # 인벤토리와 관계 설정 (역참조)
     inventory = relationship("Inventory", back_populates="owner")
 
-# 🥕 할일-카테고리 다대다 관계를 위한 연결 테이블
+# 할일-카테고리 다대다 관계를 위한 연결 테이블
 todo_category_association = Table(
     'todo_category_association', Base.metadata,
     Column('todo_id', Integer, ForeignKey('todos.id'), primary_key=True),
@@ -34,21 +29,19 @@ todo_category_association = Table(
 class Todo(Base):
     __tablename__ = "todos"
 
-    id = Column(Integer, primary_key=True, index=True) # 고유 항목 ID
-    title = Column(String, index=True) # 할일 제목
-    completed = Column(Boolean, default=False) # 완료 여부
-    owner_id = Column(Integer, ForeignKey("users.id")) # 소유자 ID
-    date = Column(DATETIME, index=True, nullable=False) # 🥕 추가한 날짜
+    id = Column(Integer, primary_key=True, index=True) 
+    title = Column(String, index=True) 
+    completed = Column(Boolean, default=False) 
+    owner_id = Column(Integer, ForeignKey("users.id")) 
+    date = Column(DATETIME, index=True, nullable=False) 
 
-    owner = relationship("User", back_populates="todos") # 소유자 정보
-    # 🥕 카테고리와의 다대다 관계 설정
+    owner = relationship("User", back_populates="todos") 
     categories = relationship(
         "Category",
         secondary=todo_category_association,
         back_populates="todos"
     )
 
-# 🥕 카테고리 모델 추가
 class Category(Base):
     __tablename__ = "categories"
 
@@ -59,21 +52,19 @@ class Category(Base):
     owner = relationship("User")
     todos = relationship("Todo", secondary=todo_category_association, back_populates="categories")
 
-# 1. 물품 모델 (Item Model)
 class Item(Base):
     """상점 물품의 정보(가격, 타입, 이미지 등)를 저장"""
     __tablename__ = "items"
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    price = Column(Integer, nullable=False) # 판매 가격 (당근)
-    item_type = Column(String, nullable=False) # 'hat', 'accessory', 'background' 등
+    price = Column(Integer, nullable=False) 
+    item_type = Column(String, nullable=False) 
     image_url = Column(String) 
     
-    # 이 물품을 소유한 인벤토리 목록을 참조 (역참조)
+    # 이 물품을 소유한 인벤토리 목록 역참조
     owners = relationship("Inventory", back_populates="item")
 
-# 2. 인벤토리 모델 (Inventory Model)
 class Inventory(Base):
     """사용자가 소유한 물품 목록 및 장착 여부를 저장"""
     __tablename__ = "inventories"

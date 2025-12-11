@@ -1,5 +1,3 @@
-# 사용자의 "마이페이지" 또는 상점 기능과 관련된 API 엔드포인트 처리
-
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,15 +10,13 @@ from .database import get_db
 router = APIRouter()
 
 class CarrotUpdate(schemas.BaseModel):
-    amount: int  # 잔액 변경량 (양수: 증가, 음수: 감소)
+    amount: int  
 
 @router.get("/shop/items")
 def read_shop_items(
     db: Session = Depends(get_db),
 ) -> List[Dict[str, Any]]:
-    """
-    상점에 진열된 모든 물품 목록을 조회합니다.
-    """
+   
     try:
         items = crud.get_all_shop_items(db)
         result = []
@@ -29,8 +25,8 @@ def read_shop_items(
                 "name": item.name,
                 "price": item.price,
                 "image_url": item.image_url,
-                "item_id": item.id,  # id → item_id 변환
-                "type": item.item_type  # item_type → type 변환
+                "item_id": item.id, 
+                "type": item.item_type 
             })
         
         return result
@@ -43,9 +39,6 @@ def read_shop_items(
 def read_user_carrot_balance(
     current_user: models.User = Depends(get_current_user)
 ):
-    """
-    현재 로그인된 사용자의 당근 잔액을 조회합니다.
-    """
     return current_user
 
 @router.put("/shop/balance/", response_model=schemas.User)
@@ -54,13 +47,8 @@ def update_user_carrot_balance(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    현재 로그인된 사용자의 당근 잔액을 업데이트합니다.
-    """
     if hasattr(current_user, 'carrot_balance') and isinstance(current_user.carrot_balance, int):
         return current_user.carrot_balance
-    
-    # 만약 User 객체가 DB 세션에서 제대로 로드되지 않아 잔액 정보가 없다면
     raise HTTPException(status_code=404, detail="사용자 잔액 정보를 찾을 수 없습니다.")
     
 @router.post("/shop/purchase/", response_model=schemas.User)
@@ -69,9 +57,7 @@ def purchase_item(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ): 
-    '''
-    현재 로그인된 사용자가 아이템을 구매합니다 (잔액 차감 및 인벤토리 추가 트랜잭션)
-    '''
+    
     # 구매 트랜잭션 처리
     updated_user = crud.purchase_item_transaction(db, current_user.id, item_id)
     

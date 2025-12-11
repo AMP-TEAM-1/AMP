@@ -45,7 +45,7 @@ export default function CategoryContent() {
     }
   };
 
-  // ✅ 박스 추가 시 자동 편집 모드로 생성.
+  // 박스 추가 시 자동 편집 모드로 생성
   const handleAddBox = async () => {
     try {
       const headers = await getAuthHeaders();
@@ -97,7 +97,6 @@ export default function CategoryContent() {
     >
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-        {/* 상단 헤더 */}
         <View style={styles.header}>
           <Pressable onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
             <Ionicons name="menu" size={28} color="#000" />
@@ -112,8 +111,6 @@ export default function CategoryContent() {
             />
           </Pressable>
         </View>
-
-        {/* 카테고리 리스트 */}
         <View style={styles.content}>
           <View style={styles.listHeader}>
             <ThemedText style={styles.listTitle}>내 카테고리</ThemedText>

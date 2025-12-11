@@ -82,8 +82,7 @@ function HomeContent() {
 
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
         <View style={styles.container}>
-
-          {/* [1] 상단 헤더 영역 - 날짜 포맷 변경 */}
+          {/* 상단 헤더 */}
           <View style={styles.header}>
             <Pressable onPress={() => navigation.toggleDrawer()} style={styles.iconButton}>
               <Ionicons name="menu" size={28} color={theme.text} />
@@ -102,7 +101,7 @@ function HomeContent() {
             </Pressable>
           </View>
 
-          {/* [2] 캘린더 카드 영역 - 월 이동 버튼 추가 */}
+          {/* 캘린더 카드 영역 */}
           <View style={styles.calendarCard}>
             <View style={styles.calendarControls}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -110,7 +109,7 @@ function HomeContent() {
                   <ThemedText style={styles.todayText}>오늘</ThemedText>
                 </Pressable>
 
-                {/* 월 이동 화살표 (월간 뷰일 때만 표시하거나 항상 표시) */}
+                {/* 월 이동 화살표 */}
                 {calendarViewMode === 'monthly' && (
                   <View style={styles.arrowContainer}>
                     <Pressable onPress={handlePrevMonth} style={styles.arrowButton}>
@@ -153,14 +152,14 @@ function HomeContent() {
             </View>
           </View>
 
-          {/* [3] 카테고리 바 */}
+          {/* 카테고리 바 */}
           <CategoryBar
             categories={coloredCategories}
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
           />
 
-          {/* [4] 할 일 리스트 */}
+          {/* 할 일 리스트 */}
           <View style={styles.listContainer}>
             <View style={styles.listHeader}>
               <ThemedText style={styles.listTitle}>To-Do List</ThemedText>
@@ -188,7 +187,7 @@ function HomeContent() {
             />
           </View>
 
-          {/* [5] 모달 */}
+          {/* 모달 */}
           <TodoActionModal
             visible={actionModalVisible}
             onClose={() => setActionModalVisible(false)}
@@ -260,7 +259,7 @@ const styles = StyleSheet.create({
   },
   iconButton: { padding: 8 },
   headerTitle: {
-    fontSize: 20, // 폰트 사이즈 조정
+    fontSize: 20, 
     fontFamily: 'Cafe24Ssurround',
     color: '#212529',
   },
