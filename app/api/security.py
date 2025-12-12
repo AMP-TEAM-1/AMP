@@ -9,7 +9,7 @@ load_dotenv()
 # --- 환경 변수 ---
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 30 # 시크릿 키 유효 기간 30분
 
 # --- 비밀번호 해싱 ---
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
