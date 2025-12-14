@@ -1,7 +1,6 @@
 /venv
 /.expo
 /DB
-.env
 
 # dependencies
 /node_modules
